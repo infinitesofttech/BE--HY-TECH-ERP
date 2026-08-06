@@ -1,11 +1,13 @@
-from rest_framework import generics, filters
+from rest_framework import generics, filters, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.views import APIView
 from drf_spectacular.utils import extend_schema
 from django_filters.rest_framework import DjangoFilterBackend
 
 from .models import Invoice, InvoiceItem, Payment
 from .serializers import InvoiceSerializer, InvoiceItemSerializer, InvoiceItemCreateSerializer, PaymentSerializer
+from . import services
 from apps.accounts.permissions import IsManagerOrAbove
 
 
@@ -125,3 +127,35 @@ class PaymentDetailView(generics.RetrieveUpdateDestroyAPIView):
     @extend_schema(request=PaymentSerializer, responses={200: PaymentSerializer})
     def put(self, request, *args, **kwargs):
         return super().put(request, *args, **kwargs)
+
+
+class InvoiceMarkPaidView(APIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = InvoiceSerializer
+
+    @extend_schema(responses={200: InvoiceSerializer})
+    def post(self, request, pk):
+        try:
+            invoice = Invoice.objects.get(pk=pk)
+        except Invoice.DoesNotExist:
+            return Response(
+                {'detail': 'Invoice not found.'},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        try:
+            invoice = services.mark_invoice_paid(
+                invoice,
+                method=request.data.get('method', 'cash'),
+                amount=request.data.get('amount'),
+                payment_date=request.data.get('payment_date'),
+                reference_number=request.data.get('reference_number', ''),
+                notes=request.data.get('notes', ''),
+            )
+        except ValueError as exc:
+            return Response(
+                {'detail': str(exc)}, status=status.HTTP_400_BAD_REQUEST,
+            )
+        invoice.refresh_from_db()
+        return Response(
+            InvoiceSerializer(invoice).data, status=status.HTTP_200_OK,
+        )

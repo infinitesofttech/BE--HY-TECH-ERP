@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import BlogCategory, BlogPost, BlogComment
+from .models import BlogCategory, BlogPost, BlogComment, BlogTag
 
 
 @admin.register(BlogCategory)
@@ -23,4 +23,13 @@ class BlogCommentAdmin(admin.ModelAdmin):
     list_display = ['name', 'post', 'email', 'is_approved', 'created_at']
     list_filter = ['is_approved']
     search_fields = ['name', 'email', 'content']
+    readonly_fields = ['created_at']
+
+
+@admin.register(BlogTag)
+class BlogTagAdmin(admin.ModelAdmin):
+    list_display = ['name', 'slug', 'status', 'created_at']
+    list_filter = ['status']
+    search_fields = ['name']
+    prepopulated_fields = {'slug': ['name']}
     readonly_fields = ['created_at']

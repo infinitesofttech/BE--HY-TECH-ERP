@@ -32,10 +32,6 @@ class Company(models.Model):
         null=True, blank=True, related_name='companies'
     )
     contacts = models.ManyToManyField('Contact', blank=True, related_name='companies_list')
-    currency = models.ForeignKey(
-        'masters.Currency', on_delete=models.SET_NULL,
-        null=True, blank=True, related_name='companies'
-    )
     language = models.CharField(max_length=50, blank=True, default='English')
     description = models.TextField(blank=True)
     visibility = models.CharField(
@@ -65,11 +61,20 @@ class Company(models.Model):
 
 
 class Contact(models.Model):
-    VISIBILITY_CHOICES = [('public', 'Public'), ('private', 'Private')]
+    TYPE_CHOICES = [('person', 'Person'), ('business', 'Business')]
+    VISIBILITY_CHOICES = [
+        ('public', 'Public'), ('private', 'Private'), ('selected', 'Selected'),
+    ]
+    STATUS_CHOICES = [('active', 'Active'), ('inactive', 'Inactive')]
 
     first_name = models.CharField(max_length=100, default='')
     last_name = models.CharField(max_length=100, default='')
     job_title = models.CharField(max_length=200, blank=True)
+    type = models.CharField(
+        max_length=10, choices=TYPE_CHOICES, default='person',
+        help_text='Person or business contact.',
+    )
+    about = models.TextField(blank=True, default='')
     company = models.ForeignKey(
         Company, on_delete=models.SET_NULL,
         null=True, blank=True, related_name='contact_list'
@@ -98,14 +103,16 @@ class Contact(models.Model):
         'masters.Industry', on_delete=models.SET_NULL,
         null=True, blank=True, related_name='contacts'
     )
-    currency = models.ForeignKey(
-        'masters.Currency', on_delete=models.SET_NULL,
-        null=True, blank=True, related_name='contacts'
-    )
     language = models.CharField(max_length=50, blank=True, default='English')
     description = models.TextField(blank=True)
     visibility = models.CharField(
         max_length=10, choices=VISIBILITY_CHOICES, default='public'
+    )
+    visible_to = models.ManyToManyField(
+        settings.AUTH_USER_MODEL,
+        blank=True,
+        related_name='visible_contacts',
+        help_text='People who can see this contact when visibility is "selected".',
     )
     street_address = models.CharField(max_length=255, blank=True)
     city = models.CharField(max_length=100, blank=True)
@@ -118,6 +125,7 @@ class Contact(models.Model):
     twitter = models.URLField(blank=True)
     whatsapp = models.CharField(max_length=20, blank=True)
     instagram = models.URLField(blank=True)
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='active')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -130,3 +138,22 @@ class Contact(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class ContactMessage(models.Model):
+    STATUS_CHOICES = [
+        ('new', 'New'), ('read', 'Read'), ('replied', 'Replied'), ('archived', 'Archived'),
+    ]
+
+    name = models.CharField(max_length=200)
+    phone = models.CharField(max_length=20, blank=True)
+    email = models.EmailField()
+    message = models.TextField()
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='new')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f'{self.name} - {self.email}'

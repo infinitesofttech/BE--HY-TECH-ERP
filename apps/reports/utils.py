@@ -41,13 +41,14 @@ def get_date_range(year, month):
 def aggregate_employee_sales(employee_id, start_date, end_date):
     """Return total sales revenue for an employee within a date range."""
     try:
-        from apps.sales.models import SalesReport
-        result = SalesReport.objects.filter(
+        from apps.sales.models import SalesOrder
+        result = SalesOrder.objects.filter(
             employee_id=employee_id,
             date__gte=start_date,
             date__lte=end_date,
+            status__in=['in_progress', 'completed'],
         ).aggregate(total=Coalesce(
-            Sum('total_revenue'),
+            Sum('total_amount'),
             Value(0, output_field=DecimalField()),
         ))
         return result['total']

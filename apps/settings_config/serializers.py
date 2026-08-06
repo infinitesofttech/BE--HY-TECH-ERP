@@ -1,43 +1,61 @@
 from rest_framework import serializers
 from .models import (
-    Department, State, City, CustomField, PrefixSetting,
+    Department, Designation, CustomField, PrefixSetting,
     PrinterSetting, GDPRConsent, LocalizationSetting,
     LanguageSetting, AppearanceSetting, InvoiceSetting, SecuritySetting,
+    Country, SmsGateway, EmailSetting, StorageSetting, SystemUpdate, NotificationSetting,
 )
 
 
 class DepartmentSerializer(serializers.ModelSerializer):
+    department_head_name = serializers.SerializerMethodField()
+    employee_count = serializers.SerializerMethodField()
+
     class Meta:
         model = Department
-        fields = '__all__'
+        fields = [
+            'id', 'name', 'department_head', 'department_head_name',
+            'description', 'status', 'employee_count', 'created_at',
+        ]
         read_only_fields = ['id', 'created_at']
+
+    def get_department_head_name(self, obj):
+        if obj.department_head:
+            return obj.department_head.get_full_name() or obj.department_head.email
+        return None
+
+    def get_employee_count(self, obj):
+        count = getattr(obj, 'employee_count', None)
+        return count if count is not None else obj.employees.count()
 
 
 class DepartmentCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Department
-        fields = ['name', 'description', 'is_active']
+        fields = ['id', 'name', 'department_head', 'description', 'status']
 
 
-class StateSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = State
-        fields = '__all__'
-
-
-class CitySerializer(serializers.ModelSerializer):
-    state_name = serializers.CharField(source='state.name', read_only=True, default='')
+class DesignationSerializer(serializers.ModelSerializer):
+    department_name = serializers.CharField(source='department.name', read_only=True, default='')
+    employee_count = serializers.SerializerMethodField()
 
     class Meta:
-        model = City
-        fields = '__all__'
-        read_only_fields = ['id']
+        model = Designation
+        fields = [
+            'id', 'name', 'department', 'department_name', 'status',
+            'employee_count', 'created_at',
+        ]
+        read_only_fields = ['id', 'created_at']
+
+    def get_employee_count(self, obj):
+        count = getattr(obj, 'employee_count', None)
+        return count if count is not None else obj.employees.count()
 
 
-class CityCreateSerializer(serializers.ModelSerializer):
+class DesignationCreateSerializer(serializers.ModelSerializer):
     class Meta:
-        model = City
-        fields = ['name', 'state', 'is_active']
+        model = Designation
+        fields = ['id', 'name', 'department', 'status']
 
 
 class CustomFieldSerializer(serializers.ModelSerializer):
@@ -116,3 +134,45 @@ class SecuritySettingSerializer(serializers.ModelSerializer):
         model = SecuritySetting
         fields = '__all__'
         read_only_fields = ['id']
+
+
+class CountrySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Country
+        fields = '__all__'
+        read_only_fields = ['id', 'created_at']
+
+
+class SmsGatewaySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SmsGateway
+        fields = '__all__'
+        read_only_fields = ['id', 'created_at']
+
+
+class EmailSettingSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = EmailSetting
+        fields = '__all__'
+        read_only_fields = ['id']
+
+
+class StorageSettingSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = StorageSetting
+        fields = '__all__'
+        read_only_fields = ['id']
+
+
+class SystemUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SystemUpdate
+        fields = '__all__'
+        read_only_fields = ['id']
+
+
+class NotificationSettingSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = NotificationSetting
+        fields = '__all__'
+        read_only_fields = ['id', 'updated_at']

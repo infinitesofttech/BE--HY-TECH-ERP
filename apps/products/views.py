@@ -1,8 +1,12 @@
 from rest_framework import generics, status, filters
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from django.db import transaction
 from django_filters.rest_framework import DjangoFilterBackend
-from .models import ProductCategory, Product, TourPlan, Policy
+from .models import (
+    ProductCategory, Product, TourPlan, Policy, Warehouse, Supplier, Inventory,
+    StockAdjustment, StockTransfer, adjust_inventory,
+)
 from .serializers import (
     ProductCategorySerializer,
     ProductSerializer,
@@ -10,6 +14,11 @@ from .serializers import (
     ProductCatalogueSerializer,
     TourPlanSerializer,
     PolicySerializer,
+    WarehouseSerializer,
+    SupplierSerializer,
+    InventorySerializer,
+    StockAdjustmentSerializer,
+    StockTransferSerializer,
 )
 from apps.accounts.permissions import IsSuperAdmin
 
@@ -18,7 +27,7 @@ class ProductCategoryListCreateView(generics.ListCreateAPIView):
     queryset = ProductCategory.objects.all()
     serializer_class = ProductCategorySerializer
     filter_backends = [filters.SearchFilter]
-    search_fields = ['name', 'description']
+    search_fields = ['name', 'slug']
 
     def get_permissions(self):
         if self.request.method == 'POST':
@@ -200,3 +209,198 @@ class PolicyToggleActiveView(APIView):
             'detail': f'Policy {"activated" if policy.is_active else "deactivated"} successfully.',
             'is_active': policy.is_active,
         }, status=status.HTTP_200_OK)
+
+
+class WarehouseListCreateView(generics.ListCreateAPIView):
+    queryset = Warehouse.objects.all()
+    serializer_class = WarehouseSerializer
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter]
+    filterset_fields = ['status']
+    search_fields = ['name', 'contact_person', 'phone']
+
+    def get_permissions(self):
+        if self.request.method == 'POST':
+            return [IsSuperAdmin()]
+        return []
+
+
+class WarehouseDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Warehouse.objects.all()
+    serializer_class = WarehouseSerializer
+
+    def get_permissions(self):
+        if self.request.method in ('PUT', 'PATCH', 'DELETE'):
+            return [IsSuperAdmin()]
+        return []
+
+
+class WarehouseToggleActiveView(APIView):
+    permission_classes = [IsSuperAdmin]
+
+    def patch(self, request, pk):
+        try:
+            warehouse = Warehouse.objects.get(pk=pk)
+        except Warehouse.DoesNotExist:
+            return Response(
+                {'detail': 'Warehouse not found.'},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        warehouse.status = 'inactive' if warehouse.status == 'active' else 'active'
+        warehouse.save(update_fields=['status'])
+        return Response({
+            'detail': f'Warehouse {"activated" if warehouse.status == "active" else "deactivated"} successfully.',
+            'status': warehouse.status,
+        }, status=status.HTTP_200_OK)
+
+
+class SupplierListCreateView(generics.ListCreateAPIView):
+    queryset = Supplier.objects.all()
+    serializer_class = SupplierSerializer
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter]
+    filterset_fields = ['status', 'country']
+    search_fields = ['name', 'email', 'phone', 'country']
+
+    def get_permissions(self):
+        if self.request.method == 'POST':
+            return [IsSuperAdmin()]
+        return []
+
+
+class SupplierDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Supplier.objects.all()
+    serializer_class = SupplierSerializer
+
+    def get_permissions(self):
+        if self.request.method in ('PUT', 'PATCH', 'DELETE'):
+            return [IsSuperAdmin()]
+        return []
+
+
+class SupplierToggleActiveView(APIView):
+    permission_classes = [IsSuperAdmin]
+
+    def patch(self, request, pk):
+        try:
+            supplier = Supplier.objects.get(pk=pk)
+        except Supplier.DoesNotExist:
+            return Response(
+                {'detail': 'Supplier not found.'},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        supplier.status = 'inactive' if supplier.status == 'active' else 'active'
+        supplier.save(update_fields=['status'])
+        return Response({
+            'detail': f'Supplier {"activated" if supplier.status == "active" else "deactivated"} successfully.',
+            'status': supplier.status,
+        }, status=status.HTTP_200_OK)
+
+
+class InventoryListCreateView(generics.ListCreateAPIView):
+    queryset = Inventory.objects.select_related('product', 'warehouse').all()
+    serializer_class = InventorySerializer
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter]
+    filterset_fields = ['product', 'warehouse', 'status']
+    search_fields = ['product__name', 'warehouse__name']
+
+    def get_permissions(self):
+        if self.request.method == 'POST':
+            return [IsSuperAdmin()]
+        return []
+
+
+class InventoryDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Inventory.objects.select_related('product', 'warehouse').all()
+    serializer_class = InventorySerializer
+
+    def get_permissions(self):
+        if self.request.method in ('PUT', 'PATCH', 'DELETE'):
+            return [IsSuperAdmin()]
+        return []
+
+
+class InventoryToggleActiveView(APIView):
+    permission_classes = [IsSuperAdmin]
+
+    def patch(self, request, pk):
+        try:
+            inventory = Inventory.objects.get(pk=pk)
+        except Inventory.DoesNotExist:
+            return Response(
+                {'detail': 'Inventory not found.'},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        inventory.status = 'inactive' if inventory.status == 'active' else 'active'
+        inventory.save(update_fields=['status'])
+        return Response({
+            'detail': f'Inventory {"activated" if inventory.status == "active" else "deactivated"} successfully.',
+            'status': inventory.status,
+        }, status=status.HTTP_200_OK)
+
+
+class StockAdjustmentListCreateView(generics.ListCreateAPIView):
+    queryset = StockAdjustment.objects.select_related(
+        'product', 'warehouse',
+    ).all()
+    serializer_class = StockAdjustmentSerializer
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter]
+    filterset_fields = ['product', 'warehouse', 'reason']
+    search_fields = ['product__name', 'warehouse__name']
+
+    def get_permissions(self):
+        if self.request.method == 'POST':
+            return [IsSuperAdmin()]
+        return []
+
+
+class StockAdjustmentDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = StockAdjustment.objects.select_related(
+        'product', 'warehouse',
+    ).all()
+    serializer_class = StockAdjustmentSerializer
+
+    def get_permissions(self):
+        if self.request.method in ('PUT', 'PATCH', 'DELETE'):
+            return [IsSuperAdmin()]
+        return []
+
+    def perform_destroy(self, instance):
+        with transaction.atomic():
+            adjust_inventory(
+                instance.product, instance.warehouse, -instance.difference,
+            )
+            instance.delete()
+
+
+class StockTransferListCreateView(generics.ListCreateAPIView):
+    queryset = StockTransfer.objects.select_related(
+        'product', 'from_warehouse', 'to_warehouse',
+    ).all()
+    serializer_class = StockTransferSerializer
+    filter_backends = [
+        DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter,
+    ]
+    filterset_fields = ['product', 'from_warehouse', 'to_warehouse', 'status']
+    search_fields = ['product__name', 'from_warehouse__name', 'to_warehouse__name']
+    ordering_fields = ['transfer_date', 'created_at']
+
+    def get_permissions(self):
+        if self.request.method == 'POST':
+            return [IsSuperAdmin()]
+        return []
+
+
+class StockTransferDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = StockTransfer.objects.select_related(
+        'product', 'from_warehouse', 'to_warehouse',
+    ).all()
+    serializer_class = StockTransferSerializer
+
+    def get_permissions(self):
+        if self.request.method in ('PUT', 'PATCH', 'DELETE'):
+            return [IsSuperAdmin()]
+        return []
+
+    def perform_destroy(self, instance):
+        with transaction.atomic():
+            instance.reverse_stock()
+            instance.delete()

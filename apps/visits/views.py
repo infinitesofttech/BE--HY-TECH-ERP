@@ -44,7 +44,6 @@ class VisitCheckInView(APIView):
             visit_type=data['visit_type'],
             dealer_id=data.get('dealer_id'),
             retailer_id=data.get('retailer_id'),
-            mechanic_id=data.get('mechanic_id'),
             purpose=data.get('purpose', ''),
             remarks=data.get('remarks', ''),
             photo=data.get('photo'),
@@ -109,7 +108,7 @@ class VisitListView(generics.ListAPIView):
 
     def get_queryset(self):
         qs = Visit.objects.select_related(
-            'employee', 'dealer', 'retailer', 'mechanic',
+            'employee', 'dealer', 'retailer',
         ).all()
 
         employee = self.request.query_params.get('employee')
@@ -140,10 +139,6 @@ class VisitListView(generics.ListAPIView):
         if retailer:
             qs = qs.filter(retailer_id=retailer)
 
-        mechanic = self.request.query_params.get('mechanic')
-        if mechanic:
-            qs = qs.filter(mechanic_id=mechanic)
-
         return qs
 
 
@@ -153,7 +148,7 @@ class VisitDetailView(generics.RetrieveAPIView):
 
     def get_queryset(self):
         return Visit.objects.select_related(
-            'employee', 'dealer', 'retailer', 'mechanic',
+            'employee', 'dealer', 'retailer',
         ).all()
 
 
@@ -165,7 +160,7 @@ class TodayVisitsView(APIView):
         visits = Visit.objects.filter(
             employee=request.user,
             check_in_time__date=today,
-        ).select_related('dealer', 'retailer', 'mechanic').order_by('-check_in_time')
+        ).select_related('dealer', 'retailer').order_by('-check_in_time')
 
         serializer = VisitSerializer(visits, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -190,7 +185,6 @@ class VisitReportView(APIView):
             avg_duration=Avg('duration'),
             dealer_count=Count('id', filter=Q(visit_type='dealer')),
             retailer_count=Count('id', filter=Q(visit_type='retailer')),
-            mechanic_count=Count('id', filter=Q(visit_type='mechanic')),
             unique_employees=Count('employee', distinct=True),
         )
 
@@ -199,7 +193,6 @@ class VisitReportView(APIView):
             'by_type': {
                 'dealer': aggregated['dealer_count'] or 0,
                 'retailer': aggregated['retailer_count'] or 0,
-                'mechanic': aggregated['mechanic_count'] or 0,
             },
             'avg_duration': str(aggregated['avg_duration']) if aggregated['avg_duration'] else None,
             'unique_employees_visiting': aggregated['unique_employees'] or 0,
@@ -211,7 +204,7 @@ class VisitExportView(APIView):
 
     def get(self, request):
         qs = Visit.objects.select_related(
-            'employee', 'dealer', 'retailer', 'mechanic',
+            'employee', 'dealer', 'retailer',
         ).all()
 
         date_from = request.query_params.get('date_from')
@@ -227,7 +220,7 @@ class VisitExportView(APIView):
 
         headers = [
             'ID', 'Employee', 'Visit Type', 'Dealer', 'Retailer',
-            'Mechanic', 'Purpose', 'Remarks', 'Status', 'Duration',
+            'Purpose', 'Remarks', 'Status', 'Duration',
             'Check In Time', 'Check In Address', 'Check Out Time',
             'Check Out Address', 'Created At',
         ]
@@ -240,7 +233,6 @@ class VisitExportView(APIView):
                 visit.get_visit_type_display(),
                 visit.dealer.name if visit.dealer else 'N/A',
                 visit.retailer.name if visit.retailer else 'N/A',
-                visit.mechanic.name if visit.mechanic else 'N/A',
                 visit.purpose,
                 visit.remarks,
                 visit.get_status_display(),

@@ -1,18 +1,23 @@
 from rest_framework import generics, status, filters
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticated
+from drf_spectacular.utils import extend_schema
 from django_filters.rest_framework import DjangoFilterBackend
 from django.db.models import Sum, Count
 from django.http import HttpResponse
 from datetime import datetime
 import openpyxl
 
-from .models import Order, OrderItem
+from .models import Order, OrderItem, Quotation, QuotationItem
 from .serializers import (
     OrderSerializer,
     OrderCreateSerializer,
     OrderStatusUpdateSerializer,
+    QuotationSerializer,
+    QuotationCreateSerializer,
 )
+from . import services
 from apps.accounts.permissions import IsManagerOrAbove
 
 
@@ -89,7 +94,7 @@ class OrderStatusUpdateView(generics.UpdateAPIView):
 
 
 class OrderExportView(APIView):
-    permission_classes = [IsManagerOrAbove]
+    # permission_classes = [IsManagerOrAbove]
 
     def get(self, request):
         orders = Order.objects.select_related(
@@ -158,3 +163,105 @@ class OrderExportView(APIView):
 
         wb.save(response)
         return response
+
+
+class QuotationListCreateView(generics.ListCreateAPIView):
+    queryset = Quotation.objects.prefetch_related('items__product').all()
+    permission_classes = [IsAuthenticated]
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+    filterset_fields = ['status', 'client']
+    search_fields = ['quote_id', 'client', 'notes']
+    ordering_fields = ['quote_date', 'valid_till', 'total_amount', 'created_at']
+
+    def get_serializer_class(self):
+        if self.request.method == 'POST':
+            return QuotationCreateSerializer
+        return QuotationSerializer
+
+    def get_permissions(self):
+        if self.request.method == 'POST':
+            return [IsAuthenticated(), IsManagerOrAbove()]
+        return [IsAuthenticated()]
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        quotation = serializer.save(created_by=request.user)
+        return Response(
+            QuotationSerializer(quotation).data,
+            status=status.HTTP_201_CREATED,
+        )
+
+
+class QuotationDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Quotation.objects.prefetch_related('items__product').all()
+    serializer_class = QuotationSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_permissions(self):
+        if self.request.method in ['PUT', 'PATCH', 'DELETE']:
+            return [IsAuthenticated(), IsManagerOrAbove()]
+        return [IsAuthenticated()]
+
+    def update(self, request, *args, **kwargs):
+        kwargs['partial'] = True
+        return super().update(request, *args, **kwargs)
+
+
+class QuotationSendView(APIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = QuotationSerializer
+
+    @extend_schema(responses={200: QuotationSerializer})
+    def post(self, request, pk):
+        quotation = Quotation.objects.get(pk=pk)
+        services.send_quotation(quotation)
+        quotation.refresh_from_db()
+        return Response(
+            QuotationSerializer(quotation).data, status=status.HTTP_200_OK,
+        )
+
+
+class QuotationApproveView(APIView):
+    permission_classes = [IsAuthenticated, IsManagerOrAbove]
+    serializer_class = QuotationSerializer
+
+    @extend_schema(responses={201: {
+        'type': 'object',
+        'properties': {
+            'quotation': {'$ref': '#/components/schemas/Quotation'},
+            'sales_order': {'$ref': '#/components/schemas/SalesOrder'},
+        },
+    }})
+    def post(self, request, pk):
+        quotation = Quotation.objects.get(pk=pk)
+        if quotation.status != 'sent' and quotation.status != 'accepted':
+            return Response(
+                {'detail': 'Only sent quotations can be approved.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        from apps.sales.serializers import SalesOrderSerializer
+        sales_order = services.approve_quotation(
+            quotation, employee=request.user,
+        )
+        quotation.refresh_from_db()
+        return Response({
+            'quotation': QuotationSerializer(quotation).data,
+            'sales_order': SalesOrderSerializer(sales_order).data,
+        }, status=status.HTTP_201_CREATED)
+
+
+class QuotationRejectView(APIView):
+    permission_classes = [IsAuthenticated, IsManagerOrAbove]
+    serializer_class = QuotationSerializer
+
+    @extend_schema(responses={200: QuotationSerializer})
+    def post(self, request, pk):
+        quotation = Quotation.objects.get(pk=pk)
+        services.reject_quotation(
+            quotation, lost_reason=request.data.get('lost_reason', ''),
+        )
+        quotation.refresh_from_db()
+        return Response(
+            QuotationSerializer(quotation).data, status=status.HTTP_200_OK,
+        )

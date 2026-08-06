@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
-from .models import User, ContactInfo, Feedback
+from .models import User, ContactInfo, Feedback, Role, LoginLog, UserActivityLog
 
 
 @admin.register(User)
@@ -60,3 +60,23 @@ class FeedbackAdmin(admin.ModelAdmin):
     list_filter = ['created_at']
     search_fields = ['name', 'email', 'phone', 'message']
     readonly_fields = ['created_at']
+
+
+@admin.register(Role)
+class RoleAdmin(admin.ModelAdmin):
+    list_display = ['name', 'created_at']
+    search_fields = ['name']
+
+
+@admin.register(LoginLog)
+class LoginLogAdmin(admin.ModelAdmin):
+    list_display = ['user', 'login_time', 'logout_time', 'session_duration', 'ip_address', 'status']
+    list_filter = ['status', 'login_time']
+    search_fields = ['user__email', 'device']
+
+
+@admin.register(UserActivityLog)
+class UserActivityLogAdmin(admin.ModelAdmin):
+    list_display = ['user', 'action', 'module', 'record_id', 'ip_address', 'action_date']
+    list_filter = ['module', 'action_date']
+    search_fields = ['user__email', 'action', 'module']

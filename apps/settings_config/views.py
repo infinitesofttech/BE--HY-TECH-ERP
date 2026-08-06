@@ -1,21 +1,26 @@
-from rest_framework import generics, status
+from rest_framework import generics, status, filters
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
+from django_filters.rest_framework import DjangoFilterBackend
+from django.db.models import Count
 
 from .models import (
-    Department, State, City, CustomField, PrefixSetting,
+    Department, Designation, CustomField, PrefixSetting,
     PrinterSetting, GDPRConsent, LocalizationSetting,
     LanguageSetting, AppearanceSetting, InvoiceSetting, SecuritySetting,
+    Country, SmsGateway, EmailSetting, StorageSetting, SystemUpdate, NotificationSetting,
 )
 from .serializers import (
     DepartmentSerializer, DepartmentCreateSerializer,
-    StateSerializer, CitySerializer, CityCreateSerializer,
+    DesignationSerializer, DesignationCreateSerializer,
     CustomFieldSerializer, CustomFieldCreateSerializer,
     PrefixSettingSerializer, PrinterSettingSerializer,
     GDPRConsentSerializer, LocalizationSettingSerializer,
     LanguageSettingSerializer, AppearanceSettingSerializer,
     InvoiceSettingSerializer, SecuritySettingSerializer,
+    CountrySerializer, SmsGatewaySerializer, EmailSettingSerializer,
+    StorageSettingSerializer, SystemUpdateSerializer, NotificationSettingSerializer,
 )
 from apps.accounts.permissions import IsManagerOrAbove
 
@@ -59,35 +64,45 @@ class SingleTonMixin:
 
 
 class DepartmentListCreateView(ListCreateMixin, generics.ListCreateAPIView):
-    queryset = Department.objects.all()
+    queryset = Department.objects.select_related('department_head').annotate(
+        employee_count=Count('employees'),
+    ).order_by('-id')
     serializer_class = DepartmentSerializer
     create_serializer_class = DepartmentCreateSerializer
+    filter_backends = [
+        DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter,
+    ]
+    filterset_fields = ['status', 'department_head']
+    search_fields = ['name', 'description', 'department_head__email', 'department_head__first_name']
+    ordering_fields = ['name', 'created_at']
 
 
 class DepartmentDetailView(DetailMixin, generics.RetrieveUpdateDestroyAPIView):
-    queryset = Department.objects.all()
+    queryset = Department.objects.select_related('department_head').annotate(
+        employee_count=Count('employees'),
+    ).all()
     serializer_class = DepartmentSerializer
 
 
-class StateListCreateView(ListCreateMixin, generics.ListCreateAPIView):
-    queryset = State.objects.all()
-    serializer_class = StateSerializer
+class DesignationListCreateView(ListCreateMixin, generics.ListCreateAPIView):
+    queryset = Designation.objects.select_related('department').annotate(
+        employee_count=Count('employees'),
+    ).order_by('-id')
+    serializer_class = DesignationSerializer
+    create_serializer_class = DesignationCreateSerializer
+    filter_backends = [
+        DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter,
+    ]
+    filterset_fields = ['status', 'department']
+    search_fields = ['name', 'department__name']
+    ordering_fields = ['name', 'created_at']
 
 
-class StateDetailView(DetailMixin, generics.RetrieveUpdateDestroyAPIView):
-    queryset = State.objects.all()
-    serializer_class = StateSerializer
-
-
-class CityListCreateView(ListCreateMixin, generics.ListCreateAPIView):
-    queryset = City.objects.all()
-    serializer_class = CitySerializer
-    create_serializer_class = CityCreateSerializer
-
-
-class CityDetailView(DetailMixin, generics.RetrieveUpdateDestroyAPIView):
-    queryset = City.objects.all()
-    serializer_class = CitySerializer
+class DesignationDetailView(DetailMixin, generics.RetrieveUpdateDestroyAPIView):
+    queryset = Designation.objects.select_related('department').annotate(
+        employee_count=Count('employees'),
+    ).all()
+    serializer_class = DesignationSerializer
 
 
 class CustomFieldListCreateView(ListCreateMixin, generics.ListCreateAPIView):
@@ -186,3 +201,51 @@ class SecuritySettingView(SingleTonMixin, generics.RetrieveUpdateAPIView):
     model = SecuritySetting
     serializer_class = SecuritySettingSerializer
     defaults = {}
+
+
+class CountryListCreateView(ListCreateMixin, generics.ListCreateAPIView):
+    queryset = Country.objects.all()
+    serializer_class = CountrySerializer
+
+
+class CountryDetailView(DetailMixin, generics.RetrieveUpdateDestroyAPIView):
+    queryset = Country.objects.all()
+    serializer_class = CountrySerializer
+
+
+class SmsGatewayListCreateView(ListCreateMixin, generics.ListCreateAPIView):
+    queryset = SmsGateway.objects.all()
+    serializer_class = SmsGatewaySerializer
+
+
+class SmsGatewayDetailView(DetailMixin, generics.RetrieveUpdateDestroyAPIView):
+    queryset = SmsGateway.objects.all()
+    serializer_class = SmsGatewaySerializer
+
+
+class EmailSettingView(SingleTonMixin, generics.RetrieveUpdateAPIView):
+    model = EmailSetting
+    serializer_class = EmailSettingSerializer
+    defaults = {}
+
+
+class StorageSettingView(SingleTonMixin, generics.RetrieveUpdateAPIView):
+    model = StorageSetting
+    serializer_class = StorageSettingSerializer
+    defaults = {}
+
+
+class SystemUpdateView(SingleTonMixin, generics.RetrieveUpdateAPIView):
+    model = SystemUpdate
+    serializer_class = SystemUpdateSerializer
+    defaults = {}
+
+
+class NotificationSettingListCreateView(ListCreateMixin, generics.ListCreateAPIView):
+    queryset = NotificationSetting.objects.all()
+    serializer_class = NotificationSettingSerializer
+
+
+class NotificationSettingDetailView(DetailMixin, generics.RetrieveUpdateDestroyAPIView):
+    queryset = NotificationSetting.objects.all()
+    serializer_class = NotificationSettingSerializer

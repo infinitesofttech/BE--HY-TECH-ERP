@@ -10,7 +10,7 @@ class Invitation(models.Model):
         ('msr', 'MSR'),
         ('dealer', 'Dealer'),
         ('retailer', 'Retailer'),
-        ('mechanic', 'Mechanic'),
+        ('company', 'Company'),
     ]
     STATUS_CHOICES = [
         ('pending', 'Pending'),

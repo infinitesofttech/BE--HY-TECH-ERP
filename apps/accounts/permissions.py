@@ -28,6 +28,15 @@ class IsMSR(BasePermission):
         )
 
 
+class IsCompany(BasePermission):
+    def has_permission(self, request, view):
+        return (
+            request.user
+            and request.user.is_authenticated
+            and request.user.role == 'company'
+        )
+
+
 class IsOwnerOrManagerOrAdmin(BasePermission):
     def has_permission(self, request, view):
         return request.user and request.user.is_authenticated

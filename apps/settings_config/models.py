@@ -3,9 +3,21 @@ from django.conf import settings
 
 
 class Department(models.Model):
+    STATUS_CHOICES = [('active', 'Active'), ('inactive', 'Inactive')]
+
     name = models.CharField(max_length=200)
+    department_head = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name='headed_departments',
+        help_text='Employee who heads this department.',
+    )
     description = models.TextField(blank=True, default='')
-    is_active = models.BooleanField(default=True)
+    status = models.CharField(
+        max_length=10, choices=STATUS_CHOICES, default='active',
+    )
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -15,9 +27,21 @@ class Department(models.Model):
         return self.name
 
 
-class State(models.Model):
+class Designation(models.Model):
+    STATUS_CHOICES = [('active', 'Active'), ('inactive', 'Inactive')]
+
     name = models.CharField(max_length=200)
-    is_active = models.BooleanField(default=True)
+    department = models.ForeignKey(
+        Department,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name='designations',
+    )
+    status = models.CharField(
+        max_length=10, choices=STATUS_CHOICES, default='active',
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         ordering = ['name']
@@ -26,17 +50,18 @@ class State(models.Model):
         return self.name
 
 
-class City(models.Model):
-    name = models.CharField(max_length=200)
-    state = models.ForeignKey(State, on_delete=models.SET_NULL, null=True, blank=True)
+class Country(models.Model):
+    name = models.CharField(max_length=100)
+    code = models.CharField(max_length=10, blank=True, help_text='Country dial code or ISO code')
     is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        verbose_name_plural = 'Cities'
+        verbose_name_plural = 'Countries'
         ordering = ['name']
 
     def __str__(self):
-        return f'{self.name}, {self.state.name if self.state else "N/A"}'
+        return self.name
 
 
 class CustomField(models.Model):
@@ -202,3 +227,86 @@ class SecuritySetting(models.Model):
 
     def __str__(self):
         return 'Security Settings'
+
+
+class SmsGateway(models.Model):
+    name = models.CharField(max_length=100)
+    api_key = models.CharField(max_length=500, blank=True)
+    api_secret = models.CharField(max_length=500, blank=True)
+    sender_id = models.CharField(max_length=100, blank=True)
+    is_default = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-is_default', 'name']
+
+    def __str__(self):
+        return self.name
+
+
+class EmailSetting(models.Model):
+    MAIL_DRIVER_CHOICES = [
+        ('php_mail', 'PHP Mail'), ('smtp', 'SMTP'), ('mail', 'Mail'),
+    ]
+    mail_driver = models.CharField(max_length=20, choices=MAIL_DRIVER_CHOICES, default='smtp')
+    host = models.CharField(max_length=200, blank=True)
+    port = models.PositiveIntegerField(default=587)
+    encryption = models.CharField(max_length=20, blank=True, default='tls')
+    username = models.CharField(max_length=200, blank=True)
+    password = models.CharField(max_length=500, blank=True)
+    from_email = models.EmailField(blank=True)
+    from_name = models.CharField(max_length=200, blank=True)
+
+    class Meta:
+        verbose_name = 'Email Setting'
+
+    def __str__(self):
+        return f'Email Settings ({self.mail_driver})'
+
+
+class StorageSetting(models.Model):
+    DRIVER_CHOICES = [('local', 'Local'), ('aws', 'AWS S3')]
+    driver = models.CharField(max_length=20, choices=DRIVER_CHOICES, default='local')
+    aws_access_key = models.CharField(max_length=500, blank=True)
+    aws_secret_key = models.CharField(max_length=500, blank=True)
+    bucket = models.CharField(max_length=200, blank=True)
+    region = models.CharField(max_length=100, blank=True)
+    base_url = models.URLField(blank=True)
+
+    class Meta:
+        verbose_name = 'Storage Setting'
+
+    def __str__(self):
+        return f'Storage Settings ({self.driver})'
+
+
+class SystemUpdate(models.Model):
+    purchase_key = models.CharField(max_length=500, blank=True)
+    version = models.CharField(max_length=20, default='1.0.0')
+    is_updated = models.BooleanField(default=False)
+    last_checked_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        verbose_name = 'System Update'
+
+    def __str__(self):
+        return f'System Update (v{self.version})'
+
+
+class NotificationSetting(models.Model):
+    MODULE_CHOICES = [
+        ('email', 'Email'), ('sms', 'SMS'), ('push', 'Push'), ('in_app', 'In-App'),
+    ]
+    module = models.CharField(max_length=20, choices=MODULE_CHOICES, unique=True)
+    email_enabled = models.BooleanField(default=True)
+    sms_enabled = models.BooleanField(default=False)
+    push_enabled = models.BooleanField(default=True)
+    in_app_enabled = models.BooleanField(default=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['module']
+
+    def __str__(self):
+        return f'Notification Settings ({self.module})'

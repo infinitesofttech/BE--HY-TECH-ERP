@@ -41,8 +41,18 @@ class CalendarEvent(models.Model):
 
 
 class Holiday(models.Model):
+    TYPE_CHOICES = [
+        ('public', 'Public'),
+        ('government', 'Government'),
+        ('optional', 'Optional'),
+        ('restricted', 'Restricted'),
+        ('other', 'Other'),
+    ]
+
     name = models.CharField(max_length=255)
     date = models.DateField()
+    description = models.TextField(blank=True, default='')
+    type = models.CharField(max_length=20, choices=TYPE_CHOICES, default='public')
     is_recurring_yearly = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)

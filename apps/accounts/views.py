@@ -6,22 +6,27 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.token_blacklist.models import OutstandingToken, BlacklistedToken
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema
-from .models import User, ContactInfo, Feedback, TwoFactorCode, EmailVerification, DeleteAccountRequest
+from apps.contacts.serializers import CompanySerializer
+from .models import (
+    User, ContactInfo, Feedback, DeleteAccountRequest, LoginLog, Role, UserActivityLog,
+)
 from .serializers import (
     LoginSerializer,
     UserSerializer,
     UserCreateSerializer,
+    CompanyRegisterSerializer,
     ProfileUpdateSerializer,
     ChangePasswordSerializer,
     ContactInfoSerializer,
     FeedbackSerializer,
-    TwoFactorVerifySerializer,
-    TwoFactorEnableSerializer,
-    EmailVerificationRequestSerializer,
-    EmailVerificationConfirmSerializer,
     DeleteAccountRequestSerializer,
+    RoleSerializer,
+    LoginLogSerializer,
+    UserActivityLogSerializer,
 )
-from .permissions import IsSuperAdmin, IsManagerOrAbove, IsOwnerOrManagerOrAdmin
+from .permissions import (
+    IsSuperAdmin, IsManagerOrAbove, IsOwnerOrManagerOrAdmin, IsCompany,
+)
 
 
 class LoginView(APIView):
@@ -35,11 +40,24 @@ class LoginView(APIView):
 
         refresh = RefreshToken.for_user(user)
 
+        ip_address = self._client_ip(request)
+        user_agent = request.META.get('HTTP_USER_AGENT', '')[:500]
+        LoginLog.objects.create(
+            user=user, status='success', ip_address=ip_address, device=user_agent,
+        )
+
         return Response({
             'access': str(refresh.access_token),
             'refresh': str(refresh),
             'user': UserSerializer(user).data,
         }, status=status.HTTP_200_OK)
+
+    @staticmethod
+    def _client_ip(request):
+        x_forwarded = request.META.get('HTTP_X_FORWARDED_FOR')
+        if x_forwarded:
+            return x_forwarded.split(',')[0].strip()
+        return request.META.get('REMOTE_ADDR')
 
 
 class RegisterView(APIView):
@@ -54,6 +72,129 @@ class RegisterView(APIView):
             UserSerializer(user).data,
             status=status.HTTP_201_CREATED,
         )
+
+
+class CompanyRegisterView(APIView):
+    permission_classes = [AllowAny]
+
+    @extend_schema(
+        request=CompanyRegisterSerializer,
+        responses={201: CompanyRegisterSerializer},
+    )
+    def post(self, request):
+        serializer = CompanyRegisterSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        company = serializer.save()
+        return Response({
+            'detail': 'Company registered successfully.',
+            'company_id': company.id,
+            'company_name': company.name,
+            'email': company.email,
+        }, status=status.HTTP_201_CREATED)
+
+
+class CompanyProfileView(APIView):
+    permission_classes = [IsCompany]
+
+    @extend_schema(responses={200: {'type': 'object'}})
+    def get(self, request):
+        from apps.contacts.models import Company
+        from apps.contacts.serializers import CompanySerializer
+        company = Company.objects.filter(owner=request.user).first()
+        if not company:
+            return Response(
+                {'detail': 'No company profile found for this account.'},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        return Response(CompanySerializer(company).data, status=status.HTTP_200_OK)
+
+    @extend_schema(request=CompanySerializer, responses={200: {'type': 'object'}})
+    def patch(self, request):
+        from apps.contacts.models import Company
+        from apps.contacts.serializers import CompanySerializer
+        company = Company.objects.filter(owner=request.user).first()
+        if not company:
+            return Response(
+                {'detail': 'No company profile found for this account.'},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        serializer = CompanySerializer(company, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class CompanyDashboardView(APIView):
+    permission_classes = [IsCompany]
+
+    @extend_schema(responses={200: {'type': 'object'}})
+    def get(self, request):
+        from apps.contacts.models import Company
+        from apps.pipeline.models import Lead, Deal
+        from apps.projects.models import Project, Task
+        from apps.contacts.models import Contact
+        from apps.invoices.models import Invoice
+        from django.db.models import Sum, Count, Q
+
+        company = Company.objects.filter(owner=request.user).first()
+        if not company:
+            return Response(
+                {'detail': 'No company profile found for this account.'},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        leads = Lead.objects.filter(
+            Q(company_name__iexact=company.name) | Q(owner=request.user)
+        )
+        deals = Deal.objects.filter(
+            Q(company=company) | Q(owner=request.user)
+        )
+        projects = Project.objects.filter(
+            Q(client_name__iexact=company.name) | Q(responsible_persons=request.user)
+        ).distinct()
+        contacts = Contact.objects.filter(company=company)
+        tasks = Task.objects.filter(
+            Q(assignees=request.user)
+        ).distinct()
+        invoices = Invoice.objects.filter(
+            Q(customer_name__iexact=company.name) | Q(customer_email=company.email)
+        )
+
+        total_deals_value = deals.aggregate(
+            total=Sum('value'),
+        )['total'] or 0
+
+        won_deals = deals.filter(status='won').count()
+        open_deals = deals.filter(status='open').count()
+
+        return Response({
+            'company': {
+                'id': company.id,
+                'name': company.name,
+                'email': company.email,
+                'phone': company.phone,
+                'website': company.website,
+                'industry': company.industry.name if company.industry else None,
+            },
+            'summary': {
+                'total_leads': leads.count(),
+                'won_leads': leads.filter(status='won').count(),
+                'lost_leads': leads.filter(status='lost').count(),
+                'total_deals': deals.count(),
+                'open_deals': open_deals,
+                'won_deals': won_deals,
+                'total_deals_value': total_deals_value,
+                'total_projects': projects.count(),
+                'active_projects': projects.filter(status='active').count(),
+                'inactive_projects': projects.filter(status='inactive').count(),
+                'total_tasks': tasks.count(),
+                'active_tasks': tasks.filter(status='active').count(),
+                'inactive_tasks': tasks.filter(status='inactive').count(),
+                'total_contacts': contacts.count(),
+                'total_invoices': invoices.count(),
+                'paid_invoices': invoices.filter(status='paid').count(),
+            },
+        }, status=status.HTTP_200_OK)
 
 
 class ProfileView(APIView):
@@ -86,11 +227,15 @@ class EmployeeListView(generics.ListAPIView):
     ordering_fields = ['date_joined', 'first_name', 'last_name']
 
     def get_queryset(self):
-        return User.objects.select_related('manager').all()
+        return User.objects.select_related(
+            'manager', 'department', 'designation',
+        ).all()
 
 
 class EmployeeDetailView(generics.RetrieveUpdateAPIView):
-    queryset = User.objects.select_related('manager').all()
+    queryset = User.objects.select_related(
+        'manager', 'department', 'designation',
+    ).all()
     serializer_class = UserSerializer
     permission_classes = [IsManagerOrAbove]
 
@@ -137,6 +282,17 @@ class LogoutView(APIView):
         tokens = OutstandingToken.objects.filter(user=request.user)
         for token in tokens:
             BlacklistedToken.objects.get_or_create(token=token)
+
+        log = LoginLog.objects.filter(
+            user=request.user, status='success', logout_time__isnull=True,
+        ).first()
+        if log:
+            from django.utils import timezone
+            log.logout_time = timezone.now()
+            duration = (log.logout_time - log.login_time).total_seconds()
+            log.session_duration = max(int(duration), 0)
+            log.save()
+
         return Response({'detail': 'Logged out successfully.'}, status=status.HTTP_205_RESET_CONTENT)
 
 
@@ -190,51 +346,24 @@ class ForgotPasswordView(APIView):
             return Response({'detail': 'If this email exists, a reset link will be sent.'}, status=status.HTTP_200_OK)
 
         from django.utils.crypto import get_random_string
+        from django.core.mail import send_mail
+        from django.conf import settings
+
         reset_token = get_random_string(64)
         user.set_password(reset_token)
         user.save(update_fields=['password'])
 
+        send_mail(
+            subject='Your temporary password',
+            message=f'Your account password has been reset.\n\nTemporary password: {reset_token}\n\nPlease log in and change your password immediately.',
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[user.email],
+            fail_silently=False,
+        )
+
         return Response({
             'detail': 'Password has been reset. Check your email for the new temporary password.',
-            'reset_token': reset_token,
         }, status=status.HTTP_200_OK)
-
-
-class ResetPasswordView(APIView):
-    permission_classes = [AllowAny]
-
-    @extend_schema(
-        request={'type': 'object', 'properties': {
-            'email': {'type': 'string'},
-            'new_password': {'type': 'string'},
-        }},
-        responses={200: {'type': 'object', 'properties': {'detail': {'type': 'string'}}}},
-    )
-    def post(self, request):
-        email = request.data.get('email')
-        new_password = request.data.get('new_password')
-        old_password = request.data.get('old_password')
-
-        if not email or not new_password:
-            return Response({'detail': 'Email and new password are required.'}, status=status.HTTP_400_BAD_REQUEST)
-
-        try:
-            user = User.objects.get(email=email, is_active=True)
-        except User.DoesNotExist:
-            return Response({'detail': 'User not found.'}, status=status.HTTP_404_NOT_FOUND)
-
-        if old_password and not user.check_password(old_password):
-            return Response({'detail': 'Current password is incorrect.'}, status=status.HTTP_400_BAD_REQUEST)
-
-        from django.contrib.auth.password_validation import validate_password
-        try:
-            validate_password(new_password, user)
-        except Exception as e:
-            return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
-
-        user.set_password(new_password)
-        user.save(update_fields=['password'])
-        return Response({'detail': 'Password has been reset successfully.'}, status=status.HTTP_200_OK)
 
 
 class DeviceListView(APIView):
@@ -303,114 +432,6 @@ class FeedbackListView(generics.ListAPIView):
     ordering = ['-created_at']
 
 
-class TwoFactorEnableView(APIView):
-    permission_classes = [IsAuthenticated]
-
-    @extend_schema(request=TwoFactorEnableSerializer, responses={201: {'type': 'object', 'properties': {'detail': {'type': 'string'}, 'code': {'type': 'string'}}}})
-    def post(self, request):
-        from django.utils import timezone
-        from django.utils.crypto import get_random_string
-        import datetime
-
-        TwoFactorCode.objects.filter(user=request.user, is_used=False).update(is_used=True)
-
-        code = get_random_string(6, allowed_chars='0123456789')
-        expires_at = timezone.now() + datetime.timedelta(minutes=5)
-
-        TwoFactorCode.objects.create(
-            user=request.user,
-            code=code,
-            expires_at=expires_at,
-        )
-
-        return Response({
-            'detail': '2FA code generated successfully.',
-            'code': code,
-        }, status=status.HTTP_201_CREATED)
-
-
-class TwoFactorVerifyView(APIView):
-    permission_classes = [IsAuthenticated]
-
-    @extend_schema(request=TwoFactorVerifySerializer, responses={200: {'type': 'object', 'properties': {'detail': {'type': 'string'}}}})
-    def post(self, request):
-        serializer = TwoFactorVerifySerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        code = serializer.validated_data['code']
-
-        from django.utils import timezone
-        try:
-            two_factor = TwoFactorCode.objects.filter(
-                user=request.user,
-                code=code,
-                is_used=False,
-                expires_at__gt=timezone.now(),
-            ).latest('created_at')
-        except TwoFactorCode.DoesNotExist:
-            return Response(
-                {'detail': 'Invalid or expired code.'},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        two_factor.is_used = True
-        two_factor.save(update_fields=['is_used'])
-
-        return Response({'detail': 'Code verified successfully.'}, status=status.HTTP_200_OK)
-
-
-class EmailVerificationRequestView(APIView):
-    permission_classes = [IsAuthenticated]
-
-    @extend_schema(request=EmailVerificationRequestSerializer, responses={201: {'type': 'object', 'properties': {'detail': {'type': 'string'}, 'token': {'type': 'string'}}}})
-    def post(self, request):
-        serializer = EmailVerificationRequestSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        email = serializer.validated_data['email']
-
-        from django.utils import timezone
-        from django.utils.crypto import get_random_string
-        import datetime
-
-        token = get_random_string(64)
-
-        EmailVerification.objects.create(
-            user=request.user,
-            token=token,
-            email=email,
-            expires_at=timezone.now() + datetime.timedelta(hours=24),
-        )
-
-        return Response({
-            'detail': 'Verification email sent.',
-            'token': token,
-        }, status=status.HTTP_201_CREATED)
-
-
-class EmailVerificationConfirmView(APIView):
-    permission_classes = [AllowAny]
-
-    @extend_schema(request=EmailVerificationConfirmSerializer, responses={200: {'type': 'object', 'properties': {'detail': {'type': 'string'}}}})
-    def post(self, request):
-        serializer = EmailVerificationConfirmSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        token = serializer.validated_data['token']
-
-        from django.utils import timezone
-
-        try:
-            verification = EmailVerification.objects.get(token=token, verified_at__isnull=True, expires_at__gt=timezone.now())
-        except EmailVerification.DoesNotExist:
-            return Response(
-                {'detail': 'Invalid or expired token.'},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        verification.verified_at = timezone.now()
-        verification.save(update_fields=['verified_at'])
-
-        return Response({'detail': 'Email verified successfully.'}, status=status.HTTP_200_OK)
-
-
 class DeleteAccountRequestView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -425,3 +446,57 @@ class DeleteAccountRequestView(APIView):
         )
 
         return Response({'detail': 'Delete account request submitted.'}, status=status.HTTP_201_CREATED)
+
+
+class RoleListCreateView(generics.ListCreateAPIView):
+    queryset = Role.objects.all()
+    serializer_class = RoleSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_permissions(self):
+        if self.request.method == 'POST':
+            return [IsManagerOrAbove()]
+        return [IsAuthenticated()]
+
+
+class RoleDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Role.objects.all()
+    serializer_class = RoleSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_permissions(self):
+        if self.request.method in ['PUT', 'PATCH', 'DELETE']:
+            return [IsManagerOrAbove()]
+        return [IsAuthenticated()]
+
+    def update(self, request, *args, **kwargs):
+        kwargs['partial'] = True
+        return super().update(request, *args, **kwargs)
+
+
+class LoginLogListView(generics.ListAPIView):
+    queryset = LoginLog.objects.select_related('user').all()
+    serializer_class = LoginLogSerializer
+    permission_classes = [IsManagerOrAbove]
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+    filterset_fields = ['status', 'user']
+    search_fields = ['user__email', 'user__first_name', 'user__last_name', 'device']
+    ordering_fields = ['login_time', 'logout_time']
+
+
+class UserActivityLogListCreateView(generics.ListCreateAPIView):
+    queryset = UserActivityLog.objects.select_related('user').all()
+    serializer_class = UserActivityLogSerializer
+    permission_classes = [IsAuthenticated]
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+    filterset_fields = ['user', 'module', 'action']
+    search_fields = ['user__email', 'action', 'module', 'record_id']
+    ordering_fields = ['action_date']
+
+    def get_permissions(self):
+        if self.request.method == 'POST':
+            return [IsManagerOrAbove()]
+        return [IsAuthenticated()]
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)

@@ -1,10 +1,11 @@
 from drf_spectacular.utils import extend_schema
 from rest_framework import generics, filters
-from .models import BlogCategory, BlogPost, BlogComment
+from .models import BlogCategory, BlogPost, BlogComment, BlogTag
 from .serializers import (
     BlogCategorySerializer,
     BlogPostSerializer,
     BlogCommentSerializer,
+    BlogTagSerializer,
 )
 from apps.accounts.permissions import IsSuperAdmin
 
@@ -91,3 +92,28 @@ class BlogCommentDetailView(generics.RetrieveUpdateDestroyAPIView):
 
     def get_permissions(self):
         return [IsSuperAdmin()]
+
+
+@extend_schema(tags=['Blog Tags'])
+class BlogTagListCreateView(generics.ListCreateAPIView):
+    queryset = BlogTag.objects.all()
+    serializer_class = BlogTagSerializer
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    search_fields = ['name']
+    ordering_fields = ['name', 'created_at']
+
+    def get_permissions(self):
+        if self.request.method == 'POST':
+            return [IsSuperAdmin()]
+        return []
+
+
+@extend_schema(tags=['Blog Tags'])
+class BlogTagDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = BlogTag.objects.all()
+    serializer_class = BlogTagSerializer
+
+    def get_permissions(self):
+        if self.request.method in ('PUT', 'PATCH', 'DELETE'):
+            return [IsSuperAdmin()]
+        return []

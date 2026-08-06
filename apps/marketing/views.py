@@ -76,7 +76,7 @@ class CampaignSendView(APIView):
             campaign = Campaign.objects.get(pk=pk)
         except Campaign.DoesNotExist:
             return Response({'detail': 'Campaign not found.'}, status=status.HTTP_404_NOT_FOUND)
-        campaign.status = 'sent'
+        campaign.status = 'active'
         campaign.sent_at = timezone.now()
         campaign.save(update_fields=['status', 'sent_at'])
         return Response({'detail': 'Campaign sent successfully.'}, status=status.HTTP_200_OK)

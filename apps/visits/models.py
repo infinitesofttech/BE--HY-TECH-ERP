@@ -6,7 +6,6 @@ class Visit(models.Model):
     VISIT_TYPE_CHOICES = [
         ('dealer', 'Dealer'),
         ('retailer', 'Retailer'),
-        ('mechanic', 'Mechanic'),
     ]
     STATUS_CHOICES = [
         ('in_progress', 'In Progress'),
@@ -28,13 +27,6 @@ class Visit(models.Model):
     )
     retailer = models.ForeignKey(
         'masters.Retailer',
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name='visits',
-    )
-    mechanic = models.ForeignKey(
-        'masters.Mechanic',
         on_delete=models.SET_NULL,
         null=True,
         blank=True,

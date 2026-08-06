@@ -1,5 +1,8 @@
 from django.contrib import admin
-from .models import Dealer, Retailer, Mechanic, TaxRate, Currency, Source, Industry
+from .models import (
+    Dealer, Retailer, Currency, Source, Industry,
+    ContactStage, LostReason, CallReason, CallLog,
+)
 
 
 @admin.register(Dealer)
@@ -16,21 +19,6 @@ class RetailerAdmin(admin.ModelAdmin):
     list_filter = ('status', 'city')
     search_fields = ('name', 'contact_person', 'city', 'pin_code')
     list_per_page = 25
-
-
-@admin.register(Mechanic)
-class MechanicAdmin(admin.ModelAdmin):
-    list_display = ('id', 'name', 'city', 'pin_code', 'status', 'assigned_to')
-    list_filter = ('status', 'city')
-    search_fields = ('name', 'contact_person', 'city', 'pin_code')
-    list_per_page = 25
-
-
-@admin.register(TaxRate)
-class TaxRateAdmin(admin.ModelAdmin):
-    list_display = ('id', 'name', 'rate', 'type', 'is_active')
-    list_filter = ('type', 'is_active')
-    search_fields = ('name',)
 
 
 @admin.register(Currency)
@@ -52,3 +40,31 @@ class IndustryAdmin(admin.ModelAdmin):
     list_display = ('name', 'is_active')
     list_filter = ('is_active',)
     search_fields = ('name',)
+
+
+@admin.register(ContactStage)
+class ContactStageAdmin(admin.ModelAdmin):
+    list_display = ('id', 'title', 'status', 'created_at')
+    list_filter = ('status',)
+    search_fields = ('title',)
+
+
+@admin.register(LostReason)
+class LostReasonAdmin(admin.ModelAdmin):
+    list_display = ('id', 'title', 'status', 'created_at')
+    list_filter = ('status',)
+    search_fields = ('title',)
+
+
+@admin.register(CallReason)
+class CallReasonAdmin(admin.ModelAdmin):
+    list_display = ('id', 'title', 'status', 'created_at')
+    list_filter = ('status',)
+    search_fields = ('title',)
+
+
+@admin.register(CallLog)
+class CallLogAdmin(admin.ModelAdmin):
+    list_display = ('id', 'name', 'phone', 'call_type', 'duration', 'date_time', 'created_at')
+    list_filter = ('call_type',)
+    search_fields = ('name', 'phone', 'notes')

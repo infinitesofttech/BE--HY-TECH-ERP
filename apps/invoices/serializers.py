@@ -19,13 +19,24 @@ class InvoiceItemCreateSerializer(serializers.Serializer):
 
 class InvoiceSerializer(serializers.ModelSerializer):
     items = InvoiceItemSerializer(many=True, read_only=True)
+    tax_name = serializers.CharField(source='tax.name', read_only=True)
+    tax_percentage = serializers.DecimalField(max_digits=5, decimal_places=2, read_only=True)
+    sales_order_id_ref = serializers.CharField(
+        source='sales_order.order_id', read_only=True, default='',
+    )
+    delivery_note_id_ref = serializers.CharField(
+        source='delivery_note.delivery_note_id', read_only=True, default='',
+    )
 
     class Meta:
         model = Invoice
         fields = [
-            'id', 'invoice_number', 'customer_name', 'customer_email',
+            'id', 'invoice_number', 'sales_order', 'sales_order_id_ref',
+            'delivery_note', 'delivery_note_id_ref',
+            'customer_name', 'customer_email',
             'customer_address', 'billing_address', 'invoice_date', 'due_date',
-            'payment_method', 'transaction_id', 'subtotal', 'tax_percentage',
+            'payment_method', 'transaction_id', 'subtotal', 'tax',
+            'tax_name', 'tax_percentage',
             'tax_amount', 'discount_percentage', 'discount_amount', 'total',
             'status', 'notes', 'terms_conditions', 'created_by',
             'created_at', 'updated_at', 'items',

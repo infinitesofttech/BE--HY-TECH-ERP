@@ -19,12 +19,15 @@ class EstimationItemCreateSerializer(serializers.Serializer):
 
 class EstimationSerializer(serializers.ModelSerializer):
     items = EstimationItemSerializer(many=True, read_only=True)
+    tax_name = serializers.CharField(source='tax.name', read_only=True)
+    tax_percentage = serializers.DecimalField(max_digits=5, decimal_places=2, read_only=True)
 
     class Meta:
         model = Estimation
         fields = [
             'id', 'estimation_number', 'title', 'customer_name', 'customer_email',
-            'customer_phone', 'valid_until', 'subtotal', 'tax_percentage',
+            'customer_phone', 'valid_until', 'subtotal', 'tax',
+            'tax_name', 'tax_percentage',
             'tax_amount', 'discount_percentage', 'discount_amount', 'total',
             'status', 'notes', 'created_by', 'created_at', 'updated_at', 'items',
         ]

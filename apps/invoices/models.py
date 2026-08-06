@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from django.db import models
 from django.conf import settings
 
@@ -12,7 +14,23 @@ class Invoice(models.Model):
         ('online', 'Online'), ('other', 'Other'),
     ]
 
-    invoice_number = models.CharField(max_length=50, unique=True)
+    invoice_number = models.CharField(max_length=50, unique=True, blank=True)
+    sales_order = models.ForeignKey(
+        'sales.SalesOrder',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='invoices',
+        help_text='Sales order this invoice bills for.',
+    )
+    delivery_note = models.ForeignKey(
+        'sales.DeliveryNote',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='invoices',
+        help_text='Delivery note this invoice was raised from.',
+    )
     customer_name = models.CharField(max_length=200)
     customer_email = models.EmailField(blank=True)
     customer_address = models.TextField(blank=True)
@@ -24,7 +42,13 @@ class Invoice(models.Model):
     )
     transaction_id = models.CharField(max_length=100, blank=True)
     subtotal = models.DecimalField(max_digits=12, decimal_places=2, default=0)
-    tax_percentage = models.DecimalField(max_digits=5, decimal_places=2, default=0)
+    tax = models.ForeignKey(
+        'finance.Tax',
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name='invoices',
+    )
     tax_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     discount_percentage = models.DecimalField(max_digits=5, decimal_places=2, default=0)
     discount_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0)
@@ -41,8 +65,24 @@ class Invoice(models.Model):
     class Meta:
         ordering = ['-created_at']
 
+    @property
+    def tax_percentage(self):
+        return self.tax.rate if self.tax else Decimal('0')
+
+    @property
+    def tax_name(self):
+        return self.tax.name if self.tax else None
+
     def __str__(self):
         return self.invoice_number
+
+    def save(self, *args, **kwargs):
+        if not self.invoice_number:
+            super().save(*args, **kwargs)
+            self.invoice_number = f'INV-{self.pk:04d}'
+            super().save(update_fields=['invoice_number'])
+            return
+        super().save(*args, **kwargs)
 
 
 class InvoiceItem(models.Model):

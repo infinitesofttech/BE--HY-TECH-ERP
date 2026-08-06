@@ -9,7 +9,7 @@ class User(AbstractUser):
         ('msr', 'MSR'),
         ('dealer', 'Dealer'),
         ('retailer', 'Retailer'),
-        ('mechanic', 'Mechanic'),
+        ('company', 'Company'),
     ]
 
     role = models.CharField(max_length=20, choices=ROLE_CHOICES)
@@ -30,6 +30,33 @@ class User(AbstractUser):
     state = models.CharField(max_length=100, blank=True)
     date_of_birth = models.DateField(null=True, blank=True)
     joining_date = models.DateField(null=True, blank=True)
+    department = models.ForeignKey(
+        'settings_config.Department',
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name='employees',
+        help_text='Department this employee belongs to.',
+    )
+    designation = models.ForeignKey(
+        'settings_config.Designation',
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name='employees',
+        help_text='Designation / job title of this employee.',
+    )
+    shift_start_time = models.TimeField(
+        null=True,
+        blank=True,
+        help_text='Work shift start time for this employee.',
+    )
+    shift_end_time = models.TimeField(
+        null=True,
+        blank=True,
+        help_text='Work shift end time for this employee.',
+    )
+    salary = models.DecimalField(max_digits=12, decimal_places=2, default=0)
 
     class Meta:
         verbose_name_plural = 'Users'
@@ -74,35 +101,6 @@ class Feedback(models.Model):
         return f'{self.name} - {self.created_at}'
 
 
-class TwoFactorCode(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='two_factor_codes')
-    code = models.CharField(max_length=6)
-    expires_at = models.DateTimeField()
-    is_used = models.BooleanField(default=False)
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        ordering = ['-created_at']
-
-    def __str__(self):
-        return f'{self.user.email} - {self.code}'
-
-
-class EmailVerification(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='email_verifications')
-    token = models.CharField(max_length=64, unique=True)
-    email = models.EmailField()
-    expires_at = models.DateTimeField()
-    verified_at = models.DateTimeField(null=True, blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        ordering = ['-created_at']
-
-    def __str__(self):
-        return f'{self.email} - {"verified" if self.verified_at else "pending"}'
-
-
 class DeleteAccountRequest(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='delete_requests')
     reason = models.TextField()
@@ -115,3 +113,52 @@ class DeleteAccountRequest(models.Model):
 
     def __str__(self):
         return f'{self.user.email} - {"processed" if self.is_processed else "pending"}'
+
+
+class Role(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+    permissions = models.JSONField(default=list, blank=True, help_text='List of permission keys')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return self.name
+
+
+class LoginLog(models.Model):
+    STATUS_CHOICES = [('success', 'Success'), ('failed', 'Failed')]
+
+    user = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, blank=True, related_name='login_logs',
+    )
+    login_time = models.DateTimeField(auto_now_add=True)
+    logout_time = models.DateTimeField(null=True, blank=True)
+    session_duration = models.PositiveIntegerField(default=0, help_text='Duration in seconds')
+    ip_address = models.GenericIPAddressField(null=True, blank=True)
+    device = models.CharField(max_length=500, blank=True)
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='success')
+
+    class Meta:
+        ordering = ['-login_time']
+
+    def __str__(self):
+        return f'{self.user} - {self.login_time} - {self.status}'
+
+
+class UserActivityLog(models.Model):
+    user = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, blank=True, related_name='activity_logs',
+    )
+    action = models.CharField(max_length=200)
+    module = models.CharField(max_length=100, blank=True)
+    record_id = models.CharField(max_length=50, blank=True)
+    ip_address = models.GenericIPAddressField(null=True, blank=True)
+    action_date = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-action_date']
+
+    def __str__(self):
+        return f'{self.user} - {self.action} - {self.action_date}'

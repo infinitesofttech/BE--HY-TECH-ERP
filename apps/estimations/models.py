@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from django.db import models
 from django.conf import settings
 
@@ -15,7 +17,13 @@ class Estimation(models.Model):
     customer_phone = models.CharField(max_length=20, blank=True)
     valid_until = models.DateField(null=True, blank=True)
     subtotal = models.DecimalField(max_digits=12, decimal_places=2, default=0)
-    tax_percentage = models.DecimalField(max_digits=5, decimal_places=2, default=0)
+    tax = models.ForeignKey(
+        'finance.Tax',
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name='estimations',
+    )
     tax_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     discount_percentage = models.DecimalField(max_digits=5, decimal_places=2, default=0)
     discount_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0)
@@ -30,6 +38,14 @@ class Estimation(models.Model):
 
     class Meta:
         ordering = ['-created_at']
+
+    @property
+    def tax_percentage(self):
+        return self.tax.rate if self.tax else Decimal('0')
+
+    @property
+    def tax_name(self):
+        return self.tax.name if self.tax else None
 
     def save(self, *args, **kwargs):
         if not self.estimation_number:

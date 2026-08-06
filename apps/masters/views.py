@@ -5,10 +5,14 @@ from rest_framework.permissions import IsAuthenticated
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema
 
-from .models import Dealer, Retailer, Mechanic, TaxRate, Currency, Source, Industry
+from .models import (
+    Dealer, Retailer, Currency, Source, Industry,
+    ContactStage, LostReason, CallReason, CallLog,
+)
 from .serializers import (
-    DealerSerializer, RetailerSerializer, MechanicSerializer,
-    TaxRateSerializer, CurrencySerializer, SourceSerializer, IndustrySerializer,
+    DealerSerializer, RetailerSerializer,
+    CurrencySerializer, SourceSerializer, IndustrySerializer,
+    ContactStageSerializer, LostReasonSerializer, CallReasonSerializer, CallLogSerializer,
 )
 from apps.accounts.permissions import IsSuperAdmin, IsManagerOrAbove
 
@@ -28,20 +32,6 @@ class DetailMixin:
     def update(self, request, *args, **kwargs):
         kwargs['partial'] = True
         return super().update(request, *args, **kwargs)
-
-
-class TaxRateListCreateView(ListCreateMixin, generics.ListCreateAPIView):
-    queryset = TaxRate.objects.all()
-    serializer_class = TaxRateSerializer
-
-    @extend_schema(request=TaxRateSerializer, responses={201: TaxRateSerializer})
-    def post(self, request, *args, **kwargs):
-        return super().post(request, *args, **kwargs)
-
-
-class TaxRateDetailView(DetailMixin, generics.RetrieveUpdateDestroyAPIView):
-    queryset = TaxRate.objects.all()
-    serializer_class = TaxRateSerializer
 
 
 class CurrencyListCreateView(ListCreateMixin, generics.ListCreateAPIView):
@@ -163,39 +153,65 @@ class RetailerToggleStatusView(APIView):
         return Response({'status': retailer.status})
 
 
-class MechanicListCreateView(generics.ListCreateAPIView):
-    queryset = Mechanic.objects.all()
-    serializer_class = MechanicSerializer
-    permission_classes = [IsAuthenticated]
-    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
-    filterset_fields = ['status', 'city', 'pin_code', 'assigned_to']
-    search_fields = ['name', 'contact_person', 'city', 'pin_code']
-    ordering_fields = ['name', 'created_at']
+class ContactStageListCreateView(ListCreateMixin, generics.ListCreateAPIView):
+    queryset = ContactStage.objects.all()
+    serializer_class = ContactStageSerializer
+
+    @extend_schema(request=ContactStageSerializer, responses={201: ContactStageSerializer})
+    def post(self, request, *args, **kwargs):
+        return super().post(request, *args, **kwargs)
+
+
+class ContactStageDetailView(DetailMixin, generics.RetrieveUpdateDestroyAPIView):
+    queryset = ContactStage.objects.all()
+    serializer_class = ContactStageSerializer
+
+
+class LostReasonListCreateView(ListCreateMixin, generics.ListCreateAPIView):
+    queryset = LostReason.objects.all()
+    serializer_class = LostReasonSerializer
+
+    @extend_schema(request=LostReasonSerializer, responses={201: LostReasonSerializer})
+    def post(self, request, *args, **kwargs):
+        return super().post(request, *args, **kwargs)
+
+
+class LostReasonDetailView(DetailMixin, generics.RetrieveUpdateDestroyAPIView):
+    queryset = LostReason.objects.all()
+    serializer_class = LostReasonSerializer
+
+
+class CallReasonListCreateView(ListCreateMixin, generics.ListCreateAPIView):
+    queryset = CallReason.objects.all()
+    serializer_class = CallReasonSerializer
+
+    @extend_schema(request=CallReasonSerializer, responses={201: CallReasonSerializer})
+    def post(self, request, *args, **kwargs):
+        return super().post(request, *args, **kwargs)
+
+
+class CallReasonDetailView(DetailMixin, generics.RetrieveUpdateDestroyAPIView):
+    queryset = CallReason.objects.all()
+    serializer_class = CallReasonSerializer
+
+
+class CallLogListCreateView(ListCreateMixin, generics.ListCreateAPIView):
+    queryset = CallLog.objects.all()
+    serializer_class = CallLogSerializer
 
     def get_permissions(self):
         if self.request.method == 'POST':
-            return [IsAuthenticated(), IsManagerOrAbove()]
+            return [IsAuthenticated()]
         return [IsAuthenticated()]
 
+    @extend_schema(request=CallLogSerializer, responses={201: CallLogSerializer})
+    def post(self, request, *args, **kwargs):
+        return super().post(request, *args, **kwargs)
 
-class MechanicDetailView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Mechanic.objects.all()
-    serializer_class = MechanicSerializer
-    permission_classes = [IsAuthenticated]
-
-    def update(self, request, *args, **kwargs):
-        kwargs['partial'] = True
-        return super().update(request, *args, **kwargs)
+    def perform_create(self, serializer):
+        serializer.save(created_by=self.request.user)
 
 
-class MechanicToggleStatusView(APIView):
-    permission_classes = [IsAuthenticated, IsManagerOrAbove]
-
-    def patch(self, request, pk):
-        try:
-            mechanic = Mechanic.objects.get(pk=pk)
-        except Mechanic.DoesNotExist:
-            return Response({'error': 'Mechanic not found'}, status=404)
-        mechanic.status = 'inactive' if mechanic.status == 'active' else 'active'
-        mechanic.save()
-        return Response({'status': mechanic.status})
+class CallLogDetailView(DetailMixin, generics.RetrieveUpdateDestroyAPIView):
+    queryset = CallLog.objects.all()
+    serializer_class = CallLogSerializer

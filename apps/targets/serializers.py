@@ -1,17 +1,19 @@
 from rest_framework import serializers
-from django.db.models import Sum
-from .models import Target
+from django.db.models import Sum, F
+from .models import Target, Team
 
 
 class TargetSerializer(serializers.ModelSerializer):
     employee_name = serializers.CharField(source='employee.get_full_name', read_only=True)
     employee_email = serializers.CharField(source='employee.email', read_only=True)
     product_name = serializers.CharField(source='product.name', read_only=True, default=None)
+    team_name = serializers.CharField(source='team.name', read_only=True, default=None)
 
     class Meta:
         model = Target
         fields = [
             'id', 'employee', 'employee_name', 'employee_email',
+            'team', 'team_name',
             'month', 'year', 'target_amount', 'achieved_amount',
             'status', 'product', 'product_name',
             'notes', 'created_at', 'updated_at',
@@ -23,7 +25,7 @@ class TargetCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Target
         fields = [
-            'id', 'employee', 'month', 'year', 'target_amount',
+            'id', 'employee', 'team', 'month', 'year', 'target_amount',
             'achieved_amount', 'status', 'product', 'notes',
         ]
         read_only_fields = ['id']
@@ -48,6 +50,7 @@ class TargetWithAchievementSerializer(serializers.ModelSerializer):
     employee_name = serializers.CharField(source='employee.get_full_name', read_only=True)
     employee_email = serializers.CharField(source='employee.email', read_only=True)
     product_name = serializers.CharField(source='product.name', read_only=True, default=None)
+    team_name = serializers.CharField(source='team.name', read_only=True, default=None)
     achieved_amount = serializers.SerializerMethodField()
     pending_amount = serializers.SerializerMethodField()
     achievement_percentage = serializers.SerializerMethodField()
@@ -56,6 +59,7 @@ class TargetWithAchievementSerializer(serializers.ModelSerializer):
         model = Target
         fields = [
             'id', 'employee', 'employee_name', 'employee_email',
+            'team', 'team_name',
             'month', 'year', 'target_amount', 'achieved_amount',
             'status', 'pending_amount', 'achievement_percentage',
             'product', 'product_name', 'notes',
@@ -63,21 +67,26 @@ class TargetWithAchievementSerializer(serializers.ModelSerializer):
         ]
 
     def _get_achieved(self, obj):
-        from apps.sales.models import SalesReport, SalesReportItem
+        from apps.sales.models import SalesOrder, SalesOrderItem
 
-        query = SalesReport.objects.filter(
+        query = SalesOrder.objects.filter(
             employee=obj.employee,
             date__year=obj.year,
             date__month=obj.month,
+            status__in=['in_progress', 'completed'],
         )
 
         if obj.product:
-            total = SalesReportItem.objects.filter(
-                report__in=query,
+            total = SalesOrderItem.objects.filter(
+                order__in=query,
                 product=obj.product,
-            ).aggregate(total=Sum('total'))['total'] or 0
+            ).aggregate(
+                total=Sum(F('amount') + F('tax_amount')),
+            )['total'] or 0
         else:
-            total = query.aggregate(total=Sum('total_revenue'))['total'] or 0
+            total = query.aggregate(
+                total=Sum('total_amount'),
+            )['total'] or 0
 
         return float(total)
 
@@ -94,3 +103,25 @@ class TargetWithAchievementSerializer(serializers.ModelSerializer):
         if obj.target_amount == 0:
             return 0
         return round((achieved / float(obj.target_amount)) * 100, 2)
+
+
+class TeamSerializer(serializers.ModelSerializer):
+    team_lead_name = serializers.SerializerMethodField()
+    members_count = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Team
+        fields = [
+            'id', 'name', 'team_lead', 'team_lead_name',
+            'members', 'members_count', 'target_revenue', 'status',
+            'created_at', 'updated_at',
+        ]
+        read_only_fields = ['id', 'created_at', 'updated_at']
+
+    def get_team_lead_name(self, obj):
+        if obj.team_lead:
+            return obj.team_lead.get_full_name() or obj.team_lead.email
+        return None
+
+    def get_members_count(self, obj):
+        return obj.members.count()

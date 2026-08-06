@@ -62,3 +62,23 @@ class BlogComment(models.Model):
 
     def __str__(self):
         return f'Comment by {self.name} on {self.post.title}'
+
+
+class BlogTag(models.Model):
+    STATUS_CHOICES = [('active', 'Active'), ('inactive', 'Inactive')]
+
+    name = models.CharField(max_length=100, unique=True)
+    slug = models.SlugField(max_length=100, unique=True, blank=True)
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='active')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['name']
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.name)
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.name

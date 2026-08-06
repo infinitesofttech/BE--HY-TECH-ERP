@@ -1,11 +1,8 @@
 from rest_framework import serializers
-from .models import Dealer, Retailer, Mechanic, TaxRate, Currency, Source, Industry
-
-
-class TaxRateSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = TaxRate
-        fields = '__all__'
+from .models import (
+    Dealer, Retailer, Currency, Source, Industry,
+    ContactStage, LostReason, CallReason, CallLog,
+)
 
 
 class CurrencySerializer(serializers.ModelSerializer):
@@ -42,9 +39,31 @@ class RetailerSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class MechanicSerializer(serializers.ModelSerializer):
-    assigned_to_name = serializers.CharField(source='assigned_to.email', read_only=True, default='')
+class ContactStageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ContactStage
+        fields = '__all__'
+        read_only_fields = ['id', 'created_at']
+
+
+class LostReasonSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = LostReason
+        fields = '__all__'
+        read_only_fields = ['id', 'created_at']
+
+
+class CallReasonSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CallReason
+        fields = '__all__'
+        read_only_fields = ['id', 'created_at']
+
+
+class CallLogSerializer(serializers.ModelSerializer):
+    created_by_name = serializers.CharField(source='created_by.email', read_only=True, default='')
 
     class Meta:
-        model = Mechanic
+        model = CallLog
         fields = '__all__'
+        read_only_fields = ['id', 'created_by', 'created_at']

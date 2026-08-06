@@ -2,20 +2,6 @@ from django.db import models
 from django.conf import settings
 
 
-class TaxRate(models.Model):
-    TYPE_CHOICES = [('percentage', 'Percentage'), ('fixed', 'Fixed')]
-    name = models.CharField(max_length=100)
-    rate = models.DecimalField(max_digits=5, decimal_places=2)
-    type = models.CharField(max_length=10, choices=TYPE_CHOICES, default='percentage')
-    is_active = models.BooleanField(default=True)
-
-    class Meta:
-        ordering = ['name']
-
-    def __str__(self):
-        return f'{self.name} ({self.rate}%)'
-
-
 class Currency(models.Model):
     name = models.CharField(max_length=100)
     code = models.CharField(max_length=3, unique=True)
@@ -115,32 +101,66 @@ class Retailer(models.Model):
         return self.name
 
 
-class Mechanic(models.Model):
+class ContactStage(models.Model):
     STATUS_CHOICES = [('active', 'Active'), ('inactive', 'Inactive')]
-    name = models.CharField(max_length=200)
-    contact_person = models.CharField(max_length=200, blank=True)
-    phone = models.CharField(max_length=15, blank=True)
-    email = models.EmailField(blank=True)
-    address = models.TextField(blank=True)
-    city = models.CharField(max_length=100, blank=True)
-    state = models.CharField(max_length=100, blank=True)
-    pin_code = models.CharField(max_length=10, blank=True)
-    latitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
-    longitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
-    assigned_to = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True,
-        related_name='assigned_mechanics'
-    )
-    managed_by = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True,
-        related_name='managed_mechanics'
-    )
+    title = models.CharField(max_length=100)
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='active')
     created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         ordering = ['-created_at']
 
     def __str__(self):
-        return self.name
+        return self.title
+
+
+class LostReason(models.Model):
+    STATUS_CHOICES = [('active', 'Active'), ('inactive', 'Inactive')]
+    title = models.CharField(max_length=100)
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='active')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return self.title
+
+
+class CallReason(models.Model):
+    STATUS_CHOICES = [('active', 'Active'), ('inactive', 'Inactive')]
+    title = models.CharField(max_length=100)
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='active')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return self.title
+
+
+class CallLog(models.Model):
+    CALL_TYPE_CHOICES = [
+        ('incoming', 'Incoming'), ('outgoing', 'Outgoing'), ('missed', 'Missed'),
+    ]
+    name = models.CharField(max_length=200, blank=True)
+    phone = models.CharField(max_length=20)
+    call_type = models.CharField(max_length=10, choices=CALL_TYPE_CHOICES, default='incoming')
+    duration = models.PositiveIntegerField(default=0, help_text='Duration in seconds')
+    date_time = models.DateTimeField(null=True, blank=True)
+    notes = models.TextField(blank=True)
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,
+        null=True, blank=True, related_name='call_logs'
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f'{self.name or self.phone} - {self.get_call_type_display()}'
+
+
+

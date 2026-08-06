@@ -1,11 +1,36 @@
 from rest_framework import serializers
-from .models import PipelineStage, Lead, Deal, DealActivity
+from django.db.models import Sum
+
+from .models import (
+    PipelineStage, Pipeline, Lead, Deal, DealActivity, Opportunity, Activity,
+)
 
 
 class PipelineStageSerializer(serializers.ModelSerializer):
     class Meta:
         model = PipelineStage
         fields = '__all__'
+
+
+class PipelineSerializer(serializers.ModelSerializer):
+    stage_details = serializers.SerializerMethodField()
+    total_deal_value = serializers.SerializerMethodField()
+    deals_count = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Pipeline
+        fields = '__all__'
+        read_only_fields = ['id', 'created_at', 'updated_at']
+
+    def get_stage_details(self, obj):
+        return [{'id': s.id, 'name': s.name} for s in obj.stages.all()]
+
+    def get_total_deal_value(self, obj):
+        total = obj.deals.aggregate(total=Sum('value'))['total']
+        return float(total or 0)
+
+    def get_deals_count(self, obj):
+        return obj.deals.count()
 
 
 class DealActivitySerializer(serializers.ModelSerializer):
@@ -18,10 +43,19 @@ class DealActivitySerializer(serializers.ModelSerializer):
 
 class LeadSerializer(serializers.ModelSerializer):
     owner_name = serializers.CharField(source='owner.email', read_only=True, default='')
+    name = serializers.CharField(read_only=True)
+    visible_to_names = serializers.SerializerMethodField()
 
     class Meta:
         model = Lead
         fields = '__all__'
+        read_only_fields = ['id', 'created_at', 'updated_at']
+
+    def get_visible_to_names(self, obj):
+        return [
+            user.get_full_name() or user.email
+            for user in obj.visible_to.all()
+        ]
 
 
 class DealSerializer(serializers.ModelSerializer):
@@ -31,6 +65,8 @@ class DealSerializer(serializers.ModelSerializer):
     contact_name = serializers.SerializerMethodField()
     company_name = serializers.SerializerMethodField()
     stage_name = serializers.SerializerMethodField()
+    pipeline_name = serializers.SerializerMethodField()
+    progress_name = serializers.SerializerMethodField()
 
     class Meta:
         model = Deal
@@ -49,4 +85,54 @@ class DealSerializer(serializers.ModelSerializer):
         return str(obj.company) if obj.company else ''
 
     def get_stage_name(self, obj):
+        return obj.get_progress_display() if obj.progress else ''
+
+    def get_pipeline_name(self, obj):
+        return obj.pipeline.name if obj.pipeline else ''
+
+    def get_progress_name(self, obj):
+        return obj.get_progress_display() if obj.progress else ''
+
+
+class OpportunitySerializer(serializers.ModelSerializer):
+    owner_name = serializers.SerializerMethodField()
+    stage_name = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Opportunity
+        fields = '__all__'
+        read_only_fields = ['id', 'opportunity_id', 'created_at', 'updated_at']
+
+    def get_owner_name(self, obj):
+        return obj.owner.email if obj.owner else ''
+
+    def get_stage_name(self, obj):
         return obj.get_stage_display() if obj.stage else ''
+
+
+class ActivitySerializer(serializers.ModelSerializer):
+    owner_name = serializers.SerializerMethodField()
+    deal_names = serializers.SerializerMethodField()
+    contact_names = serializers.SerializerMethodField()
+    company_names = serializers.SerializerMethodField()
+    created_by_name = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Activity
+        fields = '__all__'
+        read_only_fields = ['id', 'created_by', 'created_at', 'updated_at']
+
+    def get_owner_name(self, obj):
+        return obj.owner.email if obj.owner else ''
+
+    def get_deal_names(self, obj):
+        return [d.name for d in obj.deals.all()]
+
+    def get_contact_names(self, obj):
+        return [str(c) for c in obj.contacts.all()]
+
+    def get_company_names(self, obj):
+        return [c.name for c in obj.companies.all()]
+
+    def get_created_by_name(self, obj):
+        return obj.created_by.email if obj.created_by else ''

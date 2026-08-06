@@ -12,9 +12,6 @@ class VisitSerializer(serializers.ModelSerializer):
     retailer_name = serializers.CharField(
         source='retailer.name', read_only=True, default=None,
     )
-    mechanic_name = serializers.CharField(
-        source='mechanic.name', read_only=True, default=None,
-    )
 
     class Meta:
         model = Visit
@@ -25,7 +22,6 @@ class VisitCheckInSerializer(serializers.Serializer):
     visit_type = serializers.ChoiceField(choices=Visit.VISIT_TYPE_CHOICES)
     dealer_id = serializers.IntegerField(required=False)
     retailer_id = serializers.IntegerField(required=False)
-    mechanic_id = serializers.IntegerField(required=False)
     purpose = serializers.CharField(required=False, allow_blank=True)
     remarks = serializers.CharField(required=False, allow_blank=True)
     photo = serializers.ImageField(required=False)
@@ -44,10 +40,6 @@ class VisitCheckInSerializer(serializers.Serializer):
         if visit_type == 'retailer' and not attrs.get('retailer_id'):
             raise serializers.ValidationError(
                 {'retailer_id': 'retailer_id is required for retailer visits.'},
-            )
-        if visit_type == 'mechanic' and not attrs.get('mechanic_id'):
-            raise serializers.ValidationError(
-                {'mechanic_id': 'mechanic_id is required for mechanic visits.'},
             )
         return attrs
 

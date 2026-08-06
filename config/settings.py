@@ -34,6 +34,8 @@ INSTALLED_APPS = [
     'apps.visits',
     'apps.products',
     'apps.sales',
+    'apps.purchases',
+    'apps.production',
     'apps.targets',
     'apps.leaves',
     'apps.notifications',
@@ -190,6 +192,15 @@ SPECTACULAR_SETTINGS = {
 
 # Google Maps API Key
 GOOGLE_MAPS_API_KEY = config('GOOGLE_MAPS_API_KEY', default='')
+
+# Email
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = config('EMAIL_HOST', default='smtp.gmail.com')
+EMAIL_PORT = config('EMAIL_PORT', default=587, cast=int)
+EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
+EMAIL_USE_TLS = config('EMAIL_USE_TLS', default=True, cast=bool)
+DEFAULT_FROM_EMAIL = config('EMAIL_HOST_USER', default='noreply@crm.com')
 
 # Firebase Cloud Messaging (optional — set FCM_CREDENTIALS as path to service account JSON or base64-encoded JSON)
 FCM_CREDENTIALS = config('FCM_CREDENTIALS', default=None)

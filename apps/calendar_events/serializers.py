@@ -56,13 +56,30 @@ class CalendarEventCreateSerializer(serializers.ModelSerializer):
 
 
 class HolidaySerializer(serializers.ModelSerializer):
+    holiday_status = serializers.SerializerMethodField()
+
     class Meta:
         model = Holiday
-        fields = ['id', 'name', 'date', 'is_recurring_yearly', 'is_active', 'created_at']
+        fields = [
+            'id', 'name', 'date', 'description', 'type', 'holiday_status',
+            'is_recurring_yearly', 'is_active', 'created_at',
+        ]
         read_only_fields = ['id', 'created_at']
+
+    def get_holiday_status(self, obj):
+        from datetime import date, timedelta
+        today = date.today()
+        if obj.date < today:
+            return 'past'
+        if obj.date == today:
+            return 'today'
+        end_of_week = today + timedelta(days=(6 - today.weekday()))
+        if obj.date <= end_of_week:
+            return 'this_week'
+        return 'upcoming'
 
 
 class HolidayCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Holiday
-        fields = ['name', 'date', 'is_recurring_yearly']
+        fields = ['name', 'date', 'description', 'type', 'is_recurring_yearly']

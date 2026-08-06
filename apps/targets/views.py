@@ -5,18 +5,50 @@ from django.db.models import Sum, Count, Q, F, DecimalField, Value
 from django.db.models.functions import Coalesce
 from django.http import HttpResponse
 
-from rest_framework import generics, status
+from rest_framework import generics, status, filters
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from django_filters.rest_framework import DjangoFilterBackend
 
 from apps.accounts.permissions import IsManagerOrAbove
-from .models import Target
+from .models import Target, Team
 from .serializers import (
     TargetSerializer,
     TargetCreateSerializer,
     TargetWithAchievementSerializer,
+    TeamSerializer,
 )
+
+
+class TeamListCreateView(generics.ListCreateAPIView):
+    queryset = Team.objects.prefetch_related('members').select_related('team_lead').all()
+    serializer_class = TeamSerializer
+    permission_classes = [IsAuthenticated, IsManagerOrAbove]
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+    filterset_fields = ['status']
+    search_fields = ['name']
+    ordering_fields = ['name', 'created_at']
+
+    def get_permissions(self):
+        if self.request.method == 'GET':
+            return [IsAuthenticated()]
+        return [IsAuthenticated(), IsManagerOrAbove()]
+
+
+class TeamDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Team.objects.prefetch_related('members').select_related('team_lead').all()
+    serializer_class = TeamSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_permissions(self):
+        if self.request.method in ['PUT', 'PATCH', 'DELETE']:
+            return [IsAuthenticated(), IsManagerOrAbove()]
+        return [IsAuthenticated()]
+
+    def update(self, request, *args, **kwargs):
+        kwargs['partial'] = True
+        return super().update(request, *args, **kwargs)
 
 
 class TargetAssignView(generics.CreateAPIView):
@@ -115,14 +147,15 @@ class LeaderboardView(APIView):
             total_visits = 0
             total_distance = Decimal('0')
 
-            from apps.sales.models import SalesReport, SalesReportItem
+            from apps.sales.models import SalesOrder
 
-            sales_qs = SalesReport.objects.filter(
+            sales_qs = SalesOrder.objects.filter(
                 employee_id=employee_id,
                 date__year=year,
                 date__month=month,
+                status__in=['in_progress', 'completed'],
             )
-            achieved_result = sales_qs.aggregate(total=Sum('total_revenue'))
+            achieved_result = sales_qs.aggregate(total=Sum('total_amount'))
             if achieved_result['total']:
                 achieved = achieved_result['total']
 

@@ -1,0 +1,483 @@
+from datetime import date
+
+from django.contrib.auth import get_user_model
+from django.test import TestCase
+from rest_framework.test import APIClient
+
+from apps.finance.models import Tax
+from apps.invoices.models import Invoice
+from apps.invoices.services import create_invoice_from_delivery_note, mark_invoice_paid
+from apps.orders.models import Quotation, QuotationItem
+from apps.orders.services import approve_quotation, send_quotation
+from apps.pipeline.models import Lead
+from apps.production import services as production_services
+from apps.production.models import (
+    Bom,
+    BomItem,
+    FinishedGoods,
+    GoodsReceiptNote,
+    GRNItem,
+    JobOrder,
+    Machine,
+    MaterialIssueSlip,
+    MaterialRequirement,
+    ProductionProcess,
+    PurchaseRequisition,
+    QualityInspection,
+)
+from apps.products.models import Inventory, Product, ProductCategory, Warehouse
+from apps.purchases.models import PurchaseOrder, Vendor
+from apps.sales.models import Customer, DeliveryNote, SalesOrder, SalesOrderItem
+
+
+class ProductionWorkflowTests(TestCase):
+    def setUp(self):
+        User = get_user_model()
+        self.user = User.objects.create_user(
+            username='admin',
+            email='admin@production.test',
+            password='testpass123',
+            role='super_admin',
+        )
+        category = ProductCategory.objects.create(name='Steel Products')
+
+        self.steel_sheet = Product.objects.create(
+            name='Steel Sheet', category=category,
+            cost_price=100, price=120, unit='sheet',
+        )
+        self.pipe = Product.objects.create(
+            name='Pipe', category=category,
+            cost_price=40, price=50, unit='meter',
+        )
+        self.cabinet = Product.objects.create(
+            name='Steel Cabinet', category=category,
+            cost_price=500, price=800, unit='piece',
+        )
+        self.tax = Tax.objects.create(
+            name='GST 18%', rate=18, status='active', applied_to='both',
+        )
+        self.warehouse = Warehouse.objects.create(name='Main Store')
+        Inventory.objects.create(
+            product=self.steel_sheet, warehouse=self.warehouse, quantity=50,
+        )
+        Inventory.objects.create(
+            product=self.pipe, warehouse=self.warehouse, quantity=30,
+        )
+        self.vendor = Vendor.objects.create(
+            name='Raw Supplier', email='supplier@example.com',
+        )
+        self.customer = Customer.objects.create(
+            name='Acme Corp', email='acme@example.com', phone='9876543210',
+        )
+        self.machine = Machine.objects.create(name='CNC Cutting Machine')
+
+        self.bom = Bom.objects.create(
+            name='Cabinet BOM', product=self.cabinet, version='1.0',
+        )
+        BomItem.objects.create(
+            bom=self.bom, raw_material=self.steel_sheet,
+            quantity_per_unit=4, unit='sheet',
+        )
+        BomItem.objects.create(
+            bom=self.bom, raw_material=self.pipe,
+            quantity_per_unit=2, unit='meter',
+        )
+
+    def _create_quotation(self):
+        lead = Lead.objects.create(
+            first_name='John', last_name='Doe',
+            company_name='Acme Corp', email='acme@example.com',
+            phone='9876543210', product_requirement='Steel Cabinet',
+            quantity=2, status='new', owner=self.user,
+        )
+        quotation = Quotation.objects.create(
+            client='Acme Corp',
+            lead=lead,
+            customer=self.customer,
+            quote_date=date(2026, 8, 1),
+            valid_till=date(2026, 8, 15),
+            delivery_date=date(2026, 8, 25),
+            payment_terms='net_30',
+            tax=self.tax,
+            status='draft',
+            created_by=self.user,
+        )
+        QuotationItem.objects.create(
+            quotation=quotation, product=self.cabinet,
+            quantity=2, price=800, discount=0,
+        )
+        quotation.recalculate_totals()
+        return lead, quotation
+
+    def test_lead_to_quotation_to_sales_order(self):
+        lead, quotation = self._create_quotation()
+        send_quotation(quotation)
+        self.assertEqual(quotation.status, 'sent')
+
+        sales_order = approve_quotation(quotation, employee=self.user)
+        quotation.refresh_from_db()
+        lead.refresh_from_db()
+        self.assertEqual(quotation.status, 'accepted')
+        self.assertEqual(lead.status, 'won')
+        self.assertIsInstance(sales_order, SalesOrder)
+        self.assertEqual(sales_order.quotation, quotation)
+        self.assertEqual(sales_order.customer, self.customer)
+        self.assertEqual(sales_order.items.count(), 1)
+        self.assertGreater(sales_order.total_amount, 0)
+
+    def test_sales_order_to_job_orders(self):
+        _, quotation = self._create_quotation()
+        sales_order = approve_quotation(quotation, employee=self.user)
+        job_orders = production_services.create_job_orders_from_sales_order(
+            sales_order,
+        )
+        self.assertEqual(len(job_orders), 1)
+        job_order = job_orders[0]
+        self.assertEqual(job_order.product, self.cabinet)
+        self.assertEqual(job_order.quantity, 2)
+        self.assertEqual(job_order.bom, self.bom)
+        self.assertTrue(job_order.job_no.startswith('JO-'))
+
+    def test_stock_check_and_material_issue(self):
+        job_order = JobOrder.objects.create(
+            sales_order=None,
+            customer=self.customer,
+            product=self.cabinet,
+            quantity=2,
+            start_date=date(2026, 8, 10),
+            bom=self.bom,
+        )
+        requirements = production_services.compute_material_requirements(
+            job_order,
+        )
+        self.assertEqual(len(requirements), 2)
+        job_order.refresh_from_db()
+        self.assertEqual(job_order.status, 'material_ready')
+
+        slip = production_services.issue_material(
+            job_order, created_by=self.user,
+        )
+        self.assertIsInstance(slip, MaterialIssueSlip)
+        self.assertEqual(slip.items.count(), 2)
+        job_order.refresh_from_db()
+        self.assertEqual(job_order.status, 'material_issued')
+        self.steel_sheet.refresh_from_db()
+        self.pipe.refresh_from_db()
+        self.assertEqual(
+            Inventory.objects.get(product=self.steel_sheet).quantity, 42,
+        )
+        self.assertEqual(
+            Inventory.objects.get(product=self.pipe).quantity, 26,
+        )
+
+    def test_short_material_creates_requisition_and_po(self):
+        Inventory.objects.filter(product=self.steel_sheet).update(quantity=2)
+        job_order = JobOrder.objects.create(
+            customer=self.customer,
+            product=self.cabinet,
+            quantity=2,
+            start_date=date(2026, 8, 10),
+            bom=self.bom,
+        )
+        production_services.compute_material_requirements(job_order)
+        job_order.refresh_from_db()
+        self.assertEqual(job_order.status, 'waiting_material')
+
+        requisition = production_services.create_purchase_requisition(
+            job_order, requested_by=self.user,
+        )
+        self.assertIsInstance(requisition, PurchaseRequisition)
+        self.assertEqual(requisition.status, 'pending')
+        self.assertEqual(requisition.items.count(), 1)
+        self.assertEqual(
+            requisition.items.first().raw_material, self.steel_sheet,
+        )
+
+        purchase_order = production_services.approve_purchase_requisition(
+            requisition, approved_by=self.user,
+        )
+        requisition.refresh_from_db()
+        self.assertEqual(requisition.status, 'po_created')
+        self.assertIsInstance(purchase_order, PurchaseOrder)
+
+        grn = production_services.create_grn(
+            purchase_order, self.warehouse, received_by=self.user,
+        )
+        self.assertIsInstance(grn, GoodsReceiptNote)
+        grn = production_services.receive_grn(grn)
+        grn.refresh_from_db()
+        self.assertEqual(grn.status, 'received')
+
+        inspection = QualityInspection.objects.create(grn=grn, status='pending')
+        production_services.finalize_inspection(
+            inspection, passed=True, inspected_by=self.user,
+        )
+        inspection.refresh_from_db()
+        grn.refresh_from_db()
+        self.assertEqual(inspection.status, 'passed')
+        self.assertEqual(grn.status, 'accepted')
+
+        self.steel_sheet.refresh_from_db()
+        self.assertEqual(
+            Inventory.objects.get(product=self.steel_sheet).quantity, 8,
+        )
+
+    def test_production_process_and_qc(self):
+        job_order = JobOrder.objects.create(
+            customer=self.customer,
+            product=self.cabinet,
+            quantity=1,
+            start_date=date(2026, 8, 10),
+            bom=self.bom,
+        )
+        production_services.issue_material(job_order, created_by=self.user)
+        job_order = production_services.start_production(
+            job_order, machine=self.machine, supervisor=self.user,
+        )
+        self.assertEqual(job_order.status, 'in_production')
+        self.assertEqual(job_order.processes.count(), 8)
+
+        for process in job_order.processes.exclude(name__iexact='qc'):
+            production_services.advance_process(process)
+
+        finished = production_services.record_qc_result(
+            job_order, passed=True, inspected_by=self.user,
+            warehouse=self.warehouse,
+        )
+        job_order.refresh_from_db()
+        self.assertIsInstance(finished, FinishedGoods)
+        self.assertEqual(job_order.status, 'qc_passed')
+        self.assertTrue(finished.batch_no)
+        self.assertTrue(finished.barcode)
+
+    def test_start_production_accepts_machine_and_supervisor_pk(self):
+        job_order = JobOrder.objects.create(
+            customer=self.customer,
+            product=self.cabinet,
+            quantity=1,
+            start_date=date(2026, 8, 10),
+            bom=self.bom,
+        )
+        production_services.issue_material(job_order, created_by=self.user)
+        job_order = production_services.start_production(
+            job_order, machine=self.machine.id, supervisor=self.user.id,
+        )
+        job_order.refresh_from_db()
+        self.assertEqual(job_order.machine, self.machine)
+        self.assertEqual(job_order.supervisor, self.user)
+
+    def test_record_qc_result_accepts_warehouse_pk(self):
+        job_order = JobOrder.objects.create(
+            customer=self.customer,
+            product=self.cabinet,
+            quantity=1,
+            start_date=date(2026, 8, 10),
+            bom=self.bom,
+        )
+        production_services.issue_material(job_order, created_by=self.user)
+        finished = production_services.record_qc_result(
+            job_order, passed=True, inspected_by=self.user,
+            warehouse=self.warehouse.id,
+        )
+        job_order.refresh_from_db()
+        self.assertIsInstance(finished, FinishedGoods)
+        self.assertEqual(finished.warehouse, self.warehouse)
+        self.assertEqual(job_order.status, 'qc_passed')
+
+    def test_qc_failure_opens_rework(self):
+        job_order = JobOrder.objects.create(
+            customer=self.customer,
+            product=self.cabinet,
+            quantity=1,
+            start_date=date(2026, 8, 10),
+            bom=self.bom,
+        )
+        production_services.issue_material(job_order, created_by=self.user)
+        production_services.start_production(job_order)
+        result = production_services.record_qc_result(
+            job_order, passed=False, inspected_by=self.user,
+        )
+        job_order.refresh_from_db()
+        self.assertIsNone(result)
+        self.assertEqual(job_order.status, 'in_production')
+        self.assertEqual(
+            job_order.processes.exclude(name__iexact='qc')
+            .filter(status='pending').count(), 7,
+        )
+
+    def test_dispatch_creates_delivery_note_and_completes_order(self):
+        _, quotation = self._create_quotation()
+        sales_order = approve_quotation(quotation, employee=self.user)
+        job_order = production_services.create_job_orders_from_sales_order(
+            sales_order,
+        )[0]
+        production_services.issue_material(job_order, created_by=self.user)
+        production_services.start_production(job_order)
+        for process in job_order.processes.exclude(name__iexact='qc'):
+            production_services.advance_process(process)
+        production_services.record_qc_result(
+            job_order, passed=True, inspected_by=self.user,
+            warehouse=self.warehouse,
+        )
+
+        dispatch = production_services.create_dispatch(
+            job_order, transport_mode='Truck', vehicle_number='KA-01-1234',
+            driver_name='Ramesh', driver_phone='9000000000',
+        )
+        job_order.refresh_from_db()
+        sales_order.refresh_from_db()
+        self.assertEqual(dispatch.delivery_note.delivery_note_id[:2], 'DN')
+        self.assertEqual(dispatch.delivery_note.customer, self.customer)
+        self.assertEqual(job_order.status, 'completed')
+        self.assertEqual(sales_order.status, 'completed')
+        self.assertEqual(
+            job_order.finished_goods.first().status, 'dispatched',
+        )
+
+        invoice = create_invoice_from_delivery_note(dispatch.delivery_note)
+        self.assertIsInstance(invoice, Invoice)
+        self.assertTrue(invoice.invoice_number.startswith('INV-'))
+        self.assertEqual(invoice.customer_name, 'Acme Corp')
+        self.assertGreater(invoice.total, 0)
+
+        mark_invoice_paid(invoice, method='bank_transfer')
+        invoice.refresh_from_db()
+        self.assertEqual(invoice.status, 'paid')
+        self.assertEqual(invoice.payments.count(), 1)
+
+
+class ProductionAPITests(TestCase):
+    def setUp(self):
+        User = get_user_model()
+        self.admin = User.objects.create_user(
+            username='admin', email='admin@production.test',
+            password='testpass123', role='super_admin',
+        )
+        self.client = APIClient()
+        category = ProductCategory.objects.create(name='Steel Products')
+        self.product = Product.objects.create(
+            name='Steel Cabinet', category=category, price=800,
+        )
+        self.raw = Product.objects.create(
+            name='Steel Sheet', category=category, cost_price=100, price=120,
+        )
+        self.warehouse = Warehouse.objects.create(name='Main Store')
+        Inventory.objects.create(
+            product=self.raw, warehouse=self.warehouse, quantity=10,
+        )
+        self.customer = Customer.objects.create(name='Acme Corp')
+        self.bom = Bom.objects.create(name='Cabinet BOM', product=self.product)
+        BomItem.objects.create(
+            bom=self.bom, raw_material=self.raw, quantity_per_unit=1,
+        )
+        self.client.force_authenticate(user=self.admin)
+
+    def test_quotation_approve_creates_sales_order(self):
+        quotation = Quotation.objects.create(
+            client='Acme Corp', customer=self.customer, status='sent',
+            created_by=self.admin,
+        )
+        QuotationItem.objects.create(
+            quotation=quotation, product=self.product,
+            quantity=1, price=800,
+        )
+        quotation.recalculate_totals()
+        response = self.client.post(
+            f'/api/orders/quotations/{quotation.id}/approve/',
+            format='json',
+        )
+        self.assertEqual(response.status_code, 201)
+        self.assertIn('sales_order', response.data)
+        self.assertEqual(
+            SalesOrder.objects.filter(quotation=quotation).count(), 1,
+        )
+
+    def test_quotation_reject_marks_lead_lost(self):
+        lead = Lead.objects.create(first_name='John', last_name='Doe')
+        quotation = Quotation.objects.create(
+            client='Acme Corp', lead=lead, status='sent',
+            created_by=self.admin,
+        )
+        response = self.client.post(
+            f'/api/orders/quotations/{quotation.id}/reject/',
+            {'lost_reason': 'Too expensive'},
+            format='json',
+        )
+        self.assertEqual(response.status_code, 200)
+        quotation.refresh_from_db()
+        lead.refresh_from_db()
+        self.assertEqual(quotation.status, 'rejected')
+        self.assertEqual(lead.status, 'lost')
+
+    def test_start_production_from_sales_order(self):
+        sales_order = SalesOrder.objects.create(
+            employee=self.admin, customer=self.customer, date=date(2026, 8, 1),
+        )
+        SalesOrderItem.objects.create(
+            order=sales_order, product=self.product, quantity=2,
+            unit_price=800, amount=1600,
+        )
+        response = self.client.post(
+            f'/api/sales/orders/{sales_order.id}/start-production/',
+            format='json',
+        )
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(len(response.data['job_orders']), 1)
+        self.assertEqual(JobOrder.objects.filter(sales_order=sales_order).count(), 1)
+
+    def test_delivery_note_creates_invoice(self):
+        delivery_note = DeliveryNote.objects.create(
+            customer=self.customer, invoice_date=date(2026, 8, 10),
+        )
+        from apps.sales.models import DeliveryNoteItem
+        DeliveryNoteItem.objects.create(
+            delivery_note=delivery_note, product=self.product,
+            quantity=2, unit_price=800, amount=1600,
+        )
+        delivery_note.recalculate_total()
+        response = self.client.post(
+            f'/api/sales/delivery-notes/{delivery_note.id}/create-invoice/',
+            format='json',
+        )
+        self.assertEqual(response.status_code, 201)
+        self.assertTrue(response.data['invoice_number'].startswith('INV-'))
+
+    def test_invoice_mark_paid(self):
+        from apps.invoices.models import Invoice
+        invoice = Invoice.objects.create(
+            invoice_number='INV-9999', customer_name='Acme Corp',
+            invoice_date=date(2026, 8, 10), due_date=date(2026, 8, 25),
+            total=1000, status='sent',
+        )
+        response = self.client.post(
+            f'/api/invoices/invoices/{invoice.id}/mark-paid/',
+            {'method': 'cheque', 'reference_number': 'CHQ-001'},
+            format='json',
+        )
+        self.assertEqual(response.status_code, 200)
+        invoice.refresh_from_db()
+        self.assertEqual(invoice.status, 'paid')
+
+    def test_job_order_check_stock_and_issue(self):
+        job_order = JobOrder.objects.create(
+            customer=self.customer, product=self.product, quantity=2,
+            start_date=date(2026, 8, 10), bom=self.bom,
+        )
+        response = self.client.post(
+            f'/api/production/job-orders/{job_order.id}/check-stock/',
+            format='json',
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data['requirements'][0]['status'], 'available')
+
+        response = self.client.post(
+            f'/api/production/job-orders/{job_order.id}/issue-material/',
+            format='json',
+        )
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(MaterialIssueSlip.objects.count(), 1)
+
+    def test_unauthenticated_access_rejected(self):
+        anon = APIClient()
+        response = anon.get('/api/production/job-orders/')
+        self.assertEqual(response.status_code, 401)

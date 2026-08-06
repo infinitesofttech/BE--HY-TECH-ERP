@@ -5,8 +5,8 @@ from rest_framework.permissions import IsAuthenticated
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema
 
-from .models import Company, Contact
-from .serializers import CompanySerializer, ContactSerializer
+from .models import Company, Contact, ContactMessage
+from .serializers import CompanySerializer, ContactSerializer, ContactMessageSerializer
 from apps.accounts.permissions import IsManagerOrAbove
 
 
@@ -70,8 +70,8 @@ class ContactListCreateView(generics.ListCreateAPIView):
     serializer_class = ContactSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
-    filterset_fields = ['company', 'owner', 'source']
-    search_fields = ['first_name', 'last_name', 'email', 'phone', 'job_title']
+    filterset_fields = ['company', 'owner', 'source', 'type', 'visibility', 'industry']
+    search_fields = ['first_name', 'last_name', 'email', 'phone', 'job_title', 'company__name']
     ordering_fields = ['first_name', 'created_at']
 
     def get_permissions(self):
@@ -101,3 +101,32 @@ class ContactDetailView(generics.RetrieveUpdateDestroyAPIView):
     @extend_schema(request=ContactSerializer, responses={200: ContactSerializer})
     def patch(self, request, *args, **kwargs):
         return self.partial_update(request, *args, **kwargs)
+
+
+class ContactMessageListCreateView(generics.ListCreateAPIView):
+    queryset = ContactMessage.objects.all()
+    serializer_class = ContactMessageSerializer
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+    filterset_fields = ['status']
+    search_fields = ['name', 'email', 'phone', 'message']
+    ordering_fields = ['created_at']
+
+    def get_permissions(self):
+        if self.request.method == 'POST':
+            from rest_framework.permissions import AllowAny
+            return [AllowAny()]
+        return [IsAuthenticated()]
+
+    @extend_schema(request=ContactMessageSerializer, responses={201: ContactMessageSerializer})
+    def create(self, request, *args, **kwargs):
+        return super().create(request, *args, **kwargs)
+
+
+class ContactMessageDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = ContactMessage.objects.all()
+    serializer_class = ContactMessageSerializer
+    permission_classes = [IsAuthenticated]
+
+    def update(self, request, *args, **kwargs):
+        kwargs['partial'] = True
+        return super().update(request, *args, **kwargs)
