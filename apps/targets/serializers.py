@@ -6,8 +6,8 @@ from .models import Target, Team
 class TargetSerializer(serializers.ModelSerializer):
     employee_name = serializers.CharField(source='employee.get_full_name', read_only=True)
     employee_email = serializers.CharField(source='employee.email', read_only=True)
-    product_name = serializers.CharField(source='product.name', read_only=True, default=None)
-    team_name = serializers.CharField(source='team.name', read_only=True, default=None)
+    product_name = serializers.CharField(source='product.name', read_only=True, default='')
+    team_name = serializers.CharField(source='team.name', read_only=True, default='')
 
     class Meta:
         model = Target
@@ -49,8 +49,8 @@ class TargetCreateSerializer(serializers.ModelSerializer):
 class TargetWithAchievementSerializer(serializers.ModelSerializer):
     employee_name = serializers.CharField(source='employee.get_full_name', read_only=True)
     employee_email = serializers.CharField(source='employee.email', read_only=True)
-    product_name = serializers.CharField(source='product.name', read_only=True, default=None)
-    team_name = serializers.CharField(source='team.name', read_only=True, default=None)
+    product_name = serializers.CharField(source='product.name', read_only=True, default='')
+    team_name = serializers.CharField(source='team.name', read_only=True, default='')
     achieved_amount = serializers.SerializerMethodField()
     pending_amount = serializers.SerializerMethodField()
     achievement_percentage = serializers.SerializerMethodField()
@@ -119,9 +119,9 @@ class TeamSerializer(serializers.ModelSerializer):
         read_only_fields = ['id', 'created_at', 'updated_at']
 
     def get_team_lead_name(self, obj):
-        if obj.team_lead:
-            return obj.team_lead.get_full_name() or obj.team_lead.email
-        return None
+        if obj.team_lead is None:
+            return ''
+        return obj.team_lead.get_full_name() or obj.team_lead.email
 
     def get_members_count(self, obj):
         return obj.members.count()

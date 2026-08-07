@@ -17,7 +17,7 @@ class ProductCategoryAdmin(admin.ModelAdmin):
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
     list_display = [
-        'name', 'category', 'price', 'for_vehicle_type',
+        'id', 'name', 'category', 'price', 'for_vehicle_type',
         'status', 'is_active',
     ]
     list_filter = ['category', 'for_vehicle_type', 'status', 'is_active']

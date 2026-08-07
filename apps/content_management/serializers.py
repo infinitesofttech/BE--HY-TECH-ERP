@@ -78,15 +78,15 @@ class FileManagerFileSerializer(serializers.ModelSerializer):
         read_only_fields = ['id', 'file_size', 'uploaded_by', 'uploaded_at']
 
     def get_uploaded_by_name(self, obj):
-        if obj.uploaded_by:
-            return obj.uploaded_by.get_full_name() or obj.uploaded_by.email
-        return None
+        if obj.uploaded_by is None:
+            return ''
+        return obj.uploaded_by.get_full_name() or obj.uploaded_by.email
 
     def get_file_url(self, obj):
         request = self.context.get('request')
-        if obj.file and request:
-            return request.build_absolute_uri(obj.file.url)
-        return None
+        if obj.file is None or not request:
+            return ''
+        return request.build_absolute_uri(obj.file.url)
 
     def create(self, validated_data):
         uploaded_file = validated_data.get('file')

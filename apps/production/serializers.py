@@ -118,12 +118,12 @@ class FinishedGoodsSerializer(serializers.ModelSerializer):
 
 
 class JobOrderSerializer(serializers.ModelSerializer):
-    product_name = serializers.CharField(source='product.name', read_only=True)
+    product_name = serializers.CharField(source='product.name', read_only=True, default='')
     sales_order_id_ref = serializers.CharField(
-        source='sales_order.order_id', read_only=True,
+        source='sales_order.order_id', read_only=True, default='',
     )
     customer_name = serializers.CharField(
-        source='customer.name', read_only=True,
+        source='customer.name', read_only=True, default='',
     )
     supervisor_name = serializers.SerializerMethodField()
     machine_name = serializers.CharField(
@@ -152,7 +152,7 @@ class JobOrderSerializer(serializers.ModelSerializer):
     def get_supervisor_name(self, obj):
         if obj.supervisor:
             return obj.supervisor.get_full_name() or obj.supervisor.email
-        return None
+        return ''
 
 
 class JobOrderCreateSerializer(serializers.ModelSerializer):
@@ -201,12 +201,12 @@ class MaterialIssueSlipSerializer(serializers.ModelSerializer):
     def get_issued_to_name(self, obj):
         if obj.issued_to:
             return obj.issued_to.get_full_name() or obj.issued_to.email
-        return None
+        return ''
 
     def get_created_by_name(self, obj):
         if obj.created_by:
             return obj.created_by.get_full_name() or obj.created_by.email
-        return None
+        return ''
 
 
 class PurchaseRequisitionItemSerializer(serializers.ModelSerializer):
@@ -245,12 +245,12 @@ class PurchaseRequisitionSerializer(serializers.ModelSerializer):
     def get_requested_by_name(self, obj):
         if obj.requested_by:
             return obj.requested_by.get_full_name() or obj.requested_by.email
-        return None
+        return ''
 
     def get_approved_by_name(self, obj):
         if obj.approved_by:
             return obj.approved_by.get_full_name() or obj.approved_by.email
-        return None
+        return ''
 
 
 class GRNItemSerializer(serializers.ModelSerializer):
@@ -292,7 +292,7 @@ class GoodsReceiptNoteSerializer(serializers.ModelSerializer):
     def get_received_by_name(self, obj):
         if obj.received_by:
             return obj.received_by.get_full_name() or obj.received_by.email
-        return None
+        return ''
 
 
 class GRNItemCreateSerializer(serializers.ModelSerializer):
@@ -341,7 +341,7 @@ class QualityInspectionSerializer(serializers.ModelSerializer):
     def get_inspected_by_name(self, obj):
         if obj.inspected_by:
             return obj.inspected_by.get_full_name() or obj.inspected_by.email
-        return None
+        return ''
 
 
 class DispatchSerializer(serializers.ModelSerializer):

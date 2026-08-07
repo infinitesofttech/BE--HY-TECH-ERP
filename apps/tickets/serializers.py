@@ -19,7 +19,11 @@ class TicketSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     def get_customer_name(self, obj):
-        return obj.customer.email if obj.customer else None
+        if obj.customer is None:
+            return ''
+        return obj.customer.email
 
     def get_assigned_to_name(self, obj):
-        return obj.assigned_to.email if obj.assigned_to else None
+        if obj.assigned_to is None:
+            return ''
+        return obj.assigned_to.email

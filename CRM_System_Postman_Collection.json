@@ -3949,6 +3949,39 @@
           }
         },
         {
+          "name": "Start Sales Order Production (super_admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer <access_token>"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/sales/orders/1/start-production",
+              "host": [
+                "http://localhost:8000"
+              ],
+              "path": [
+                "api",
+                "sales",
+                "orders",
+                "1",
+                "start-production"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"machine\": 1,\n  \"supervisor\": 1,\n  \"operators\": [1]\n}"
+            }
+          }
+        },
+        {
           "name": "Delete Sales Order (super_admin)",
           "request": {
             "method": "DELETE",
@@ -4238,6 +4271,35 @@
                 "1",
                 "toggle-active",
                 ""
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Invoice From Delivery Note (super_admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer <access_token>"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/sales/delivery-notes/1/create-invoice",
+              "host": [
+                "http://localhost:8000"
+              ],
+              "path": [
+                "api",
+                "sales",
+                "delivery-notes",
+                "1",
+                "create-invoice"
               ]
             }
           }
@@ -6139,6 +6201,103 @@
                 "1",
                 ""
               ]
+            }
+          }
+        },
+        {
+          "name": "Send Quotation",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer <access_token>"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/orders/quotations/1/send/",
+              "host": [
+                "http://localhost:8000"
+              ],
+              "path": [
+                "",
+                "api",
+                "orders",
+                "quotations",
+                "1",
+                "send",
+                ""
+              ]
+            }
+          }
+        },
+        {
+          "name": "Approve Quotation",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer <access_token>"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/orders/quotations/1/approve/",
+              "host": [
+                "http://localhost:8000"
+              ],
+              "path": [
+                "",
+                "api",
+                "orders",
+                "quotations",
+                "1",
+                "approve",
+                ""
+              ]
+            }
+          }
+        },
+        {
+          "name": "Reject Quotation",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer <access_token>"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/orders/quotations/1/reject/",
+              "host": [
+                "http://localhost:8000"
+              ],
+              "path": [
+                "",
+                "api",
+                "orders",
+                "quotations",
+                "1",
+                "reject",
+                ""
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"lost_reason\": \"Price too high\"\n}"
             }
           }
         }
@@ -9122,6 +9281,35 @@
             "body": {
               "mode": "raw",
               "raw": "{\n  \"notes\": \"Updated notes\",\n  \"status\": \"sent\",\n  \"invoice_number\": \"string\",\n  \"customer_name\": \"string\",\n  \"customer_email\": \"user@example.com\",\n  \"customer_address\": \"string\",\n  \"billing_address\": \"string\",\n  \"invoice_date\": \"2026-01-01\",\n  \"due_date\": \"2026-01-01\",\n  \"payment_method\": \"cash\",\n  \"transaction_id\": \"string\",\n  \"subtotal\": 100,\n  \"tax\": 1,\n  \"tax_amount\": 100,\n  \"discount_percentage\": 100,\n  \"discount_amount\": 100,\n  \"total\": 100,\n  \"terms_conditions\": \"string\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Mark Invoice Paid (super_admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer <access_token>"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/invoices/invoices/1/mark-paid",
+              "host": [
+                "http://localhost:8000"
+              ],
+              "path": [
+                "api",
+                "invoices",
+                "invoices",
+                "1",
+                "mark-paid"
+              ]
             }
           }
         },
@@ -22164,7 +22352,7 @@
               }
             ],
             "url": {
-              "raw": "http://localhost:8000/api/purchases//",
+              "raw": "http://localhost:8000/api/purchases/",
               "host": [
                 "http://localhost:8000"
               ],
@@ -22192,7 +22380,7 @@
               }
             ],
             "url": {
-              "raw": "http://localhost:8000/api/purchases//",
+              "raw": "http://localhost:8000/api/purchases/",
               "host": [
                 "http://localhost:8000"
               ],
@@ -22604,6 +22792,2328 @@
               ]
             },
             "description": "Purchase analytics dashboard (manager+).\n\nReturns for the date range:\n- total_spend, suppliers (distinct vendors)\n- avg_lead_time_days (actual_delivery_date - order_date)\n- on_time_percent and status (excellent >= 90 / good >= 75 / average >= 60 / poor < 60)\n- records per supplier: vendor, requestors, total_spend, avg_lead_time_days, on_time_percent, status\n\nQuery params: date_from=YYYY-MM-DD, date_to=YYYY-MM-DD (defaults to last 30 days)."
+          }
+        }
+      ]
+    },
+    {
+      "name": "36. PRODUCTION (Machines / BOMs / Job Orders / Material / Requisitions / GRN / QC / Finished Goods / Dispatch)",
+      "item": [
+        {
+          "name": "List Machines",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer <access_token>"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/production/machines/",
+              "host": [
+                "http://localhost:8000"
+              ],
+              "path": [
+                "",
+                "api",
+                "production",
+                "machines",
+                ""
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Machine (super_admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer <access_token>"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/production/machines/",
+              "host": [
+                "http://localhost:8000"
+              ],
+              "path": [
+                "",
+                "api",
+                "production",
+                "machines",
+                ""
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Injection Molding Machine\",\n  \"machine_type\": \"injection\",\n  \"status\": \"available\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Get Machine Detail",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer <access_token>"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/production/machines/1/",
+              "host": [
+                "http://localhost:8000"
+              ],
+              "path": [
+                "",
+                "api",
+                "production",
+                "machines",
+                "1",
+                ""
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Machine (super_admin)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer <access_token>"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/production/machines/1/",
+              "host": [
+                "http://localhost:8000"
+              ],
+              "path": [
+                "",
+                "api",
+                "production",
+                "machines",
+                "1",
+                ""
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"maintenance\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Delete Machine (super_admin)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer <access_token>"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/production/machines/1/",
+              "host": [
+                "http://localhost:8000"
+              ],
+              "path": [
+                "",
+                "api",
+                "production",
+                "machines",
+                "1",
+                ""
+              ]
+            }
+          }
+        },
+        {
+          "name": "List BOMs",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer <access_token>"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/production/boms/",
+              "host": [
+                "http://localhost:8000"
+              ],
+              "path": [
+                "",
+                "api",
+                "production",
+                "boms",
+                ""
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create BOM (super_admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer <access_token>"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/production/boms/",
+              "host": [
+                "http://localhost:8000"
+              ],
+              "path": [
+                "",
+                "api",
+                "production",
+                "boms",
+                ""
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Bike Frame BOM\",\n  \"product\": 1,\n  \"version\": \"1.0\",\n  \"status\": \"active\",\n  \"items\": [\n    {\"raw_material\": 1, \"quantity_per_unit\": \"2\", \"unit\": \"kg\"},\n    {\"raw_material\": 2, \"quantity_per_unit\": \"1\", \"unit\": \"pc\"}\n  ]\n}"
+            }
+          }
+        },
+        {
+          "name": "Get BOM Detail",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer <access_token>"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/production/boms/1/",
+              "host": [
+                "http://localhost:8000"
+              ],
+              "path": [
+                "",
+                "api",
+                "production",
+                "boms",
+                "1",
+                ""
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update BOM (super_admin)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer <access_token>"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/production/boms/1/",
+              "host": [
+                "http://localhost:8000"
+              ],
+              "path": [
+                "",
+                "api",
+                "production",
+                "boms",
+                "1",
+                ""
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"version\": \"1.1\",\n  \"status\": \"draft\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Delete BOM (super_admin)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer <access_token>"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/production/boms/1/",
+              "host": [
+                "http://localhost:8000"
+              ],
+              "path": [
+                "",
+                "api",
+                "production",
+                "boms",
+                "1",
+                ""
+              ]
+            }
+          }
+        },
+        {
+          "name": "List Job Orders",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer <access_token>"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/production/job-orders/",
+              "host": [
+                "http://localhost:8000"
+              ],
+              "path": [
+                "",
+                "api",
+                "production",
+                "job-orders",
+                ""
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Job Order (super_admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer <access_token>"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/production/job-orders/",
+              "host": [
+                "http://localhost:8000"
+              ],
+              "path": [
+                "",
+                "api",
+                "production",
+                "job-orders",
+                ""
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sales_order\": 1,\n  \"quotation\": null,\n  \"customer\": 1,\n  \"product\": 1,\n  \"quantity\": 10,\n  \"start_date\": \"2026-08-06\",\n  \"end_date\": \"2026-08-13\",\n  \"priority\": \"high\",\n  \"machine\": 1,\n  \"supervisor\": 1,\n  \"operators\": [1],\n  \"bom\": 1,\n  \"notes\": \"Urgent order\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Get Job Order Detail",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer <access_token>"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/production/job-orders/1/",
+              "host": [
+                "http://localhost:8000"
+              ],
+              "path": [
+                "",
+                "api",
+                "production",
+                "job-orders",
+                "1",
+                ""
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Job Order (super_admin)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer <access_token>"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/production/job-orders/1/",
+              "host": [
+                "http://localhost:8000"
+              ],
+              "path": [
+                "",
+                "api",
+                "production",
+                "job-orders",
+                "1",
+                ""
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"priority\": \"urgent\",\n  \"notes\": \"Rush production\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Delete Job Order (super_admin)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer <access_token>"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/production/job-orders/1/",
+              "host": [
+                "http://localhost:8000"
+              ],
+              "path": [
+                "",
+                "api",
+                "production",
+                "job-orders",
+                "1",
+                ""
+              ]
+            }
+          }
+        },
+        {
+          "name": "Check Stock for Job Order",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer <access_token>"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/production/job-orders/1/check-stock/",
+              "host": [
+                "http://localhost:8000"
+              ],
+              "path": [
+                "",
+                "api",
+                "production",
+                "job-orders",
+                "1",
+                "check-stock",
+                ""
+              ]
+            }
+          }
+        },
+        {
+          "name": "Issue Material for Job Order",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer <access_token>"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/production/job-orders/1/issue-material/",
+              "host": [
+                "http://localhost:8000"
+              ],
+              "path": [
+                "",
+                "api",
+                "production",
+                "job-orders",
+                "1",
+                "issue-material",
+                ""
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"issued_to\": 1\n}"
+            }
+          }
+        },
+        {
+          "name": "Create Requisition from Job Order",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer <access_token>"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/production/job-orders/1/create-requisition/",
+              "host": [
+                "http://localhost:8000"
+              ],
+              "path": [
+                "",
+                "api",
+                "production",
+                "job-orders",
+                "1",
+                "create-requisition",
+                ""
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"department\": \"Production\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Start Job Order Production",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer <access_token>"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/production/job-orders/1/start/",
+              "host": [
+                "http://localhost:8000"
+              ],
+              "path": [
+                "",
+                "api",
+                "production",
+                "job-orders",
+                "1",
+                "start",
+                ""
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"machine\": 1,\n  \"supervisor\": 1,\n  \"operators\": [1]\n}"
+            }
+          }
+        },
+        {
+          "name": "Rework Job Order",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer <access_token>"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/production/job-orders/1/rework/",
+              "host": [
+                "http://localhost:8000"
+              ],
+              "path": [
+                "",
+                "api",
+                "production",
+                "job-orders",
+                "1",
+                "rework",
+                ""
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"notes\": \"Fix assembly issue and re-run process\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Record Job Order QC Result",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer <access_token>"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/production/job-orders/1/qc/",
+              "host": [
+                "http://localhost:8000"
+              ],
+              "path": [
+                "",
+                "api",
+                "production",
+                "job-orders",
+                "1",
+                "qc",
+                ""
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"passed\": true,\n  \"warehouse\": 1,\n  \"notes\": \"All quality checks passed\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Dispatch Job Order",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer <access_token>"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/production/job-orders/1/dispatch/",
+              "host": [
+                "http://localhost:8000"
+              ],
+              "path": [
+                "",
+                "api",
+                "production",
+                "job-orders",
+                "1",
+                "dispatch",
+                ""
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"packing_note\": \"Box 1 of 1\",\n  \"transport_mode\": \"road\",\n  \"vehicle_number\": \"KA01 AB 1234\",\n  \"driver_name\": \"Ravi Kumar\",\n  \"driver_phone\": \"9876543210\",\n  \"label_printed\": true\n}"
+            }
+          }
+        },
+        {
+          "name": "List Material Issue Slips",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer <access_token>"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/production/material-issues/",
+              "host": [
+                "http://localhost:8000"
+              ],
+              "path": [
+                "",
+                "api",
+                "production",
+                "material-issues",
+                ""
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Material Issue Slip Detail",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer <access_token>"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/production/material-issues/1/",
+              "host": [
+                "http://localhost:8000"
+              ],
+              "path": [
+                "",
+                "api",
+                "production",
+                "material-issues",
+                "1",
+                ""
+              ]
+            }
+          }
+        },
+        {
+          "name": "List Purchase Requisitions",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer <access_token>"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/production/requisitions/",
+              "host": [
+                "http://localhost:8000"
+              ],
+              "path": [
+                "",
+                "api",
+                "production",
+                "requisitions",
+                ""
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Purchase Requisition (super_admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer <access_token>"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/production/requisitions/",
+              "host": [
+                "http://localhost:8000"
+              ],
+              "path": [
+                "",
+                "api",
+                "production",
+                "requisitions",
+                ""
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"job_order\": 1,\n  \"department\": \"Production\",\n  \"requested_by\": 1\n}"
+            }
+          }
+        },
+        {
+          "name": "Get Purchase Requisition Detail",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer <access_token>"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/production/requisitions/1/",
+              "host": [
+                "http://localhost:8000"
+              ],
+              "path": [
+                "",
+                "api",
+                "production",
+                "requisitions",
+                "1",
+                ""
+              ]
+            }
+          }
+        },
+        {
+          "name": "Approve Requisition",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer <access_token>"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/production/requisitions/1/approve/",
+              "host": [
+                "http://localhost:8000"
+              ],
+              "path": [
+                "",
+                "api",
+                "production",
+                "requisitions",
+                "1",
+                "approve",
+                ""
+              ]
+            }
+          }
+        },
+        {
+          "name": "Reject Requisition",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer <access_token>"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/production/requisitions/1/reject/",
+              "host": [
+                "http://localhost:8000"
+              ],
+              "path": [
+                "",
+                "api",
+                "production",
+                "requisitions",
+                "1",
+                "reject",
+                ""
+              ]
+            }
+          }
+        },
+        {
+          "name": "List GRNs",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer <access_token>"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/production/grns/",
+              "host": [
+                "http://localhost:8000"
+              ],
+              "path": [
+                "",
+                "api",
+                "production",
+                "grns",
+                ""
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create GRN (super_admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer <access_token>"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/production/grns/",
+              "host": [
+                "http://localhost:8000"
+              ],
+              "path": [
+                "",
+                "api",
+                "production",
+                "grns",
+                ""
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"purchase_order\": 1,\n  \"supplier\": 1,\n  \"warehouse\": 1,\n  \"received_date\": \"2026-08-06\",\n  \"status\": \"received\",\n  \"received_by\": 1,\n  \"notes\": \"Received as per PO\",\n  \"items\": [\n    {\"product\": 1, \"quantity\": 20, \"rejection_reason\": \"\"}\n  ]\n}"
+            }
+          }
+        },
+        {
+          "name": "Get GRN Detail",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer <access_token>"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/production/grns/1/",
+              "host": [
+                "http://localhost:8000"
+              ],
+              "path": [
+                "",
+                "api",
+                "production",
+                "grns",
+                "1",
+                ""
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update GRN (super_admin)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer <access_token>"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/production/grns/1/",
+              "host": [
+                "http://localhost:8000"
+              ],
+              "path": [
+                "",
+                "api",
+                "production",
+                "grns",
+                "1",
+                ""
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"notes\": \"Updated notes\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Delete GRN (super_admin)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer <access_token>"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/production/grns/1/",
+              "host": [
+                "http://localhost:8000"
+              ],
+              "path": [
+                "",
+                "api",
+                "production",
+                "grns",
+                "1",
+                ""
+              ]
+            }
+          }
+        },
+        {
+          "name": "Receive GRN Goods",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer <access_token>"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/production/grns/1/receive/",
+              "host": [
+                "http://localhost:8000"
+              ],
+              "path": [
+                "",
+                "api",
+                "production",
+                "grns",
+                "1",
+                "receive",
+                ""
+              ]
+            }
+          }
+        },
+        {
+          "name": "Inspect GRN Goods",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer <access_token>"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/production/grns/1/inspect/",
+              "host": [
+                "http://localhost:8000"
+              ],
+              "path": [
+                "",
+                "api",
+                "production",
+                "grns",
+                "1",
+                "inspect",
+                ""
+              ]
+            }
+          }
+        },
+        {
+          "name": "List Quality Inspections",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer <access_token>"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/production/inspections/",
+              "host": [
+                "http://localhost:8000"
+              ],
+              "path": [
+                "",
+                "api",
+                "production",
+                "inspections",
+                ""
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Quality Inspection (super_admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer <access_token>"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/production/inspections/",
+              "host": [
+                "http://localhost:8000"
+              ],
+              "path": [
+                "",
+                "api",
+                "production",
+                "inspections",
+                ""
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"grn\": 1,\n  \"job_order\": null,\n  \"product\": 1,\n  \"quantity\": 20,\n  \"status\": \"pending\",\n  \"inspected_by\": 1,\n  \"notes\": \"Inbound QC\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Get Quality Inspection Detail",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer <access_token>"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/production/inspections/1/",
+              "host": [
+                "http://localhost:8000"
+              ],
+              "path": [
+                "",
+                "api",
+                "production",
+                "inspections",
+                "1",
+                ""
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Quality Inspection (super_admin)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer <access_token>"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/production/inspections/1/",
+              "host": [
+                "http://localhost:8000"
+              ],
+              "path": [
+                "",
+                "api",
+                "production",
+                "inspections",
+                "1",
+                ""
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"in_progress\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Delete Quality Inspection (super_admin)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer <access_token>"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/production/inspections/1/",
+              "host": [
+                "http://localhost:8000"
+              ],
+              "path": [
+                "",
+                "api",
+                "production",
+                "inspections",
+                "1",
+                ""
+              ]
+            }
+          }
+        },
+        {
+          "name": "Record Inspection Result",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer <access_token>"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/production/inspections/1/result/",
+              "host": [
+                "http://localhost:8000"
+              ],
+              "path": [
+                "",
+                "api",
+                "production",
+                "inspections",
+                "1",
+                "result",
+                ""
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"passed\": true,\n  \"notes\": \"Sample passed all checks\"\n}"
+            }
+          }
+        },
+        {
+          "name": "List Production Processes",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer <access_token>"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/production/processes/",
+              "host": [
+                "http://localhost:8000"
+              ],
+              "path": [
+                "",
+                "api",
+                "production",
+                "processes",
+                ""
+              ]
+            }
+          }
+        },
+        {
+          "name": "Advance Production Process",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer <access_token>"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/production/processes/1/advance/",
+              "host": [
+                "http://localhost:8000"
+              ],
+              "path": [
+                "",
+                "api",
+                "production",
+                "processes",
+                "1",
+                "advance",
+                ""
+              ]
+            }
+          }
+        },
+        {
+          "name": "List Finished Goods",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer <access_token>"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/production/finished-goods/",
+              "host": [
+                "http://localhost:8000"
+              ],
+              "path": [
+                "",
+                "api",
+                "production",
+                "finished-goods",
+                ""
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Finished Goods Detail",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer <access_token>"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/production/finished-goods/1/",
+              "host": [
+                "http://localhost:8000"
+              ],
+              "path": [
+                "",
+                "api",
+                "production",
+                "finished-goods",
+                "1",
+                ""
+              ]
+            }
+          }
+        },
+        {
+          "name": "List Dispatches",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer <access_token>"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/production/dispatches/",
+              "host": [
+                "http://localhost:8000"
+              ],
+              "path": [
+                "",
+                "api",
+                "production",
+                "dispatches",
+                ""
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Dispatch (super_admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer <access_token>"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/production/dispatches/",
+              "host": [
+                "http://localhost:8000"
+              ],
+              "path": [
+                "",
+                "api",
+                "production",
+                "dispatches",
+                ""
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"job_order\": 1,\n  \"packing_note\": \"Box 1 of 1\",\n  \"label_printed\": true,\n  \"transport_mode\": \"road\",\n  \"vehicle_number\": \"KA01 AB 1234\",\n  \"driver_name\": \"Ravi Kumar\",\n  \"driver_phone\": \"9876543210\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Get Dispatch Detail",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer <access_token>"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/production/dispatches/1/",
+              "host": [
+                "http://localhost:8000"
+              ],
+              "path": [
+                "",
+                "api",
+                "production",
+                "dispatches",
+                "1",
+                ""
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Dispatch (super_admin)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer <access_token>"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/production/dispatches/1/",
+              "host": [
+                "http://localhost:8000"
+              ],
+              "path": [
+                "",
+                "api",
+                "production",
+                "dispatches",
+                "1",
+                ""
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"packing_note\": \"Box 1 of 1 - fragile\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Delete Dispatch (super_admin)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer <access_token>"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/production/dispatches/1/",
+              "host": [
+                "http://localhost:8000"
+              ],
+              "path": [
+                "",
+                "api",
+                "production",
+                "dispatches",
+                "1",
+                ""
+              ]
+            }
+          }
+        },
+        {
+          "name": "Mark Dispatch Dispatched",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer <access_token>"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/production/dispatches/1/mark-dispatched/",
+              "host": [
+                "http://localhost:8000"
+              ],
+              "path": [
+                "",
+                "api",
+                "production",
+                "dispatches",
+                "1",
+                "mark-dispatched",
+                ""
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"vehicle_number\": \"KA01 AB 1234\",\n  \"driver_name\": \"Ravi Kumar\",\n  \"driver_phone\": \"9876543210\"\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "37. ASSETS (Registrations / Assignments / Depreciations / Maintenance / Disposal / Analytics)",
+      "item": [
+        {
+          "name": "List Asset Registrations",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer <access_token>"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/assets/registrations/",
+              "host": [
+                "http://localhost:8000"
+              ],
+              "path": [
+                "api",
+                "assets",
+                "api",
+                "assets",
+                "registrations",
+                ""
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Asset Registration (super_admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer <access_token>"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/assets/registrations/",
+              "host": [
+                "http://localhost:8000"
+              ],
+              "path": [
+                "api",
+                "assets",
+                "api",
+                "assets",
+                "registrations",
+                ""
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"asset_name\": \"Laptop Dell XPS\",\n  \"asset_user\": 1,\n  \"category\": \"IT Equipment\",\n  \"location\": \"Head Office\",\n  \"purchase_date\": \"2025-01-15\",\n  \"warranty_end_date\": \"2027-01-15\",\n  \"warranty\": 24,\n  \"status\": \"active\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Get Asset Registration Detail",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer <access_token>"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/assets/registrations/1/",
+              "host": [
+                "http://localhost:8000"
+              ],
+              "path": [
+                "api",
+                "assets",
+                "api",
+                "assets",
+                "registrations",
+                "1",
+                ""
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Asset Registration (super_admin)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer <access_token>"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/assets/registrations/1/",
+              "host": [
+                "http://localhost:8000"
+              ],
+              "path": [
+                "api",
+                "assets",
+                "api",
+                "assets",
+                "registrations",
+                "1",
+                ""
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"inactive\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Delete Asset Registration (super_admin)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer <access_token>"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/assets/registrations/1/",
+              "host": [
+                "http://localhost:8000"
+              ],
+              "path": [
+                "api",
+                "assets",
+                "api",
+                "assets",
+                "registrations",
+                "1",
+                ""
+              ]
+            }
+          }
+        },
+        {
+          "name": "List Asset Assignments",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer <access_token>"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/assets/assignments/",
+              "host": [
+                "http://localhost:8000"
+              ],
+              "path": [
+                "api",
+                "assets",
+                "api",
+                "assets",
+                "assignments",
+                ""
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Asset Assignment (super_admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer <access_token>"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/assets/assignments/",
+              "host": [
+                "http://localhost:8000"
+              ],
+              "path": [
+                "api",
+                "assets",
+                "api",
+                "assets",
+                "assignments",
+                ""
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"asset\": 1,\n  \"assigned_to\": 1,\n  \"department\": \"Engineering\",\n  \"assignment_date\": \"2025-02-01\",\n  \"return_date\": null,\n  \"status\": \"active\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Get Asset Assignment Detail",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer <access_token>"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/assets/assignments/1/",
+              "host": [
+                "http://localhost:8000"
+              ],
+              "path": [
+                "api",
+                "assets",
+                "api",
+                "assets",
+                "assignments",
+                "1",
+                ""
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Asset Assignment (super_admin)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer <access_token>"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/assets/assignments/1/",
+              "host": [
+                "http://localhost:8000"
+              ],
+              "path": [
+                "api",
+                "assets",
+                "api",
+                "assets",
+                "assignments",
+                "1",
+                ""
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"inactive\",\n  \"return_date\": \"2026-08-01\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Delete Asset Assignment (super_admin)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer <access_token>"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/assets/assignments/1/",
+              "host": [
+                "http://localhost:8000"
+              ],
+              "path": [
+                "api",
+                "assets",
+                "api",
+                "assets",
+                "assignments",
+                "1",
+                ""
+              ]
+            }
+          }
+        },
+        {
+          "name": "List Asset Depreciations",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer <access_token>"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/assets/depreciations/",
+              "host": [
+                "http://localhost:8000"
+              ],
+              "path": [
+                "api",
+                "assets",
+                "api",
+                "assets",
+                "depreciations",
+                ""
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Asset Depreciation (super_admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer <access_token>"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/assets/depreciations/",
+              "host": [
+                "http://localhost:8000"
+              ],
+              "path": [
+                "api",
+                "assets",
+                "api",
+                "assets",
+                "depreciations",
+                ""
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"asset\": 1,\n  \"purchase_cost\": \"1500.00\",\n  \"accumulated_depreciation\": \"300.00\",\n  \"net_book_value\": \"1200.00\",\n  \"depreciation_method\": \"straight_line\",\n  \"useful_life_years\": 5,\n  \"status\": \"in_use\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Get Asset Depreciation Detail",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer <access_token>"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/assets/depreciations/1/",
+              "host": [
+                "http://localhost:8000"
+              ],
+              "path": [
+                "api",
+                "assets",
+                "api",
+                "assets",
+                "depreciations",
+                "1",
+                ""
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Asset Depreciation (super_admin)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer <access_token>"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/assets/depreciations/1/",
+              "host": [
+                "http://localhost:8000"
+              ],
+              "path": [
+                "api",
+                "assets",
+                "api",
+                "assets",
+                "depreciations",
+                "1",
+                ""
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"accumulated_depreciation\": \"450.00\",\n  \"net_book_value\": \"1050.00\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Delete Asset Depreciation (super_admin)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer <access_token>"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/assets/depreciations/1/",
+              "host": [
+                "http://localhost:8000"
+              ],
+              "path": [
+                "api",
+                "assets",
+                "api",
+                "assets",
+                "depreciations",
+                "1",
+                ""
+              ]
+            }
+          }
+        },
+        {
+          "name": "List Asset Maintenance",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer <access_token>"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/assets/maintenances/",
+              "host": [
+                "http://localhost:8000"
+              ],
+              "path": [
+                "api",
+                "assets",
+                "api",
+                "assets",
+                "maintenances",
+                ""
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Asset Maintenance (super_admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer <access_token>"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/assets/maintenances/",
+              "host": [
+                "http://localhost:8000"
+              ],
+              "path": [
+                "api",
+                "assets",
+                "api",
+                "assets",
+                "maintenances",
+                ""
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"asset\": 1,\n  \"maintenance_type\": \"preventive\",\n  \"scheduled_date\": \"2026-09-01\",\n  \"remark\": \"Annual servicing\",\n  \"status\": \"scheduled\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Get Asset Maintenance Detail",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer <access_token>"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/assets/maintenances/1/",
+              "host": [
+                "http://localhost:8000"
+              ],
+              "path": [
+                "api",
+                "assets",
+                "api",
+                "assets",
+                "maintenances",
+                "1",
+                ""
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Asset Maintenance (super_admin)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer <access_token>"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/assets/maintenances/1/",
+              "host": [
+                "http://localhost:8000"
+              ],
+              "path": [
+                "api",
+                "assets",
+                "api",
+                "assets",
+                "maintenances",
+                "1",
+                ""
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"completed\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Delete Asset Maintenance (super_admin)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer <access_token>"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/assets/maintenances/1/",
+              "host": [
+                "http://localhost:8000"
+              ],
+              "path": [
+                "api",
+                "assets",
+                "api",
+                "assets",
+                "maintenances",
+                "1",
+                ""
+              ]
+            }
+          }
+        },
+        {
+          "name": "List Asset Disposals",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer <access_token>"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/assets/disposals/",
+              "host": [
+                "http://localhost:8000"
+              ],
+              "path": [
+                "api",
+                "assets",
+                "api",
+                "assets",
+                "disposals",
+                ""
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Asset Disposal (super_admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer <access_token>"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/assets/disposals/",
+              "host": [
+                "http://localhost:8000"
+              ],
+              "path": [
+                "api",
+                "assets",
+                "api",
+                "assets",
+                "disposals",
+                ""
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"asset\": 1,\n  \"method\": \"auction\",\n  \"value\": \"900.00\",\n  \"date\": \"2026-12-01\",\n  \"approved_by\": 1,\n  \"status\": \"scheduled\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Get Asset Disposal Detail",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer <access_token>"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/assets/disposals/1/",
+              "host": [
+                "http://localhost:8000"
+              ],
+              "path": [
+                "api",
+                "assets",
+                "api",
+                "assets",
+                "disposals",
+                "1",
+                ""
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Asset Disposal (super_admin)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer <access_token>"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/assets/disposals/1/",
+              "host": [
+                "http://localhost:8000"
+              ],
+              "path": [
+                "api",
+                "assets",
+                "api",
+                "assets",
+                "disposals",
+                "1",
+                ""
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"completed\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Delete Asset Disposal (super_admin)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer <access_token>"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/assets/disposals/1/",
+              "host": [
+                "http://localhost:8000"
+              ],
+              "path": [
+                "api",
+                "assets",
+                "api",
+                "assets",
+                "disposals",
+                "1",
+                ""
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Asset Analytics",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer <access_token>"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/assets/analytics/",
+              "host": [
+                "http://localhost:8000"
+              ],
+              "path": [
+                "api",
+                "assets",
+                "api",
+                "assets",
+                "analytics",
+                ""
+              ]
+            }
           }
         }
       ]

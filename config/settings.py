@@ -28,6 +28,7 @@ INSTALLED_APPS = [
 
     # Local apps
     'apps.accounts',
+    'apps.assets',
     'apps.attendance',
     'apps.tracking',
     'apps.masters',

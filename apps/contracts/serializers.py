@@ -10,4 +10,6 @@ class ContractSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     def get_created_by_name(self, obj):
-        return obj.created_by.email if obj.created_by else None
+        if obj.created_by is None:
+            return ''
+        return obj.created_by.email

@@ -23,10 +23,14 @@ class BlogPostSerializer(serializers.ModelSerializer):
         read_only_fields = ['id', 'slug', 'created_at', 'updated_at']
 
     def get_author_name(self, obj):
-        return obj.author.get_full_name() or obj.author.email if obj.author else None
+        if obj.author is None:
+            return ''
+        return obj.author.get_full_name() or obj.author.email
 
     def get_category_name(self, obj):
-        return obj.category.name if obj.category else None
+        if obj.category is None:
+            return ''
+        return obj.category.name
 
 
 class BlogCommentSerializer(serializers.ModelSerializer):

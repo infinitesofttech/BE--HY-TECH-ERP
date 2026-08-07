@@ -43,7 +43,7 @@ class MembershipAddonCreateSerializer(serializers.ModelSerializer):
 
 class SubscriptionSerializer(serializers.ModelSerializer):
     user_name = serializers.CharField(source='user.get_full_name', read_only=True)
-    plan_name = serializers.CharField(source='plan.name', read_only=True)
+    plan_name = serializers.CharField(source='plan.name', read_only=True, default='')
 
     class Meta:
         model = Subscription

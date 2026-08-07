@@ -15,7 +15,9 @@ class TrackingLocationSerializer(serializers.ModelSerializer):
         read_only_fields = ['id', 'created_at']
 
     def get_employee_email(self, obj):
-        return obj.employee.email if obj.employee else None
+        if obj.employee is None:
+            return ''
+        return obj.employee.email
 
 
 class LocationUpdateSerializer(serializers.Serializer):

@@ -7,10 +7,10 @@ class VisitSerializer(serializers.ModelSerializer):
         source='employee.email', read_only=True,
     )
     dealer_name = serializers.CharField(
-        source='dealer.name', read_only=True, default=None,
+        source='dealer.name', read_only=True, default='',
     )
     retailer_name = serializers.CharField(
-        source='retailer.name', read_only=True, default=None,
+        source='retailer.name', read_only=True, default='',
     )
 
     class Meta:

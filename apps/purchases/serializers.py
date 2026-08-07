@@ -40,7 +40,7 @@ class PurchaseItemCreateSerializer(serializers.ModelSerializer):
 class PurchaseSerializer(serializers.ModelSerializer):
     vendor_name = serializers.CharField(source='vendor.name', read_only=True)
     requestor_name = serializers.SerializerMethodField()
-    tax_name = serializers.CharField(source='tax.name', read_only=True)
+    tax_name = serializers.CharField(source='tax.name', read_only=True, default='')
     tax_percentage = serializers.DecimalField(max_digits=5, decimal_places=2, read_only=True)
     items = PurchaseItemSerializer(many=True, read_only=True)
 
@@ -61,7 +61,7 @@ class PurchaseSerializer(serializers.ModelSerializer):
     def get_requestor_name(self, obj):
         if obj.requestor:
             return obj.requestor.get_full_name() or obj.requestor.email
-        return None
+        return ''
 
 
 class PurchaseCreateSerializer(serializers.ModelSerializer):
@@ -154,7 +154,7 @@ class PurchaseOrderSerializer(serializers.ModelSerializer):
     vendor_name = serializers.CharField(source='vendor.name', read_only=True)
     lead_time_days = serializers.SerializerMethodField()
     on_time = serializers.SerializerMethodField()
-    tax_name = serializers.CharField(source='tax.name', read_only=True)
+    tax_name = serializers.CharField(source='tax.name', read_only=True, default='')
     tax_percentage = serializers.DecimalField(max_digits=5, decimal_places=2, read_only=True)
     items = PurchaseOrderItemSerializer(many=True, read_only=True)
 
@@ -179,7 +179,7 @@ class PurchaseOrderSerializer(serializers.ModelSerializer):
             return (obj.actual_delivery_date - obj.order_date).days
         if obj.expected_delivery_date and obj.order_date:
             return (obj.expected_delivery_date - obj.order_date).days
-        return None
+        return ''
 
     def get_on_time(self, obj):
         if (
@@ -187,7 +187,7 @@ class PurchaseOrderSerializer(serializers.ModelSerializer):
             and obj.expected_delivery_date
         ):
             return obj.actual_delivery_date <= obj.expected_delivery_date
-        return None
+        return ''
 
 
 class PurchaseOrderCreateSerializer(serializers.ModelSerializer):
@@ -279,10 +279,10 @@ class PurchaseReturnItemCreateSerializer(serializers.ModelSerializer):
 
 class PurchaseReturnSerializer(serializers.ModelSerializer):
     purchase_id_ref = serializers.CharField(
-        source='purchase.purchase_id', read_only=True,
+        source='purchase.purchase_id', read_only=True, default='',
     )
-    vendor_name = serializers.CharField(source='vendor.name', read_only=True)
-    tax_name = serializers.CharField(source='tax.name', read_only=True)
+    vendor_name = serializers.CharField(source='vendor.name', read_only=True, default='')
+    tax_name = serializers.CharField(source='tax.name', read_only=True, default='')
     tax_percentage = serializers.DecimalField(max_digits=5, decimal_places=2, read_only=True)
     items = PurchaseReturnItemSerializer(many=True, read_only=True)
 

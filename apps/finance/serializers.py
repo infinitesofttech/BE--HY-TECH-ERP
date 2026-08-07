@@ -18,6 +18,11 @@ class BankAccountSerializer(serializers.ModelSerializer):
         model = BankAccount
         fields = '__all__'
         read_only_fields = ['id', 'created_at']
+        extra_kwargs = {
+            'account_number': {'write_only': True},
+            'ifsc_code': {'write_only': True},
+            'branch': {'write_only': True},
+        }
 
 
 class ExpenseCategorySerializer(serializers.ModelSerializer):

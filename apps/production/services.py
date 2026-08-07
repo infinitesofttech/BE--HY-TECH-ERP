@@ -77,11 +77,64 @@ def refresh_material_requirement(requirement):
     return requirement
 
 
+def _finished_goods_available(product):
+    """Available finished-goods stock for a BOM-less product.
+
+    Uses the active inventory sum when warehouse records exist, falling back
+    to the product quantity field otherwise.
+    """
+    total = Inventory.objects.filter(
+        product=product, status='active',
+    ).aggregate(total=Sum('quantity'))['total']
+    if total is not None:
+        return Decimal(total)
+    quantity = (
+        product.__class__.objects.filter(pk=product.pk)
+        .values_list('quantity', flat=True).first() or 0
+    )
+    return Decimal(quantity)
+
+
 def compute_material_requirements(job_order):
-    """Derive material requirements from the BOM and compare with stock."""
+    """Derive material requirements from the BOM and compare with stock.
+
+    Products without an active BOM are checked against their own stock
+    (the product quantity) so shortages against the job quantity are still
+    detected.
+    """
     requirements = []
     if job_order.bom is None:
-        job_order.status = 'material_check'
+        if job_order.product is None:
+            job_order.status = 'material_check'
+            job_order.save(update_fields=['status', 'updated_at'])
+            return requirements
+        with transaction.atomic():
+            required = Decimal(job_order.quantity)
+            requirement, _ = MaterialRequirement.objects.update_or_create(
+                job_order=job_order,
+                raw_material=job_order.product,
+                defaults={'required_quantity': required},
+            )
+            if requirement.issued_quantity > 0:
+                requirement.status = 'issued'
+            else:
+                requirement.available_quantity = _finished_goods_available(
+                    job_order.product,
+                )
+                requirement.status = (
+                    'available'
+                    if requirement.available_quantity >= required
+                    else 'short'
+                )
+                requirement.save(
+                    update_fields=['available_quantity', 'status', 'updated_at'],
+                )
+            requirements.append(requirement)
+        job_order.status = (
+            'material_ready'
+            if requirement.status in ('available', 'issued')
+            else 'waiting_material'
+        )
         job_order.save(update_fields=['status', 'updated_at'])
         return requirements
 
@@ -133,6 +186,8 @@ def issue_material(job_order, issued_to=None, created_by=None):
             f'Create a purchase requisition first.'
         )
 
+    issued_to = _resolve_fk(None, issued_to, get_user_model())
+
     with transaction.atomic():
         slip = MaterialIssueSlip.objects.create(
             job_order=job_order,
@@ -143,28 +198,38 @@ def issue_material(job_order, issued_to=None, created_by=None):
         )
         items = []
         for requirement in requirements:
-            available = Inventory.objects.filter(
-                product=requirement.raw_material, status='active',
-            ).order_by('-quantity').first()
-            if available is None:
-                raise ValueError(
-                    f'No inventory record for {requirement.raw_material.name}.'
-                )
             quantity = requirement.required_quantity
-            if available.quantity < quantity:
+            inventory_rows = list(Inventory.objects.filter(
+                product=requirement.raw_material, status='active',
+            ).order_by('-quantity'))
+            total = sum(row.quantity for row in inventory_rows)
+            if total < quantity:
                 raise ValueError(
-                    f'Insufficient stock in {available.warehouse.name} for '
-                    f'{requirement.raw_material.name}.'
+                    f'Insufficient stock for {requirement.raw_material.name}. '
+                    f'Available: {total}, required: {quantity}.'
                 )
-            adjust_inventory(
-                requirement.raw_material, available.warehouse, -quantity,
-            )
-            items.append(MaterialIssueItem(
-                slip=slip,
-                raw_material=requirement.raw_material,
-                quantity=quantity,
-                warehouse=available.warehouse,
-            ))
+            remaining = quantity
+            for inventory in inventory_rows:
+                if remaining <= 0:
+                    break
+                take = min(inventory.quantity, remaining)
+                if take <= 0:
+                    continue
+                adjust_inventory(
+                    requirement.raw_material, inventory.warehouse, -take,
+                )
+                items.append(MaterialIssueItem(
+                    slip=slip,
+                    raw_material=requirement.raw_material,
+                    quantity=take,
+                    warehouse=inventory.warehouse,
+                ))
+                remaining -= take
+            if remaining > 0:
+                raise ValueError(
+                    f'Insufficient stock for {requirement.raw_material.name}. '
+                    f'Available: {total}, required: {quantity}.'
+                )
             requirement.issued_quantity = quantity
             requirement.status = 'issued'
             requirement.save(update_fields=['issued_quantity', 'status'])

@@ -23,7 +23,7 @@ class ProductCategorySerializer(serializers.ModelSerializer):
 
 class ProductSerializer(serializers.ModelSerializer):
     category_name = serializers.CharField(source='category.name', read_only=True)
-    tax_name = serializers.CharField(source='tax.name', read_only=True)
+    tax_name = serializers.CharField(source='tax.name', read_only=True, default='')
     tax_percentage = serializers.DecimalField(max_digits=5, decimal_places=2, read_only=True)
 
     class Meta:
@@ -51,7 +51,7 @@ class ProductCreateSerializer(serializers.ModelSerializer):
 
 class ProductCatalogueSerializer(serializers.ModelSerializer):
     category_name = serializers.CharField(source='category.name', read_only=True)
-    tax_name = serializers.CharField(source='tax.name', read_only=True)
+    tax_name = serializers.CharField(source='tax.name', read_only=True, default='')
     tax_percentage = serializers.DecimalField(max_digits=5, decimal_places=2, read_only=True)
 
     class Meta:
@@ -59,7 +59,7 @@ class ProductCatalogueSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'name', 'category_name', 'description', 'specifications',
             'sku', 'cost_price', 'selling_price', 'price',
-            'tax', 'tax_name', 'tax_percentage', 'unit', 'quantity', 'image',
+            'tax_name', 'tax_percentage', 'unit', 'quantity', 'image',
             'for_vehicle_type', 'status',
         ]
 

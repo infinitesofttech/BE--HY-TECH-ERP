@@ -69,7 +69,7 @@ class CampaignDetailSerializer(serializers.ModelSerializer):
             'recipient_filter', 'status', 'scheduled_at', 'sent_at',
             'deal_value', 'currency', 'period', 'period_value',
             'target_audience', 'target_audience_details',
-            'description', 'attachment',
+            'description',
             'stats_sent_count', 'stats_opened_count', 'stats_clicked_count',
             'created_by', 'created_by_name', 'created_at', 'updated_at',
             'is_active', 'attachments',

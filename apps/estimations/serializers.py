@@ -19,7 +19,7 @@ class EstimationItemCreateSerializer(serializers.Serializer):
 
 class EstimationSerializer(serializers.ModelSerializer):
     items = EstimationItemSerializer(many=True, read_only=True)
-    tax_name = serializers.CharField(source='tax.name', read_only=True)
+    tax_name = serializers.CharField(source='tax.name', read_only=True, default='')
     tax_percentage = serializers.DecimalField(max_digits=5, decimal_places=2, read_only=True)
 
     class Meta:

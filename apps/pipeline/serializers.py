@@ -13,7 +13,6 @@ class PipelineStageSerializer(serializers.ModelSerializer):
 
 
 class PipelineSerializer(serializers.ModelSerializer):
-    stage_details = serializers.SerializerMethodField()
     total_deal_value = serializers.SerializerMethodField()
     deals_count = serializers.SerializerMethodField()
 
@@ -21,9 +20,6 @@ class PipelineSerializer(serializers.ModelSerializer):
         model = Pipeline
         fields = '__all__'
         read_only_fields = ['id', 'created_at', 'updated_at']
-
-    def get_stage_details(self, obj):
-        return [{'id': s.id, 'name': s.name} for s in obj.stages.all()]
 
     def get_total_deal_value(self, obj):
         total = obj.deals.aggregate(total=Sum('value'))['total']
@@ -44,18 +40,16 @@ class DealActivitySerializer(serializers.ModelSerializer):
 class LeadSerializer(serializers.ModelSerializer):
     owner_name = serializers.CharField(source='owner.email', read_only=True, default='')
     name = serializers.CharField(read_only=True)
-    visible_to_names = serializers.SerializerMethodField()
 
     class Meta:
         model = Lead
-        fields = '__all__'
-        read_only_fields = ['id', 'created_at', 'updated_at']
-
-    def get_visible_to_names(self, obj):
-        return [
-            user.get_full_name() or user.email
-            for user in obj.visible_to.all()
+        fields = [
+            'id', 'first_name', 'last_name', 'name', 'lead_type', 'company_name',
+            'email', 'phone', 'status', 'value', 'product_requirement',
+            'quantity', 'owner', 'owner_name', 'source', 'industry', 'description',
+            'created_at', 'updated_at',
         ]
+        read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class DealSerializer(serializers.ModelSerializer):
@@ -64,7 +58,6 @@ class DealSerializer(serializers.ModelSerializer):
     lead_name = serializers.SerializerMethodField()
     contact_name = serializers.SerializerMethodField()
     company_name = serializers.SerializerMethodField()
-    stage_name = serializers.SerializerMethodField()
     pipeline_name = serializers.SerializerMethodField()
     progress_name = serializers.SerializerMethodField()
 
@@ -83,9 +76,6 @@ class DealSerializer(serializers.ModelSerializer):
 
     def get_company_name(self, obj):
         return str(obj.company) if obj.company else ''
-
-    def get_stage_name(self, obj):
-        return obj.get_progress_display() if obj.progress else ''
 
     def get_pipeline_name(self, obj):
         return obj.pipeline.name if obj.pipeline else ''

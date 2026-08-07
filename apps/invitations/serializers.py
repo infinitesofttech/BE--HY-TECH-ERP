@@ -14,9 +14,12 @@ class InvitationSerializer(serializers.ModelSerializer):
         model = Invitation
         fields = '__all__'
         read_only_fields = [
-            'id', 'token', 'invited_by', 'sent_at',
+            'id', 'invited_by', 'sent_at',
             'accepted_at', 'expires_at', 'created_at',
         ]
+        extra_kwargs = {
+            'token': {'write_only': True},
+        }
 
     def get_invited_by_name(self, obj):
         return obj.invited_by.email if obj.invited_by else None

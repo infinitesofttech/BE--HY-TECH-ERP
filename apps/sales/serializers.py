@@ -32,7 +32,7 @@ class CustomerFeedbackSerializer(serializers.ModelSerializer):
 
 class SalesOrderItemSerializer(serializers.ModelSerializer):
     product_name = serializers.CharField(source='product.name', read_only=True)
-    tax_name = serializers.CharField(source='tax.name', read_only=True)
+    tax_name = serializers.CharField(source='tax.name', read_only=True, default='')
     tax_percentage = serializers.DecimalField(max_digits=5, decimal_places=2, read_only=True)
 
     class Meta:
@@ -75,7 +75,7 @@ class SalesOrderSerializer(serializers.ModelSerializer):
     def get_employee_name(self, obj):
         if obj.employee:
             return obj.employee.get_full_name() or obj.employee.email
-        return None
+        return ''
 
 
 class SalesOrderCreateSerializer(serializers.ModelSerializer):
@@ -185,7 +185,7 @@ class DeliveryNoteSerializer(serializers.ModelSerializer):
     sales_order_id_ref = serializers.CharField(
         source='sales_order.order_id', read_only=True, default='',
     )
-    tax_name = serializers.CharField(source='tax.name', read_only=True)
+    tax_name = serializers.CharField(source='tax.name', read_only=True, default='')
     tax_percentage = serializers.DecimalField(max_digits=5, decimal_places=2, read_only=True)
     items = DeliveryNoteItemSerializer(many=True, read_only=True)
 

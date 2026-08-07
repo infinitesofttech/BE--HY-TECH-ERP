@@ -14,7 +14,7 @@ class PipelineStageAdmin(admin.ModelAdmin):
 
 @admin.register(Lead)
 class LeadAdmin(admin.ModelAdmin):
-    list_display = ('name', 'company_name', 'email', 'phone', 'status', 'source', 'value', 'owner', 'created_at')
+    list_display = ('id', 'name', 'company_name', 'email', 'phone', 'status', 'source', 'value', 'owner', 'created_at')
     list_filter = ('status', 'source', 'industry', 'visibility')
     search_fields = ('first_name', 'last_name', 'company_name', 'email', 'phone')
     filter_horizontal = ('visible_to',)

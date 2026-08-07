@@ -11,7 +11,9 @@ class CompanySerializer(serializers.ModelSerializer):
         read_only_fields = ['id', 'created_at', 'updated_at']
 
     def get_owner_name(self, obj):
-        return obj.owner.email if obj.owner else None
+        if obj.owner is None:
+            return ''
+        return obj.owner.email
 
 
 class ContactSerializer(serializers.ModelSerializer):
@@ -26,10 +28,14 @@ class ContactSerializer(serializers.ModelSerializer):
         read_only_fields = ['id', 'created_at', 'updated_at']
 
     def get_owner_name(self, obj):
-        return obj.owner.get_full_name() or obj.owner.email if obj.owner else None
+        if obj.owner is None:
+            return ''
+        return obj.owner.get_full_name() or obj.owner.email
 
     def get_company_name(self, obj):
-        return obj.company.name if obj.company else None
+        if obj.company is None:
+            return ''
+        return obj.company.name
 
     def get_visible_to_names(self, obj):
         return [

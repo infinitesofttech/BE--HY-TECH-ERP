@@ -8,7 +8,6 @@ User = get_user_model()
 class CalendarEventSerializer(serializers.ModelSerializer):
     created_by_name = serializers.CharField(source='created_by.get_full_name', read_only=True)
     created_by_email = serializers.CharField(source='created_by.email', read_only=True)
-    attendee_ids = serializers.SerializerMethodField()
     attendee_names = serializers.SerializerMethodField()
 
     class Meta:
@@ -17,13 +16,10 @@ class CalendarEventSerializer(serializers.ModelSerializer):
             'id', 'title', 'description', 'event_type',
             'start_datetime', 'end_datetime', 'is_all_day',
             'location', 'color', 'created_by', 'created_by_name',
-            'created_by_email', 'attendees', 'attendee_ids',
+            'created_by_email', 'attendees',
             'attendee_names', 'is_active', 'created_at', 'updated_at',
         ]
         read_only_fields = ['id', 'created_by', 'created_at', 'updated_at']
-
-    def get_attendee_ids(self, obj):
-        return list(obj.attendees.values_list('id', flat=True))
 
     def get_attendee_names(self, obj):
         return [

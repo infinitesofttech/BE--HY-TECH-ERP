@@ -66,13 +66,13 @@ class LeaveSerializer(serializers.ModelSerializer):
     employee_email = serializers.CharField(source='employee.email', read_only=True)
     leave_type_name = serializers.CharField(source='leave_type.name', read_only=True)
     assigned_approver_name = serializers.CharField(
-        source='assigned_approver.get_full_name', read_only=True, default=None,
+        source='assigned_approver.get_full_name', read_only=True, default='',
     )
     assigned_approver_email = serializers.CharField(
-        source='assigned_approver.email', read_only=True, default=None,
+        source='assigned_approver.email', read_only=True, default='',
     )
     approved_by_name = serializers.CharField(
-        source='approved_by.get_full_name', read_only=True, default=None,
+        source='approved_by.get_full_name', read_only=True, default='',
     )
 
     class Meta:

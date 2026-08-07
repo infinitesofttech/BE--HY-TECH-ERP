@@ -20,9 +20,9 @@ class DepartmentSerializer(serializers.ModelSerializer):
         read_only_fields = ['id', 'created_at']
 
     def get_department_head_name(self, obj):
-        if obj.department_head:
-            return obj.department_head.get_full_name() or obj.department_head.email
-        return None
+        if obj.department_head is None:
+            return ''
+        return obj.department_head.get_full_name() or obj.department_head.email
 
     def get_employee_count(self, obj):
         count = getattr(obj, 'employee_count', None)
@@ -148,6 +148,10 @@ class SmsGatewaySerializer(serializers.ModelSerializer):
         model = SmsGateway
         fields = '__all__'
         read_only_fields = ['id', 'created_at']
+        extra_kwargs = {
+            'api_key': {'write_only': True},
+            'api_secret': {'write_only': True},
+        }
 
 
 class EmailSettingSerializer(serializers.ModelSerializer):
@@ -155,6 +159,9 @@ class EmailSettingSerializer(serializers.ModelSerializer):
         model = EmailSetting
         fields = '__all__'
         read_only_fields = ['id']
+        extra_kwargs = {
+            'password': {'write_only': True},
+        }
 
 
 class StorageSettingSerializer(serializers.ModelSerializer):
@@ -162,6 +169,10 @@ class StorageSettingSerializer(serializers.ModelSerializer):
         model = StorageSetting
         fields = '__all__'
         read_only_fields = ['id']
+        extra_kwargs = {
+            'aws_access_key': {'write_only': True},
+            'aws_secret_key': {'write_only': True},
+        }
 
 
 class SystemUpdateSerializer(serializers.ModelSerializer):
@@ -169,6 +180,9 @@ class SystemUpdateSerializer(serializers.ModelSerializer):
         model = SystemUpdate
         fields = '__all__'
         read_only_fields = ['id']
+        extra_kwargs = {
+            'purchase_key': {'write_only': True},
+        }
 
 
 class NotificationSettingSerializer(serializers.ModelSerializer):

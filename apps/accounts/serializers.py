@@ -43,11 +43,14 @@ class UserSerializer(serializers.ModelSerializer):
             'is_active', 'date_joined',
         ]
         read_only_fields = ['id', 'date_joined', 'is_active']
+        extra_kwargs = {
+            'device_token': {'write_only': True},
+        }
 
     def get_manager_name(self, obj):
-        if obj.manager:
-            return obj.manager.get_full_name() or obj.manager.email
-        return None
+        if obj.manager is None:
+            return ''
+        return obj.manager.get_full_name() or obj.manager.email
 
 
 class UserCreateSerializer(serializers.ModelSerializer):

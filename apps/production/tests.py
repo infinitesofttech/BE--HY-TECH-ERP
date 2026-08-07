@@ -1,4 +1,5 @@
 from datetime import date
+from decimal import Decimal
 
 from django.contrib.auth import get_user_model
 from django.test import TestCase
@@ -8,6 +9,7 @@ from apps.finance.models import Tax
 from apps.invoices.models import Invoice
 from apps.invoices.services import create_invoice_from_delivery_note, mark_invoice_paid
 from apps.orders.models import Quotation, QuotationItem
+from apps.orders.serializers import QuotationCreateSerializer
 from apps.orders.services import approve_quotation, send_quotation
 from apps.pipeline.models import Lead
 from apps.production import services as production_services
@@ -170,6 +172,82 @@ class ProductionWorkflowTests(TestCase):
             Inventory.objects.get(product=self.pipe).quantity, 26,
         )
 
+    def test_product_without_bom_checks_own_stock_and_creates_requisition(self):
+        Product.objects.filter(pk=self.cabinet.pk).update(quantity=26)
+        job_order = JobOrder.objects.create(
+            customer=self.customer,
+            product=self.cabinet,
+            quantity=40,
+            start_date=date(2026, 8, 10),
+        )
+        requirements = production_services.compute_material_requirements(
+            job_order,
+        )
+        self.assertEqual(len(requirements), 1)
+        requirement = requirements[0]
+        self.assertEqual(requirement.raw_material, self.cabinet)
+        self.assertEqual(requirement.required_quantity, Decimal('40'))
+        self.assertEqual(requirement.available_quantity, Decimal('26'))
+        self.assertEqual(requirement.status, 'short')
+        job_order.refresh_from_db()
+        self.assertEqual(job_order.status, 'waiting_material')
+
+        requisition = production_services.create_purchase_requisition(
+            job_order, requested_by=self.user,
+        )
+        self.assertIsInstance(requisition, PurchaseRequisition)
+        self.assertEqual(requisition.items.count(), 1)
+        item = requisition.items.first()
+        self.assertEqual(item.raw_material, self.cabinet)
+        self.assertEqual(item.quantity, Decimal('14'))
+
+    def test_product_without_bom_marked_available_when_stock_sufficient(self):
+        Product.objects.filter(pk=self.cabinet.pk).update(quantity=26)
+        job_order = JobOrder.objects.create(
+            customer=self.customer,
+            product=self.cabinet,
+            quantity=20,
+            start_date=date(2026, 8, 10),
+        )
+        requirements = production_services.compute_material_requirements(
+            job_order,
+        )
+        self.assertEqual(requirements[0].status, 'available')
+        job_order.refresh_from_db()
+        self.assertEqual(job_order.status, 'material_ready')
+
+    def test_issue_material_uses_stock_across_multiple_warehouses(self):
+        second = Warehouse.objects.create(name='Second Warehouse')
+        Inventory.objects.create(
+            product=self.cabinet, warehouse=self.warehouse, quantity=15,
+        )
+        Inventory.objects.create(
+            product=self.cabinet, warehouse=second, quantity=25,
+        )
+        job_order = JobOrder.objects.create(
+            customer=self.customer,
+            product=self.cabinet,
+            quantity=40,
+            start_date=date(2026, 8, 10),
+        )
+        slip = production_services.issue_material(
+            job_order, created_by=self.user,
+        )
+        slip.refresh_from_db()
+        self.assertEqual(slip.items.count(), 2)
+        quantities = {item.quantity for item in slip.items.all()}
+        self.assertEqual(quantities, {15, 25})
+        self.assertEqual(
+            Inventory.objects.get(
+                product=self.cabinet, warehouse=self.warehouse,
+            ).quantity, 0,
+        )
+        self.assertEqual(
+            Inventory.objects.get(
+                product=self.cabinet, warehouse=second,
+            ).quantity, 0,
+        )
+
     def test_short_material_creates_requisition_and_po(self):
         Inventory.objects.filter(product=self.steel_sheet).update(quantity=2)
         job_order = JobOrder.objects.create(
@@ -221,6 +299,48 @@ class ProductionWorkflowTests(TestCase):
         self.assertEqual(
             Inventory.objects.get(product=self.steel_sheet).quantity, 8,
         )
+
+    def test_lead_requirement_quantity_is_used_for_quotation_sales_order_and_materials(self):
+        lead = Lead.objects.create(
+            first_name='Jane', last_name='Buyer', company_name='Acme Corp',
+            email='jane@example.com', phone='9999999999',
+            product_requirement='Steel Cabinet', quantity=3, status='new',
+            owner=self.user,
+        )
+        serializer = QuotationCreateSerializer(data={
+            'client': 'Acme Corp',
+            'lead': lead.id,
+            'quote_date': '2026-08-01',
+            'valid_till': '2026-08-15',
+            'delivery_date': '2026-08-25',
+            'payment_terms': 'net_30',
+            'tax': self.tax.id,
+            'status': 'draft',
+        })
+        self.assertTrue(serializer.is_valid(), serializer.errors)
+        quotation = serializer.save(created_by=self.user)
+
+        sales_order = approve_quotation(quotation, employee=self.user)
+        job_orders = production_services.create_job_orders_from_sales_order(sales_order)
+        self.assertEqual(job_orders[0].quantity, lead.quantity)
+
+        requirements = production_services.compute_material_requirements(job_orders[0])
+        self.assertEqual(len(requirements), 2)
+        steel_requirement = next(r for r in requirements if r.raw_material == self.steel_sheet)
+        pipe_requirement = next(r for r in requirements if r.raw_material == self.pipe)
+        self.assertEqual(steel_requirement.required_quantity, Decimal('12'))
+        self.assertEqual(pipe_requirement.required_quantity, Decimal('6'))
+
+        Inventory.objects.filter(product=self.steel_sheet).update(quantity=2)
+        Inventory.objects.filter(product=self.pipe).update(quantity=5)
+        production_services.compute_material_requirements(job_orders[0])
+        job_orders[0].refresh_from_db()
+        self.assertEqual(job_orders[0].status, 'waiting_material')
+
+        requisition = production_services.create_purchase_requisition(
+            job_orders[0], requested_by=self.user,
+        )
+        self.assertEqual(requisition.items.count(), 2)
 
     def test_production_process_and_qc(self):
         job_order = JobOrder.objects.create(
@@ -283,6 +403,20 @@ class ProductionWorkflowTests(TestCase):
         self.assertIsInstance(finished, FinishedGoods)
         self.assertEqual(finished.warehouse, self.warehouse)
         self.assertEqual(job_order.status, 'qc_passed')
+
+    def test_issue_material_accepts_issued_to_pk(self):
+        job_order = JobOrder.objects.create(
+            customer=self.customer,
+            product=self.cabinet,
+            quantity=1,
+            start_date=date(2026, 8, 10),
+            bom=self.bom,
+        )
+        slip = production_services.issue_material(
+            job_order, issued_to=self.user.id, created_by=self.user,
+        )
+        slip.refresh_from_db()
+        self.assertEqual(slip.issued_to, self.user)
 
     def test_qc_failure_opens_rework(self):
         job_order = JobOrder.objects.create(
@@ -476,6 +610,44 @@ class ProductionAPITests(TestCase):
         )
         self.assertEqual(response.status_code, 201)
         self.assertEqual(MaterialIssueSlip.objects.count(), 1)
+
+    def test_check_stock_reports_short_for_product_without_bom(self):
+        Product.objects.filter(pk=self.product.pk).update(quantity=26)
+        job_order = JobOrder.objects.create(
+            customer=self.customer, product=self.product, quantity=40,
+            start_date=date(2026, 8, 10),
+        )
+        response = self.client.post(
+            f'/api/production/job-orders/{job_order.id}/check-stock/',
+            format='json',
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data['requirements']), 1)
+        self.assertEqual(response.data['requirements'][0]['status'], 'short')
+        self.assertEqual(
+            response.data['requirements'][0]['available_quantity'], 26.0,
+        )
+
+    def test_grn_inspect_populates_product_and_quantity(self):
+        grn = GoodsReceiptNote.objects.create(
+            purchase_order=None,
+            supplier=None,
+            warehouse=self.warehouse,
+            received_date=date(2026, 8, 12),
+            status='received',
+        )
+        GRNItem.objects.create(grn=grn, product=self.product, quantity=5)
+        GRNItem.objects.create(grn=grn, product=self.raw, quantity=10)
+        response = self.client.post(
+            f'/api/production/grns/{grn.id}/inspect/',
+            format='json',
+        )
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(len(response.data), 2)
+        by_product = {item['product_name']: item for item in response.data}
+        self.assertEqual(by_product[self.product.name]['quantity'], '5.00')
+        self.assertEqual(by_product[self.raw.name]['quantity'], '10.00')
+        self.assertTrue(all(item['inspection_no'] for item in response.data))
 
     def test_unauthenticated_access_rejected(self):
         anon = APIClient()

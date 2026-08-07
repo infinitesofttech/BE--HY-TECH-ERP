@@ -455,12 +455,22 @@ class GoodsReceiptNoteInspectView(APIView):
 
     def post(self, request, pk):
         grn = GoodsReceiptNote.objects.get(pk=pk)
-        inspection = QualityInspection.objects.create(
-            grn=grn,
-            status='pending',
-        )
+        items = list(grn.items.select_related('product').all())
+        if not items:
+            return Response(
+                {'detail': 'GRN has no items to inspect.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        inspections = []
+        for item in items:
+            inspections.append(QualityInspection.objects.create(
+                grn=grn,
+                product=item.product,
+                quantity=item.quantity,
+                status='pending',
+            ))
         return Response(
-            QualityInspectionSerializer(inspection).data,
+            QualityInspectionSerializer(inspections, many=True).data,
             status=status.HTTP_201_CREATED,
         )
 

@@ -13,6 +13,7 @@ urlpatterns = [
 
     # App URLs
     path('api/auth/', include('apps.accounts.urls')),
+    path('api/assets/', include('apps.assets.urls')),
     path('api/attendance/', include('apps.attendance.urls')),
     path('api/tracking/', include('apps.tracking.urls')),
     path('api/dealers/', include('apps.masters.urls_dealers')),
