@@ -22797,7 +22797,7 @@
       ]
     },
     {
-      "name": "36. PRODUCTION (Machines / BOMs / Job Orders / Material / Requisitions / GRN / QC / Finished Goods / Dispatch)",
+      "name": "36. PRODUCTION (Machines / Stages / BOMs / Job Orders / Material / Requisitions / GRN / QC / Finished Goods / Dispatch)",
       "item": [
         {
           "name": "List Machines",
@@ -22937,6 +22937,150 @@
                 "api",
                 "production",
                 "machines",
+                "1",
+                ""
+              ]
+            }
+          }
+        },
+        {
+          "name": "List Production Stages",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer <access_token>"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/production/stages",
+              "host": [
+                "http://localhost:8000"
+              ],
+              "path": [
+                "",
+                "api",
+                "production",
+                "stages",
+                ""
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Production Stage (super_admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer <access_token>"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/production/stages",
+              "host": [
+                "http://localhost:8000"
+              ],
+              "path": [
+                "",
+                "api",
+                "production",
+                "stages",
+                ""
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"packing\",\n  \"sequence\": 9,\n  \"is_active\": true\n}"
+            }
+          }
+        },
+        {
+          "name": "Get Production Stage Detail",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer <access_token>"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/production/stages/1",
+              "host": [
+                "http://localhost:8000"
+              ],
+              "path": [
+                "",
+                "api",
+                "production",
+                "stages",
+                "1",
+                ""
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Production Stage (super_admin)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer <access_token>"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/production/stages/1",
+              "host": [
+                "http://localhost:8000"
+              ],
+              "path": [
+                "",
+                "api",
+                "production",
+                "stages",
+                "1",
+                ""
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"quality_check\",\n  \"is_active\": true\n}"
+            }
+          }
+        },
+        {
+          "name": "Delete Production Stage (super_admin)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer <access_token>"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/production/stages/1",
+              "host": [
+                "http://localhost:8000"
+              ],
+              "path": [
+                "",
+                "api",
+                "production",
+                "stages",
                 "1",
                 ""
               ]

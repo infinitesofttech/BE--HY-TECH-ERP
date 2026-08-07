@@ -20,21 +20,15 @@ from .models import (
     MaterialIssueSlip,
     MaterialRequirement,
     ProductionProcess,
+    ProductionStage,
     PurchaseRequisition,
     PurchaseRequisitionItem,
     QualityInspection,
 )
 
-PRODUCTION_STAGES = [
-    'cutting',
-    'fabrication',
-    'machining',
-    'welding',
-    'grinding',
-    'painting',
-    'assembly',
-    'qc',
-]
+def get_production_stages():
+    """Active production stages, ordered by sequence."""
+    return ProductionStage.objects.filter(is_active=True).order_by('sequence')
 
 
 def create_job_orders_from_sales_order(sales_order, start_date=None):
@@ -406,9 +400,9 @@ def start_production(job_order, machine=None, supervisor=None, operators=None):
         if not job_order.material_requirements.exists() and job_order.bom:
             compute_material_requirements(job_order)
         if not job_order.processes.exists():
-            for index, name in enumerate(PRODUCTION_STAGES, start=1):
+            for stage in get_production_stages():
                 ProductionProcess.objects.create(
-                    job_order=job_order, sequence=index, name=name,
+                    job_order=job_order, sequence=stage.sequence, name=stage.name,
                 )
         first = job_order.processes.order_by('sequence').first()
         if first and first.status == 'pending':

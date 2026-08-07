@@ -10,14 +10,14 @@ from .models import (
 
 @admin.register(Department)
 class DepartmentAdmin(admin.ModelAdmin):
-    list_display = ('name', 'department_head', 'description', 'status', 'created_at')
+    list_display = ('id', 'name', 'department_head', 'description', 'status', 'created_at')
     list_filter = ('status',)
     search_fields = ('name', 'department_head__email')
 
 
 @admin.register(Designation)
 class DesignationAdmin(admin.ModelAdmin):
-    list_display = ('name', 'department', 'status', 'created_at')
+    list_display = ('id', 'name', 'department', 'status', 'created_at')
     list_filter = ('status', 'department')
     search_fields = ('name', 'department__name')
 

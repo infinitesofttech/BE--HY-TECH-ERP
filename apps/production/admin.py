@@ -13,10 +13,19 @@ from .models import (
     MaterialIssueSlip,
     MaterialRequirement,
     ProductionProcess,
+    ProductionStage,
     PurchaseRequisition,
     PurchaseRequisitionItem,
     QualityInspection,
 )
+
+
+@admin.register(ProductionStage)
+class ProductionStageAdmin(admin.ModelAdmin):
+    list_display = ['sequence', 'name', 'is_active']
+    list_editable = ['name', 'is_active']
+    list_filter = ['is_active']
+    search_fields = ['name']
 
 
 class BomItemInline(admin.TabularInline):

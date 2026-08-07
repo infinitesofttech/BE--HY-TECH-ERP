@@ -2,6 +2,22 @@ from django.conf import settings
 from django.db import models
 
 
+class ProductionStage(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+    sequence = models.PositiveIntegerField(unique=True)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['sequence']
+        verbose_name = 'Production Stage'
+        verbose_name_plural = 'Production Stages'
+
+    def __str__(self):
+        return f'{self.sequence}. {self.name}'
+
+
 class Machine(models.Model):
     STATUS_CHOICES = [('active', 'Active'), ('inactive', 'Inactive')]
 

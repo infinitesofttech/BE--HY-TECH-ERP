@@ -13,10 +13,21 @@ from .models import (
     MaterialIssueSlip,
     MaterialRequirement,
     ProductionProcess,
+    ProductionStage,
     PurchaseRequisition,
     PurchaseRequisitionItem,
     QualityInspection,
 )
+
+
+class ProductionStageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductionStage
+        fields = [
+            'id', 'name', 'sequence', 'is_active',
+            'created_at', 'updated_at',
+        ]
+        read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class MachineSerializer(serializers.ModelSerializer):

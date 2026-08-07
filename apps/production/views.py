@@ -14,6 +14,7 @@ from .models import (
     Machine,
     MaterialIssueSlip,
     ProductionProcess,
+    ProductionStage,
     PurchaseRequisition,
     QualityInspection,
 )
@@ -30,6 +31,7 @@ from .serializers import (
     MachineSerializer,
     MaterialIssueSlipSerializer,
     ProductionProcessSerializer,
+    ProductionStageSerializer,
     PurchaseRequisitionSerializer,
     QualityInspectionSerializer,
 )
@@ -54,6 +56,36 @@ class MachineListCreateView(generics.ListCreateAPIView):
 class MachineDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Machine.objects.all()
     serializer_class = MachineSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_permissions(self):
+        if self.request.method in ['PUT', 'PATCH', 'DELETE']:
+            return [IsAuthenticated(), IsManagerOrAbove()]
+        return [IsAuthenticated()]
+
+    def update(self, request, *args, **kwargs):
+        kwargs['partial'] = True
+        return super().update(request, *args, **kwargs)
+
+
+class ProductionStageListCreateView(generics.ListCreateAPIView):
+    queryset = ProductionStage.objects.all()
+    serializer_class = ProductionStageSerializer
+    permission_classes = [IsAuthenticated]
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+    filterset_fields = ['is_active']
+    search_fields = ['name']
+    ordering_fields = ['sequence', 'name', 'created_at']
+
+    def get_permissions(self):
+        if self.request.method == 'POST':
+            return [IsAuthenticated(), IsManagerOrAbove()]
+        return [IsAuthenticated()]
+
+
+class ProductionStageDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = ProductionStage.objects.all()
+    serializer_class = ProductionStageSerializer
     permission_classes = [IsAuthenticated]
 
     def get_permissions(self):
