@@ -26,11 +26,12 @@ class StaffLoginView(APIView):
     def post(self, request):
         username_or_email = request.data.get('username', '').strip()
         password = request.data.get('password', '')
+        portal_type = request.data.get('portal_type', '').strip().lower()
 
         if not username_or_email or not password:
             return Response({'error': 'Username and password are required.'}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Authenticate
+        # Map display name if needed
         target_name = username_or_email
         if target_name.lower() == 'operator':
             target_name = 'staff'
@@ -53,8 +54,15 @@ class StaffLoginView(APIView):
         if not user.is_active:
             return Response({'error': 'User account is inactive.'}, status=status.HTTP_403_FORBIDDEN)
 
+        is_admin_user = user.is_superuser or user.role in ['super_admin', 'manager', 'admin']
+
+        # Enforce portal role separation if portal_type is specified
+        if portal_type == 'admin' and not is_admin_user:
+            return Response({'error': 'Access denied. Admin portal requires administrator credentials.'}, status=status.HTTP_403_FORBIDDEN)
+
+        user_type = 'admin' if is_admin_user else 'employee'
+
         refresh = RefreshToken.for_user(user)
-        user_type = 'admin' if (user.is_superuser or user.role in ['super_admin', 'manager', 'admin']) else 'employee'
 
         return Response({
             'message': 'Staff login successful.',
@@ -78,17 +86,57 @@ class CustomerLoginView(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
-        identifier = request.data.get('mobile_number') or request.data.get('family_id') or request.data.get('username')
-        if not identifier:
-            return Response({'error': 'Mobile number or Family ID is required.'}, status=status.HTTP_400_BAD_REQUEST)
+        family_id = request.data.get('family_id', '').strip()
+        mobile_number = request.data.get('mobile_number', '').strip()
+        password = request.data.get('password', '').strip()
 
-        identifier = str(identifier).strip()
+        # Fallbacks for legacy payload if provided
+        if not family_id and request.data.get('username'):
+            family_id = request.data.get('username').strip()
+
+        if not family_id or not mobile_number:
+            return Response(
+                {'error': 'Family ID and Mobile Number are required.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if not password:
+            return Response(
+                {'error': 'Password is required for Citizen Portal login.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Match Customer by Family ID and Mobile Number
         customer = Customer.objects.filter(
-            Q(mobile_number=identifier) | Q(family_id__iexact=identifier)
+            Q(family_id__iexact=family_id) & Q(mobile_number=mobile_number)
         ).first()
 
+        # Flexible Family ID match (e.g. HTF-001 vs HTF-000001)
         if not customer:
-            return Response({'error': 'Customer household not found with this mobile or Family ID.'}, status=status.HTTP_404_NOT_FOUND)
+            clean_fid = family_id.upper().replace(' ', '')
+            customer = Customer.objects.filter(
+                (
+                    Q(family_id__iexact=clean_fid)
+                    | Q(family_id__iexact=clean_fid.replace('HTF-001', 'HTF-000001'))
+                    | Q(family_id__iexact=clean_fid.replace('HTF-000001', 'HTF-001'))
+                ) & Q(mobile_number=mobile_number)
+            ).first()
+
+        if not customer:
+            return Response(
+                {'error': 'No citizen record found matching this Family ID and Mobile Number.'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        if not customer.is_active:
+            return Response({'error': 'Citizen account is inactive.'}, status=status.HTTP_403_FORBIDDEN)
+
+        # Validate password strictly
+        if not customer.check_password(password):
+            return Response(
+                {'error': 'Invalid Family ID, Mobile Number, or Password.'},
+                status=status.HTTP_401_UNAUTHORIZED
+            )
 
         # Find or create a user representation for JWT
         user, _ = User.objects.get_or_create(

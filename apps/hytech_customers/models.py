@@ -21,6 +21,7 @@ class Customer(models.Model):
     is_active = models.BooleanField(default=True)
     notes = models.TextField(blank=True, null=True)
     digital_card_sent = models.BooleanField(default=False)
+    password = models.CharField(max_length=128, blank=True, default='', help_text="Encrypted password for Citizen Portal login")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -29,6 +30,22 @@ class Customer(models.Model):
 
     def __str__(self):
         return f"{self.family_id} - {self.head_of_family}"
+
+    def set_password(self, raw_password):
+        from django.contrib.auth.hashers import make_password
+        self.password = make_password(raw_password)
+
+    def check_password(self, raw_password):
+        from django.contrib.auth.hashers import check_password
+        if not self.password:
+            return False
+        if self.password.startswith(('pbkdf2_', 'argon2', 'bcrypt')):
+            return check_password(raw_password, self.password)
+        if self.password == raw_password:
+            self.set_password(raw_password)
+            self.save(update_fields=['password'])
+            return True
+        return False
 
     def save(self, *args, **kwargs):
         if not self.family_id:
