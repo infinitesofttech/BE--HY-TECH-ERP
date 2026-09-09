@@ -1,4 +1,4 @@
-from django.db import models
+from django.db import models, transaction
 from django.conf import settings
 
 
@@ -6,7 +6,7 @@ class Ticket(models.Model):
     PRIORITY_CHOICES = [('low', 'Low'), ('medium', 'Medium'), ('high', 'High'), ('urgent', 'Urgent')]
     STATUS_CHOICES = [('open', 'Open'), ('in_progress', 'In Progress'), ('resolved', 'Resolved'), ('closed', 'Closed')]
 
-    ticket_id = models.CharField(max_length=20, unique=True, blank=True)
+    ticket_id = models.CharField(max_length=20, unique=True, null=True, blank=True)
     subject = models.CharField(max_length=200)
     description = models.TextField()
     customer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='tickets')
@@ -24,6 +24,15 @@ class Ticket(models.Model):
 
     def __str__(self):
         return f'{self.ticket_id} - {self.subject}'
+
+    def save(self, *args, **kwargs):
+        if not self.ticket_id:
+            with transaction.atomic():
+                last = Ticket.objects.select_for_update().order_by('-id').first()
+                self.ticket_id = f'TKT-{(last.id if last else 0) + 1:04d}'
+                super().save(*args, **kwargs)
+        else:
+            super().save(*args, **kwargs)
 
 
 class TicketReply(models.Model):

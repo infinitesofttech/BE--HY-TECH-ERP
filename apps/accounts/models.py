@@ -10,6 +10,17 @@ class User(AbstractUser):
         ('dealer', 'Dealer'),
         ('retailer', 'Retailer'),
         ('company', 'Company'),
+        ('hr', 'HR'),
+        ('accountant', 'Accountant'),
+        ('sales_executive', 'Sales Executive'),
+        ('marketing_executive', 'Marketing Executive'),
+        ('developer', 'Developer'),
+        ('support_executive', 'Support Executive'),
+        ('operation_executive', 'Operations Executive'),
+        ('project_manager', 'Project Manager'),
+        ('quality_analyst', 'Quality Analyst'),
+        ('designer', 'Designer'),
+        ('production_worker', 'Production Worker'),
     ]
 
     role = models.CharField(max_length=20, choices=ROLE_CHOICES)
@@ -60,6 +71,13 @@ class User(AbstractUser):
 
     class Meta:
         verbose_name_plural = 'Users'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['email'],
+                name='unique_user_email',
+                condition=models.Q(email__gt=''),
+            ),
+        ]
 
     def __str__(self):
         return self.email if self.email else self.username
@@ -162,3 +180,58 @@ class UserActivityLog(models.Model):
 
     def __str__(self):
         return f'{self.user} - {self.action} - {self.action_date}'
+
+
+class DesignDocument(models.Model):
+    DOCUMENT_TYPE_CHOICES = [
+        ('cad', 'CAD Drawing'),
+        ('technical', 'Technical Drawing'),
+        ('mockup', 'Mockup'),
+        ('flow', 'Flow Diagram'),
+        ('other', 'Other'),
+    ]
+
+    design_no = models.CharField(max_length=20, unique=True, null=True, blank=True)
+    title = models.CharField(max_length=200)
+    description = models.TextField(blank=True)
+    document_type = models.CharField(
+        max_length=20, choices=DOCUMENT_TYPE_CHOICES, default='other',
+    )
+    version = models.CharField(max_length=20, default='1.0')
+    file = models.FileField(upload_to='designs/')
+    thumbnail = models.ImageField(upload_to='designs/thumbnails/', null=True, blank=True)
+    designer = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='design_documents',
+        help_text='Designer who uploaded this design.',
+    )
+    visible_to = models.ManyToManyField(
+        'settings_config.Department',
+        blank=True,
+        related_name='visible_designs',
+        help_text='Departments allowed to view this design.',
+    )
+    is_public = models.BooleanField(
+        default=False,
+        help_text='If true, visible to all departments.',
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f'{self.design_no or self.pk} - {self.title}'
+
+    def save(self, *args, **kwargs):
+        if not self.design_no:
+            self.design_no = None
+            super().save(*args, **kwargs)
+            self.design_no = f'DSGN-{self.pk:04d}'
+            super().save(update_fields=['design_no'])
+            return
+        super().save(*args, **kwargs)

@@ -9,10 +9,15 @@ class Project(models.Model):
     ]
 
     name = models.CharField(max_length=200)
-    project_id = models.CharField(max_length=50, unique=True, blank=True)
+    project_id = models.CharField(max_length=50, unique=True, null=True, blank=True)
     project_type = models.CharField(max_length=100, blank=True)
     description = models.TextField(blank=True)
     client_name = models.CharField(max_length=200, blank=True)
+    company = models.ForeignKey(
+        'contacts.Company', on_delete=models.SET_NULL,
+        null=True, blank=True, related_name='projects',
+        help_text='Registered company this project is connected to.',
+    )
     category = models.CharField(max_length=100, blank=True)
     project_timing = models.CharField(max_length=100, blank=True)
     price = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
@@ -45,6 +50,7 @@ class Project(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.project_id:
+            self.project_id = None
             super().save(*args, **kwargs)
             self.project_id = f'PRJ{self.pk:04d}'
             super().save(update_fields=['project_id'])
@@ -98,7 +104,7 @@ class Milestone(models.Model):
         ('pending', 'Pending'), ('approved', 'Approved'), ('completed', 'Completed'),
     ]
 
-    milestone_id = models.CharField(max_length=50, unique=True, blank=True)
+    milestone_id = models.CharField(max_length=50, unique=True, null=True, blank=True)
     project = models.ForeignKey(
         Project, on_delete=models.CASCADE, related_name='milestones'
     )
@@ -124,6 +130,7 @@ class Milestone(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.milestone_id:
+            self.milestone_id = None
             super().save(*args, **kwargs)
             self.milestone_id = f'MLT{self.pk:04d}'
             super().save(update_fields=['milestone_id'])

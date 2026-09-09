@@ -1,13 +1,15 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
-from .models import User, ContactInfo, Feedback, Role, LoginLog, UserActivityLog
+from .models import (
+    User, ContactInfo, Feedback, Role, LoginLog, UserActivityLog, DesignDocument,
+)
 
 
 @admin.register(User)
 class UserAdmin(BaseUserAdmin):
     model = User
     list_display = [
-        'email', 'first_name', 'last_name', 'role', 'territory',
+        'id','email', 'first_name', 'last_name', 'role', 'territory',
         'is_active', 'is_staff',
     ]
     list_filter = ['role', 'is_active', 'is_staff', 'state', 'city']
@@ -80,3 +82,11 @@ class UserActivityLogAdmin(admin.ModelAdmin):
     list_display = ['user', 'action', 'module', 'record_id', 'ip_address', 'action_date']
     list_filter = ['module', 'action_date']
     search_fields = ['user__email', 'action', 'module']
+
+
+@admin.register(DesignDocument)
+class DesignDocumentAdmin(admin.ModelAdmin):
+    list_display = ['design_no', 'title', 'document_type', 'designer', 'is_public', 'created_at']
+    list_filter = ['document_type', 'is_public', 'created_at']
+    search_fields = ['design_no', 'title', 'description', 'designer__email']
+    readonly_fields = ['design_no', 'created_at', 'updated_at']

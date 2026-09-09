@@ -3977,7 +3977,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"machine\": 1,\n  \"supervisor\": 1,\n  \"operators\": [1]\n}"
+              "raw": "{\n  \"start_date\": \"2026-08-06\"\n}"
             }
           }
         },
@@ -22944,6 +22944,150 @@
           }
         },
         {
+          "name": "List Workers",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer <access_token>"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/production/workers/",
+              "host": [
+                "http://localhost:8000"
+              ],
+              "path": [
+                "",
+                "api",
+                "production",
+                "workers",
+                ""
+              ]
+            }
+          }
+        },
+        {
+          "name": "Register Worker (manager+)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer <access_token>"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/production/workers/",
+              "host": [
+                "http://localhost:8000"
+              ],
+              "path": [
+                "",
+                "api",
+                "production",
+                "workers",
+                ""
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"first_name\": \"Ravi\",\n  \"last_name\": \"Kumar\",\n  \"email\": \"ravi.worker@test.com\",\n  \"phone\": \"9876543210\",\n  \"password\": \"Worker@123\",\n  \"worker_type\": \"cutting\",\n  \"skill_level\": \"junior\",\n  \"machine\": 1,\n  \"status\": \"active\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Get Worker Detail",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer <access_token>"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/production/workers/1/",
+              "host": [
+                "http://localhost:8000"
+              ],
+              "path": [
+                "",
+                "api",
+                "production",
+                "workers",
+                "1",
+                ""
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Worker (manager+)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer <access_token>"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/production/workers/1/",
+              "host": [
+                "http://localhost:8000"
+              ],
+              "path": [
+                "",
+                "api",
+                "production",
+                "workers",
+                "1",
+                ""
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"first_name\": \"Ravi\",\n  \"last_name\": \"Kumar\",\n  \"email\": \"ravi.updated@test.com\",\n  \"phone\": \"9876543210\",\n  \"worker_type\": \"bending\",\n  \"skill_level\": \"senior\",\n  \"machine\": 1,\n  \"status\": \"active\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Delete Worker (manager+)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer <access_token>"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/production/workers/1/",
+              "host": [
+                "http://localhost:8000"
+              ],
+              "path": [
+                "",
+                "api",
+                "production",
+                "workers",
+                "1",
+                ""
+              ]
+            }
+          }
+        },
+        {
           "name": "List Production Stages",
           "request": {
             "method": "GET",
@@ -23285,7 +23429,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"sales_order\": 1,\n  \"quotation\": null,\n  \"customer\": 1,\n  \"product\": 1,\n  \"quantity\": 10,\n  \"start_date\": \"2026-08-06\",\n  \"end_date\": \"2026-08-13\",\n  \"priority\": \"high\",\n  \"machine\": 1,\n  \"supervisor\": 1,\n  \"operators\": [1],\n  \"bom\": 1,\n  \"notes\": \"Urgent order\"\n}"
+              "raw": "{\n  \"sales_order\": 1,\n  \"quotation\": null,\n  \"customer\": 1,\n  \"product\": 1,\n  \"quantity\": 10,\n  \"start_date\": \"2026-08-06\",\n  \"end_date\": \"2026-08-13\",\n  \"priority\": \"high\",\n  \"machine\": 1,\n  \"supervisor\": 1,\n  \"operators\": [1],\n  \"workers\": [1],\n  \"bom\": 1,\n  \"notes\": \"Urgent order\"\n}"
             }
           }
         },
@@ -23345,7 +23489,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"priority\": \"urgent\",\n  \"notes\": \"Rush production\"\n}"
+              "raw": "{\n  \"priority\": \"urgent\",\n  \"operators\": [1],\n  \"workers\": [2],\n  \"notes\": \"Rush production\"\n}"
             }
           }
         },
@@ -23507,7 +23651,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"machine\": 1,\n  \"supervisor\": 1,\n  \"operators\": [1]\n}"
+              "raw": "{\n  \"processes\": [\"fabrication\", \"assembly\", \"Welding\", \"Painting\", \"QC\"],\n  \"machine\": 1,\n  \"supervisor\": 1,\n  \"operators\": [1],\n  \"workers\": [1]\n}"
             }
           }
         },
@@ -24251,6 +24395,10 @@
                 "advance",
                 ""
               ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"worker\": 1\n}"
             }
           }
         },
@@ -24481,6 +24629,231 @@
             "body": {
               "mode": "raw",
               "raw": "{\n  \"vehicle_number\": \"KA01 AB 1234\",\n  \"driver_name\": \"Ravi Kumar\",\n  \"driver_phone\": \"9876543210\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Worker Attendance Excel",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer <access_token>"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/production/workers/attendance/excel/",
+              "host": [
+                "http://localhost:8000"
+              ],
+              "path": [
+                "",
+                "api",
+                "production",
+                "workers",
+                "attendance",
+                "excel",
+                ""
+              ]
+            }
+          }
+        },
+        {
+          "name": "Worker Profile Daily Routine Excel",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer <access_token>"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/production/workers/profile-daily-routine/excel/",
+              "host": [
+                "http://localhost:8000"
+              ],
+              "path": [
+                "",
+                "api",
+                "production",
+                "workers",
+                "profile-daily-routine",
+                "excel",
+                ""
+              ]
+            }
+          }
+        },
+        {
+          "name": "Production Report Excel",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer <access_token>"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/production/job-orders/1/production-report/",
+              "host": [
+                "http://localhost:8000"
+              ],
+              "path": [
+                "",
+                "api",
+                "production",
+                "job-orders",
+                "1",
+                "production-report",
+                ""
+              ]
+            }
+          }
+        },
+        {
+          "name": "List Daily Work Entries",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer <access_token>"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/production/daily-work/",
+              "host": [
+                "http://localhost:8000"
+              ],
+              "path": [
+                "",
+                "api",
+                "production",
+                "daily-work",
+                ""
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Daily Work Entry",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer <access_token>"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/production/daily-work/",
+              "host": [
+                "http://localhost:8000"
+              ],
+              "path": [
+                "",
+                "api",
+                "production",
+                "daily-work",
+                ""
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"date\": \"2025-01-15\",\n  \"job_order\": 1,\n  \"description\": \"Fabricated cabinet frame\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Get Daily Work Entry Detail",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer <access_token>"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/production/daily-work/1/",
+              "host": [
+                "http://localhost:8000"
+              ],
+              "path": [
+                "",
+                "api",
+                "production",
+                "daily-work",
+                "1",
+                ""
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Daily Work Entry",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer <access_token>"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/production/daily-work/1/",
+              "host": [
+                "http://localhost:8000"
+              ],
+              "path": [
+                "",
+                "api",
+                "production",
+                "daily-work",
+                "1",
+                ""
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"description\": \"Updated work summary\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Delete Daily Work Entry",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer <access_token>"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/production/daily-work/1/",
+              "host": [
+                "http://localhost:8000"
+              ],
+              "path": [
+                "",
+                "api",
+                "production",
+                "daily-work",
+                "1",
+                ""
+              ]
             }
           }
         }

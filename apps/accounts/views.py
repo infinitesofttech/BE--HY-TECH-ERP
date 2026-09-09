@@ -6,9 +6,11 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.token_blacklist.models import OutstandingToken, BlacklistedToken
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema
+from django.db.models import Q
 from apps.contacts.serializers import CompanySerializer
 from .models import (
     User, ContactInfo, Feedback, DeleteAccountRequest, LoginLog, Role, UserActivityLog,
+    DesignDocument,
 )
 from .serializers import (
     LoginSerializer,
@@ -23,9 +25,11 @@ from .serializers import (
     RoleSerializer,
     LoginLogSerializer,
     UserActivityLogSerializer,
+    DesignDocumentSerializer,
+    DesignDocumentCreateSerializer,
 )
 from .permissions import (
-    IsSuperAdmin, IsManagerOrAbove, IsOwnerOrManagerOrAdmin, IsCompany,
+    IsSuperAdmin, IsManagerOrAbove, IsOwnerOrManagerOrAdmin, IsCompany, IsDesigner,
 )
 
 
@@ -144,21 +148,25 @@ class CompanyDashboardView(APIView):
             )
 
         leads = Lead.objects.filter(
-            Q(company_name__iexact=company.name) | Q(owner=request.user)
-        )
+            Q(company=company) | Q(contacts__company=company)
+        ).distinct()
         deals = Deal.objects.filter(
-            Q(company=company) | Q(owner=request.user)
-        )
+            Q(company=company)
+            | Q(related_companies=company)
+            | Q(contact__company=company)
+        ).distinct()
         projects = Project.objects.filter(
-            Q(client_name__iexact=company.name) | Q(responsible_persons=request.user)
+            Q(company=company)
+            | Q(deals__company=company)
         ).distinct()
-        contacts = Contact.objects.filter(company=company)
+        contacts = Contact.objects.filter(
+            Q(company=company) | Q(companies_list=company)
+        ).distinct()
         tasks = Task.objects.filter(
-            Q(assignees=request.user)
+            Q(project__company=company)
+            | Q(project__deals__company=company)
         ).distinct()
-        invoices = Invoice.objects.filter(
-            Q(customer_name__iexact=company.name) | Q(customer_email=company.email)
-        )
+        invoices = Invoice.objects.filter(company=company)
 
         total_deals_value = deals.aggregate(
             total=Sum('value'),
@@ -500,3 +508,88 @@ class UserActivityLogListCreateView(generics.ListCreateAPIView):
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
+
+
+class DesignDocumentListCreateView(generics.ListCreateAPIView):
+    permission_classes = [IsAuthenticated]
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+    filterset_fields = ['document_type', 'is_public']
+    search_fields = ['design_no', 'title', 'description', 'designer__email']
+    ordering_fields = ['created_at', 'updated_at']
+
+    def get_serializer_class(self):
+        if self.request.method == 'POST':
+            return DesignDocumentCreateSerializer
+        return DesignDocumentSerializer
+
+    def get_queryset(self):
+        queryset = DesignDocument.objects.select_related(
+            'designer',
+        ).prefetch_related('visible_to').all()
+        user = self.request.user
+        if user.role in ['super_admin', 'manager', 'designer']:
+            return queryset
+        if user.department_id is not None:
+            queryset = queryset.filter(
+                Q(is_public=True)
+                | Q(visible_to=user.department_id)
+            ).distinct()
+        else:
+            queryset = queryset.filter(is_public=True)
+        return queryset
+
+    def get_permissions(self):
+        if self.request.method == 'POST':
+            return [IsAuthenticated(), IsDesigner()]
+        return [IsAuthenticated()]
+
+    def create(self, request, *args, **kwargs):
+        data = request.data.copy()
+        visible_to = data.get('visible_to')
+        if visible_to is not None and isinstance(visible_to, str):
+            value = visible_to.strip()
+            if value.startswith('['):
+                import json
+                try:
+                    parsed = json.loads(value)
+                    visible_to = parsed if isinstance(parsed, list) else [parsed]
+                except ValueError:
+                    visible_to = []
+            else:
+                visible_to = [
+                    int(p) for p in value.split(',') if p.strip()
+                ]
+            data.setlist('visible_to', visible_to)
+        serializer = self.get_serializer(data=data)
+        serializer.is_valid(raise_exception=True)
+        design = serializer.save(designer=request.user)
+        return Response(
+            DesignDocumentSerializer(design).data,
+            status=status.HTTP_201_CREATED,
+        )
+
+
+class DesignDocumentDetailView(generics.RetrieveDestroyAPIView):
+    serializer_class = DesignDocumentSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        if self.request.user.role in ['super_admin', 'manager', 'designer']:
+            return DesignDocument.objects.select_related(
+                'designer',
+            ).prefetch_related('visible_to').all()
+        if self.request.user.department_id is not None:
+            return DesignDocument.objects.select_related(
+                'designer',
+            ).prefetch_related('visible_to').filter(
+                Q(is_public=True)
+                | Q(visible_to=self.request.user.department_id)
+            ).distinct()
+        return DesignDocument.objects.select_related(
+            'designer',
+        ).prefetch_related('visible_to').filter(is_public=True)
+
+    def get_permissions(self):
+        if self.request.method == 'DELETE':
+            return [IsAuthenticated(), IsDesigner()]
+        return [IsAuthenticated()]

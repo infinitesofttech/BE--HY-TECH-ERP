@@ -50,10 +50,6 @@ class CalendarEventDetailView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = CalendarEventSerializer
     permission_classes = [IsAuthenticated]
 
-    def update(self, request, *args, **kwargs):
-        kwargs['partial'] = True
-        return super().update(request, *args, **kwargs)
-
 
 class HolidayListCreateView(generics.ListCreateAPIView):
     queryset = Holiday.objects.all()
@@ -87,10 +83,6 @@ class HolidayDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Holiday.objects.all()
     serializer_class = HolidaySerializer
     permission_classes = [IsAuthenticated]
-
-    def update(self, request, *args, **kwargs):
-        kwargs['partial'] = True
-        return super().update(request, *args, **kwargs)
 
 
 class UpcomingHolidaysView(APIView):

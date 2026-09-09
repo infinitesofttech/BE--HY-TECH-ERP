@@ -37,6 +37,15 @@ class IsCompany(BasePermission):
         )
 
 
+class IsDesigner(BasePermission):
+    def has_permission(self, request, view):
+        return (
+            request.user
+            and request.user.is_authenticated
+            and request.user.role == 'designer'
+        )
+
+
 class IsOwnerOrManagerOrAdmin(BasePermission):
     def has_permission(self, request, view):
         return request.user and request.user.is_authenticated

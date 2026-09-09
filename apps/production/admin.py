@@ -3,6 +3,7 @@ from django.contrib import admin
 from .models import (
     Bom,
     BomItem,
+    DailyWorkEntry,
     Dispatch,
     FinishedGoods,
     GoodsReceiptNote,
@@ -17,6 +18,7 @@ from .models import (
     PurchaseRequisition,
     PurchaseRequisitionItem,
     QualityInspection,
+    Worker,
 )
 
 
@@ -38,6 +40,13 @@ class MachineAdmin(admin.ModelAdmin):
     list_display = ['name', 'code', 'machine_type', 'status']
     list_filter = ['status', 'machine_type']
     search_fields = ['name', 'code']
+
+
+@admin.register(Worker)
+class WorkerAdmin(admin.ModelAdmin):
+    list_display = ['worker_code', 'user', 'worker_type', 'skill_level', 'machine', 'status']
+    list_filter = ['worker_type', 'skill_level', 'status']
+    search_fields = ['worker_code', 'user__first_name', 'user__last_name', 'user__email']
 
 
 @admin.register(Bom)
@@ -129,7 +138,7 @@ class QualityInspectionAdmin(admin.ModelAdmin):
 
 @admin.register(ProductionProcess)
 class ProductionProcessAdmin(admin.ModelAdmin):
-    list_display = ['job_order', 'sequence', 'name', 'status']
+    list_display = ['id', 'job_order', 'sequence', 'name', 'status']
     list_filter = ['status', 'name']
 
 
@@ -151,3 +160,13 @@ class DispatchAdmin(admin.ModelAdmin):
     ]
     list_filter = ['status']
     search_fields = ['dispatch_no', 'vehicle_number', 'driver_name']
+
+
+@admin.register(DailyWorkEntry)
+class DailyWorkEntryAdmin(admin.ModelAdmin):
+    list_display = ['id', 'worker', 'date', 'job_order', 'description']
+    list_filter = ['date']
+    search_fields = [
+        'worker__user__first_name', 'worker__user__last_name',
+        'worker__user__email', 'description', 'job_order__job_no',
+    ]

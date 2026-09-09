@@ -1,8 +1,12 @@
 from rest_framework import serializers
+import uuid
+from django.db import transaction
+from django.db.utils import IntegrityError
 
 from .models import (
     Bom,
     BomItem,
+    DailyWorkEntry,
     Dispatch,
     FinishedGoods,
     GoodsReceiptNote,
@@ -17,6 +21,7 @@ from .models import (
     PurchaseRequisition,
     PurchaseRequisitionItem,
     QualityInspection,
+    Worker,
 )
 
 
@@ -105,13 +110,23 @@ class MaterialRequirementSerializer(serializers.ModelSerializer):
 
 
 class ProductionProcessSerializer(serializers.ModelSerializer):
+    worker_name = serializers.SerializerMethodField()
+
     class Meta:
         model = ProductionProcess
         fields = [
-            'id', 'sequence', 'name', 'status', 'started_at',
-            'completed_at', 'notes',
+            'id', 'sequence', 'name', 'worker', 'worker_name', 'status',
+            'started_at', 'completed_at', 'notes',
         ]
         read_only_fields = ['id', 'started_at', 'completed_at']
+
+    def get_worker_name(self, obj):
+        if obj.worker:
+            return (obj.worker.worker_code
+                    + ' - ' + (obj.worker.user.get_full_name()
+                               or obj.worker.user.email
+                               or ''))
+        return ''
 
 
 class FinishedGoodsSerializer(serializers.ModelSerializer):
@@ -144,6 +159,7 @@ class JobOrderSerializer(serializers.ModelSerializer):
     material_requirements = MaterialRequirementSerializer(many=True, read_only=True)
     processes = ProductionProcessSerializer(many=True, read_only=True)
     finished_goods = FinishedGoodsSerializer(many=True, read_only=True)
+    workers_detail = serializers.SerializerMethodField()
     status_display = serializers.CharField(source='get_status_display', read_only=True)
 
     class Meta:
@@ -153,8 +169,9 @@ class JobOrderSerializer(serializers.ModelSerializer):
             'customer', 'customer_name', 'product', 'product_name', 'quantity',
             'start_date', 'end_date', 'priority', 'status', 'status_display',
             'progress', 'machine', 'machine_name', 'supervisor', 'supervisor_name',
-            'operators', 'bom', 'bom_name', 'notes', 'material_requirements',
-            'processes', 'finished_goods', 'created_at', 'updated_at',
+            'operators', 'workers', 'workers_detail', 'bom', 'bom_name', 'notes',
+            'material_requirements', 'processes', 'finished_goods',
+            'created_at', 'updated_at',
         ]
         read_only_fields = [
             'id', 'job_no', 'progress', 'created_at', 'updated_at',
@@ -165,6 +182,18 @@ class JobOrderSerializer(serializers.ModelSerializer):
             return obj.supervisor.get_full_name() or obj.supervisor.email
         return ''
 
+    def get_workers_detail(self, obj):
+        return [
+            {
+                'id': w.id,
+                'worker_id': w.user_id,
+                'worker_code': w.worker_code,
+                'name': w.user.get_full_name() or w.user.email,
+                'worker_type': w.worker_type,
+            }
+            for w in obj.workers.all()
+        ]
+
 
 class JobOrderCreateSerializer(serializers.ModelSerializer):
     class Meta:
@@ -172,7 +201,7 @@ class JobOrderCreateSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'sales_order', 'quotation', 'customer', 'product', 'quantity',
             'start_date', 'end_date', 'priority', 'machine', 'supervisor',
-            'operators', 'bom', 'notes',
+            'operators', 'workers', 'bom', 'notes',
         ]
         read_only_fields = ['id']
 
@@ -197,6 +226,7 @@ class MaterialIssueItemSerializer(serializers.ModelSerializer):
 class MaterialIssueSlipSerializer(serializers.ModelSerializer):
     job_no = serializers.CharField(source='job_order.job_no', read_only=True)
     issued_to_name = serializers.SerializerMethodField()
+    issued_to_worker_name = serializers.SerializerMethodField()
     created_by_name = serializers.SerializerMethodField()
     items = MaterialIssueItemSerializer(many=True, read_only=True)
 
@@ -204,7 +234,8 @@ class MaterialIssueSlipSerializer(serializers.ModelSerializer):
         model = MaterialIssueSlip
         fields = [
             'id', 'slip_no', 'job_order', 'job_no', 'issue_date', 'issued_to',
-            'issued_to_name', 'status', 'created_by', 'created_by_name',
+            'issued_to_name', 'issued_to_worker', 'issued_to_worker_name',
+            'status', 'created_by', 'created_by_name',
             'items', 'created_at', 'updated_at',
         ]
         read_only_fields = ['id', 'slip_no', 'created_at', 'updated_at']
@@ -212,6 +243,14 @@ class MaterialIssueSlipSerializer(serializers.ModelSerializer):
     def get_issued_to_name(self, obj):
         if obj.issued_to:
             return obj.issued_to.get_full_name() or obj.issued_to.email
+        return ''
+
+    def get_issued_to_worker_name(self, obj):
+        if obj.issued_to_worker:
+            return (obj.issued_to_worker.worker_code
+                    + ' - ' + (obj.issued_to_worker.user.get_full_name()
+                               or obj.issued_to_worker.user.email
+                               or ''))
         return ''
 
     def get_created_by_name(self, obj):
@@ -387,3 +426,165 @@ class DispatchCreateSerializer(serializers.ModelSerializer):
             'vehicle_number', 'driver_name', 'driver_phone',
         ]
         read_only_fields = ['id']
+
+
+class WorkerSerializer(serializers.ModelSerializer):
+    worker_id = serializers.SerializerMethodField()
+    worker_name = serializers.CharField(source='user.get_full_name', read_only=True)
+    worker_email = serializers.CharField(source='user.email', read_only=True)
+    worker_phone = serializers.CharField(source='user.phone', read_only=True)
+    machine_name = serializers.CharField(source='machine.name', read_only=True, default='')
+    worker_type_display = serializers.CharField(source='get_worker_type_display', read_only=True)
+    skill_level_display = serializers.CharField(source='get_skill_level_display', read_only=True)
+    status_display = serializers.CharField(source='get_status_display', read_only=True)
+    first_name = serializers.CharField(required=False, write_only=True, allow_blank=True)
+    last_name = serializers.CharField(required=False, write_only=True, allow_blank=True)
+    email = serializers.EmailField(required=False, write_only=True)
+    phone = serializers.CharField(required=False, write_only=True, allow_blank=True)
+
+    class Meta:
+        model = Worker
+        fields = [
+            'id', 'worker_id', 'user', 'worker_code', 'worker_name',
+            'worker_email', 'worker_phone', 'worker_type', 'worker_type_display',
+            'skill_level', 'skill_level_display', 'machine', 'machine_name',
+            'status', 'status_display', 'first_name', 'last_name', 'email',
+            'phone', 'created_at', 'updated_at',
+        ]
+        read_only_fields = ['id', 'worker_code', 'created_at', 'updated_at']
+
+    def get_worker_id(self, obj):
+        return obj.user_id
+
+    def update(self, instance, validated_data):
+        user_fields = {
+            'first_name': validated_data.pop('first_name', None),
+            'last_name': validated_data.pop('last_name', None),
+            'email': validated_data.pop('email', None),
+            'phone': validated_data.pop('phone', None),
+        }
+        for field, value in user_fields.items():
+            if value is not None:
+                setattr(instance.user, field, value)
+        if any(v is not None for v in user_fields.values()):
+            instance.user.save()
+        for field, value in validated_data.items():
+            setattr(instance, field, value)
+        instance.save()
+        return instance
+
+
+class WorkerCreateSerializer(serializers.ModelSerializer):
+    user_id = serializers.IntegerField(required=False, write_only=True)
+    first_name = serializers.CharField(required=False, write_only=True)
+    last_name = serializers.CharField(required=False, write_only=True, allow_blank=True)
+    email = serializers.EmailField(required=False, write_only=True)
+    phone = serializers.CharField(required=False, write_only=True, allow_blank=True)
+    password = serializers.CharField(required=False, write_only=True, min_length=8)
+
+    class Meta:
+        model = Worker
+        fields = [
+            'user_id', 'first_name', 'last_name', 'email', 'phone', 'password',
+            'worker_type', 'skill_level', 'machine', 'status',
+        ]
+
+    def _create_user(self, attrs):
+        from django.contrib.auth import get_user_model
+        User = get_user_model()
+        first_name = attrs.pop('first_name', '')
+        last_name = attrs.pop('last_name', '')
+        email = attrs.pop('email', None)
+        phone = attrs.pop('phone', '')
+        password = attrs.pop('password', None)
+
+        if email:
+            email = email.lower()
+            if User.objects.filter(email=email).exists():
+                raise serializers.ValidationError({'email': 'A user with this email already exists.'})
+        if not email and not attrs.get('user_id'):
+            raise serializers.ValidationError({'email': 'Either user_id or email is required.'})
+
+        if attrs.get('user_id'):
+            user = attrs.get('_user') or User.objects.get(pk=attrs['user_id'])
+            if user.role != 'production_worker':
+                user.role = 'production_worker'
+                user.save(update_fields=['role'])
+        else:
+            username = email or f'worker_{uuid.uuid4().hex[:16]}'
+            user = User(
+                username=username,
+                email=email or '',
+                first_name=first_name,
+                last_name=last_name,
+                phone=phone,
+                role='production_worker',
+            )
+            if password:
+                user.set_password(password)
+            else:
+                user.set_unusable_password()
+            try:
+                user.save()
+            except IntegrityError:
+                raise serializers.ValidationError(
+                    {'email': 'A user with this email already exists.'}
+                )
+        return user
+
+    def create(self, validated_data):
+        user_fields = {
+            'user_id': validated_data.pop('user_id', None),
+            'first_name': validated_data.pop('first_name', ''),
+            'last_name': validated_data.pop('last_name', ''),
+            'email': validated_data.pop('email', None),
+            'phone': validated_data.pop('phone', ''),
+            'password': validated_data.pop('password', None),
+        }
+        with transaction.atomic():
+            if user_fields.get('user_id'):
+                from django.contrib.auth import get_user_model
+                User = get_user_model()
+                user = User.objects.select_for_update().get(pk=user_fields['user_id'])
+                if Worker.objects.filter(user=user).exists():
+                    raise serializers.ValidationError(
+                        {'user_id': 'This user is already registered as a worker.'}
+                    )
+                user_fields['_user'] = user
+            user = self._create_user(user_fields)
+            worker = Worker.objects.create(user=user, **validated_data)
+        return worker
+
+
+class DailyWorkEntrySerializer(serializers.ModelSerializer):
+    worker_name = serializers.SerializerMethodField()
+    job_order_no = serializers.CharField(
+        source='job_order.job_no', read_only=True, allow_null=True,
+    )
+
+    class Meta:
+        model = DailyWorkEntry
+        fields = [
+            'id', 'worker', 'worker_name',
+            'date', 'job_order', 'job_order_no',
+            'description',
+            'created_at', 'updated_at',
+        ]
+        read_only_fields = ['id', 'created_at', 'updated_at']
+
+    def get_worker_name(self, obj):
+        return (
+            obj.worker.user.get_full_name() or obj.worker.user.email
+        )
+
+
+class DailyWorkEntryCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DailyWorkEntry
+        fields = [
+            'date', 'job_order', 'description',
+        ]
+        extra_kwargs = {
+            'date': {'required': False},
+            'description': {'required': False},
+        }

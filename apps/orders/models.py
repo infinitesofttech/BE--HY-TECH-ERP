@@ -83,7 +83,7 @@ class Quotation(models.Model):
         ('cogd', 'Cash on Goods Delivery'),
     ]
 
-    quote_id = models.CharField(max_length=50, unique=True, blank=True)
+    quote_id = models.CharField(max_length=50, unique=True, null=True, blank=True)
     client = models.CharField(max_length=200)
     lead = models.ForeignKey(
         'pipeline.Lead',
@@ -137,6 +137,7 @@ class Quotation(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.quote_id:
+            self.quote_id = None
             super().save(*args, **kwargs)
             self.quote_id = f'QOT{self.pk:04d}'
             super().save(update_fields=['quote_id'])

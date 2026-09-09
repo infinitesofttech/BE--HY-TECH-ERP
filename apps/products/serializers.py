@@ -1,9 +1,17 @@
 from rest_framework import serializers
 
+from django.db import transaction
+
 from .models import (
     ProductCategory, Product, TourPlan, Policy, Warehouse, Supplier, Inventory,
     StockAdjustment, StockTransfer,
 )
+
+
+def _lockable_inventory(product, warehouse):
+    return Inventory.objects.select_for_update().filter(
+        product=product, warehouse=warehouse,
+    ).first()
 
 
 class ProductCategorySerializer(serializers.ModelSerializer):
@@ -139,14 +147,13 @@ class StockAdjustmentSerializer(serializers.ModelSerializer):
             product = attrs.get('product', getattr(self.instance, 'product', None))
             warehouse = attrs.get('warehouse', getattr(self.instance, 'warehouse', None))
             if product and warehouse:
-                current = Inventory.objects.filter(
-                    product=product, warehouse=warehouse,
-                ).first()
-                available = current.quantity if current else 0
-                if available + attrs['difference'] < 0:
-                    raise serializers.ValidationError(
-                        {'difference': f'Insufficient stock in {warehouse.name}. Available: {available}.'}
-                    )
+                with transaction.atomic():
+                    current = _lockable_inventory(product, warehouse)
+                    available = current.quantity if current else 0
+                    if available + attrs['difference'] < 0:
+                        raise serializers.ValidationError(
+                            {'difference': f'Insufficient stock in {warehouse.name}. Available: {available}.'}
+                        )
         return attrs
 
 

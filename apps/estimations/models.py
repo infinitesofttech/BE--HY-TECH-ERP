@@ -1,6 +1,6 @@
 from decimal import Decimal
 
-from django.db import models
+from django.db import models, transaction
 from django.conf import settings
 
 
@@ -49,9 +49,12 @@ class Estimation(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.estimation_number:
-            last = Estimation.objects.all().aggregate(m=models.Max('id'))['m']
-            self.estimation_number = f'EST-{(last or 0) + 1:05d}'
-        super().save(*args, **kwargs)
+            with transaction.atomic():
+                last = Estimation.objects.select_for_update().order_by('-id').first()
+                self.estimation_number = f'EST-{(last.id if last else 0) + 1:05d}'
+                super().save(*args, **kwargs)
+        else:
+            super().save(*args, **kwargs)
 
     def __str__(self):
         return self.estimation_number
@@ -97,9 +100,12 @@ class Proposal(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.proposal_number:
-            last = Proposal.objects.all().aggregate(m=models.Max('id'))['m']
-            self.proposal_number = f'PRO-{(last or 0) + 1:05d}'
-        super().save(*args, **kwargs)
+            with transaction.atomic():
+                last = Proposal.objects.select_for_update().order_by('-id').first()
+                self.proposal_number = f'PRO-{(last.id if last else 0) + 1:05d}'
+                super().save(*args, **kwargs)
+        else:
+            super().save(*args, **kwargs)
 
     def __str__(self):
         return self.proposal_number

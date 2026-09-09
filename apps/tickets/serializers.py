@@ -17,6 +17,7 @@ class TicketSerializer(serializers.ModelSerializer):
     class Meta:
         model = Ticket
         fields = '__all__'
+        read_only_fields = ['created_at', 'updated_at']
 
     def get_customer_name(self, obj):
         if obj.customer is None:

@@ -1,8 +1,11 @@
 from rest_framework import serializers
 from django.contrib.auth import authenticate
 from django.db import transaction
-from .models import User, ContactInfo, Feedback, Role, LoginLog, UserActivityLog
+from .models import (
+    User, ContactInfo, Feedback, Role, LoginLog, UserActivityLog, DesignDocument,
+)
 from apps.contacts.models import Company
+from apps.settings_config.models import Department
 
 
 class LoginSerializer(serializers.Serializer):
@@ -177,6 +180,73 @@ class LoginLogSerializer(serializers.ModelSerializer):
         if obj.user:
             return obj.user.get_full_name() or obj.user.email
         return None
+
+
+class DesignDocumentSerializer(serializers.ModelSerializer):
+    designer_name = serializers.SerializerMethodField()
+    visible_to_ids = serializers.PrimaryKeyRelatedField(
+        source='visible_to',
+        many=True,
+        read_only=True,
+        default=[],
+    )
+    visible_departments = serializers.SerializerMethodField()
+
+    class Meta:
+        model = DesignDocument
+        fields = [
+            'id', 'design_no', 'title', 'description', 'document_type',
+            'version', 'file', 'thumbnail',
+            'designer', 'designer_name', 'visible_to', 'visible_to_ids',
+            'visible_departments', 'is_public', 'created_at', 'updated_at',
+        ]
+        read_only_fields = ['id', 'design_no', 'designer', 'created_at', 'updated_at']
+
+    def get_designer_name(self, obj):
+        if obj.designer:
+            return obj.designer.get_full_name() or obj.designer.email
+        return None
+
+    def get_visible_departments(self, obj):
+        return [
+            {'id': d.id, 'name': d.name}
+            for d in obj.visible_to.all()
+        ]
+
+
+class DesignDocumentCreateSerializer(serializers.ModelSerializer):
+    visible_to = serializers.PrimaryKeyRelatedField(
+        queryset=Department.objects.all(),
+        many=True,
+        required=False,
+        allow_empty=True,
+        default=[],
+    )
+
+    class Meta:
+        model = DesignDocument
+        fields = [
+            'title', 'description', 'document_type', 'version',
+            'file', 'thumbnail', 'visible_to', 'is_public',
+        ]
+
+    def create(self, validated_data):
+        visible_to = validated_data.pop('visible_to', [])
+        designer = validated_data.pop(
+            'designer', self.context['request'].user,
+        )
+        design = DesignDocument.objects.create(designer=designer, **validated_data)
+        design.visible_to.set(visible_to)
+        return design
+
+    def update(self, instance, validated_data):
+        visible_to = validated_data.pop('visible_to', None)
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+        if visible_to is not None:
+            instance.visible_to.set(visible_to)
+        return instance
 
 
 class UserActivityLogSerializer(serializers.ModelSerializer):

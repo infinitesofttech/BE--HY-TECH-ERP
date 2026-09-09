@@ -27,10 +27,6 @@ class ConversationDetailView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = ConversationSerializer
     permission_classes = [IsAuthenticated]
 
-    def update(self, request, *args, **kwargs):
-        kwargs['partial'] = True
-        return super().update(request, *args, **kwargs)
-
 
 @extend_schema(tags=['Chat'])
 class MessageListCreateView(generics.ListCreateAPIView):
@@ -51,10 +47,6 @@ class MessageDetailView(generics.RetrieveUpdateDestroyAPIView):
 
     def get_queryset(self):
         return Message.objects.filter(conversation_id=self.kwargs['conversation_pk'])
-
-    def update(self, request, *args, **kwargs):
-        kwargs['partial'] = True
-        return super().update(request, *args, **kwargs)
 
 
 @extend_schema(tags=['Chat'])

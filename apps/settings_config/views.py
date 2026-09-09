@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from django_filters.rest_framework import DjangoFilterBackend
 from django.db.models import Count
+from django.db import transaction
 
 from .models import (
     Department, Designation, CustomField, PrefixSetting,
@@ -41,10 +42,6 @@ class ListCreateMixin:
 
 class DetailMixin:
     permission_classes = [IsAuthenticated]
-
-    def update(self, request, *args, **kwargs):
-        kwargs['partial'] = True
-        return super().update(request, *args, **kwargs)
 
 
 class SingleTonMixin:
@@ -131,11 +128,12 @@ class PrefixSettingNextNumberView(APIView):
 
     def patch(self, request, pk):
         try:
-            prefix = PrefixSetting.objects.get(pk=pk)
+            with transaction.atomic():
+                prefix = PrefixSetting.objects.select_for_update().get(pk=pk)
+                prefix.next_number += 1
+                prefix.save()
         except PrefixSetting.DoesNotExist:
             return Response({'error': 'Prefix setting not found'}, status=status.HTTP_404_NOT_FOUND)
-        prefix.next_number += 1
-        prefix.save()
         return Response(PrefixSettingSerializer(prefix).data)
 
 

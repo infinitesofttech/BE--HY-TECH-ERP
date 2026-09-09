@@ -14,6 +14,7 @@ class EmailCampaignSerializer(serializers.ModelSerializer):
     class Meta:
         model = EmailCampaign
         fields = '__all__'
+        read_only_fields = ['created_at', 'updated_at']
 
     def get_created_by_name(self, obj):
         return obj.created_by.email if obj.created_by else ''

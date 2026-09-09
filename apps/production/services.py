@@ -24,12 +24,8 @@ from .models import (
     PurchaseRequisition,
     PurchaseRequisitionItem,
     QualityInspection,
+    Worker,
 )
-
-def get_production_stages():
-    """Active production stages, ordered by sequence."""
-    return ProductionStage.objects.filter(is_active=True).order_by('sequence')
-
 
 def create_job_orders_from_sales_order(sales_order, start_date=None):
     """Create one JobOrder per product line of the approved sales order."""
@@ -165,6 +161,9 @@ def check_stock(job_order):
 def issue_material(job_order, issued_to=None, created_by=None):
     """Issue all available raw materials for the job order.
 
+    ``issued_to`` accepts a single value that is either an employee
+    (User) id or a worker (Worker) id - the type is detected automatically.
+
     Decrements inventory and creates a MaterialIssueSlip. Raises ValueError
     if any material is short - create a PurchaseRequisition first.
     """
@@ -180,20 +179,21 @@ def issue_material(job_order, issued_to=None, created_by=None):
             f'Create a purchase requisition first.'
         )
 
-    issued_to = _resolve_fk(None, issued_to, get_user_model())
+    issued_to, issued_to_worker = _resolve_issued_to(issued_to)
 
     with transaction.atomic():
         slip = MaterialIssueSlip.objects.create(
             job_order=job_order,
             issue_date=date.today(),
             issued_to=issued_to,
+            issued_to_worker=issued_to_worker,
             created_by=created_by,
             status='issued',
         )
         items = []
         for requirement in requirements:
             quantity = requirement.required_quantity
-            inventory_rows = list(Inventory.objects.filter(
+            inventory_rows = list(Inventory.objects.select_for_update().filter(
                 product=requirement.raw_material, status='active',
             ).order_by('-quantity'))
             total = sum(row.quantity for row in inventory_rows)
@@ -346,6 +346,11 @@ def receive_grn(grn):
             item.save(update_fields=['accepted_quantity'])
         grn.status = 'received'
         grn.save(update_fields=['status', 'updated_at'])
+        if grn.purchase_order is not None:
+            order = grn.purchase_order
+            order.status = 'received'
+            order.actual_delivery_date = grn.received_date
+            order.save(update_fields=['status', 'actual_delivery_date', 'updated_at'])
     _refresh_requirements_for_products([
         item.product_id for item in grn.items.all()
     ])
@@ -394,15 +399,74 @@ def _resolve_fk(current, value, model):
         return None
 
 
-def start_production(job_order, machine=None, supervisor=None, operators=None):
-    """Begin production: create stage checklist and start the first process."""
+def _resolve_issued_to(value):
+    """Resolve a single issued_to value to an (employee, worker) pair.
+
+    The value is always a User id for both employees and workers (every
+    worker is backed by a User), so no id collision is possible. A User
+    that has a production worker profile maps to the worker column.
+    """
+    User = get_user_model()
+    if value is None:
+        return None, None
+    if isinstance(value, Worker):
+        return None, value
+    if isinstance(value, User):
+        user = value
+    else:
+        try:
+            pk = int(value)
+        except (TypeError, ValueError):
+            raise ValueError(
+                'Invalid issued_to. Must be a User id (employee or worker).'
+            )
+        try:
+            user = User.objects.get(pk=pk)
+        except User.DoesNotExist:
+            raise ValueError(
+                'Invalid issued_to. No employee or worker found with that id.'
+            )
+    worker = getattr(user, 'production_worker_profile', None)
+    if worker is not None:
+        return None, worker
+    return user, None
+
+
+def start_production(job_order, machine=None, supervisor=None, operators=None,
+                     process_names=None, workers=None):
+    """Begin production: create the process checklist and start the first process.
+
+    ``process_names`` must be existing active production stages (matched
+    case-insensitively). They become the job-specific checklist in the given
+    order. Raises ValueError when an unknown stage is supplied.
+    """
+    if isinstance(process_names, str):
+        process_names = [process_names]
+    if process_names:
+        stages = {
+            stage.name.lower(): stage.name
+            for stage in ProductionStage.objects.filter(is_active=True)
+        }
+        missing = [
+            name for name in process_names
+            if not name or name.lower() not in stages
+        ]
+        if missing:
+            raise ValueError(
+                'Unknown production stage(s): {}. Choose from: {}.'.format(
+                    ', '.join(missing),
+                    ', '.join(sorted(set(stages.values()))),
+                )
+            )
+        process_names = [stages[name.lower()] for name in process_names]
     with transaction.atomic():
         if not job_order.material_requirements.exists() and job_order.bom:
             compute_material_requirements(job_order)
-        if not job_order.processes.exists():
-            for stage in get_production_stages():
+        if process_names:
+            job_order.processes.all().delete()
+            for sequence, name in enumerate(process_names, start=1):
                 ProductionProcess.objects.create(
-                    job_order=job_order, sequence=stage.sequence, name=stage.name,
+                    job_order=job_order, sequence=sequence, name=name,
                 )
         first = job_order.processes.order_by('sequence').first()
         if first and first.status == 'pending':
@@ -416,6 +480,8 @@ def start_production(job_order, machine=None, supervisor=None, operators=None):
         job_order.supervisor = supervisor if supervisor is not None else job_order.supervisor
         if operators is not None:
             job_order.operators.set(operators)
+        if workers is not None:
+            job_order.workers.set(workers)
         job_order.status = 'in_production'
         job_order.progress = 10
         job_order.save()

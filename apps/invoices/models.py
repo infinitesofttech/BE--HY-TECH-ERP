@@ -14,7 +14,7 @@ class Invoice(models.Model):
         ('online', 'Online'), ('other', 'Other'),
     ]
 
-    invoice_number = models.CharField(max_length=50, unique=True, blank=True)
+    invoice_number = models.CharField(max_length=50, unique=True, null=True, blank=True)
     sales_order = models.ForeignKey(
         'sales.SalesOrder',
         on_delete=models.SET_NULL,
@@ -35,6 +35,11 @@ class Invoice(models.Model):
     customer_email = models.EmailField(blank=True)
     customer_address = models.TextField(blank=True)
     billing_address = models.TextField(blank=True)
+    company = models.ForeignKey(
+        'contacts.Company', on_delete=models.SET_NULL,
+        null=True, blank=True, related_name='invoices',
+        help_text='Registered company this invoice is connected to.',
+    )
     invoice_date = models.DateField()
     due_date = models.DateField()
     payment_method = models.CharField(
@@ -78,6 +83,7 @@ class Invoice(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.invoice_number:
+            self.invoice_number = None
             super().save(*args, **kwargs)
             self.invoice_number = f'INV-{self.pk:04d}'
             super().save(update_fields=['invoice_number'])

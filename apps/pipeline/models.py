@@ -48,6 +48,11 @@ class Lead(models.Model):
     last_name = models.CharField(max_length=100, blank=True, default='')
     lead_type = models.CharField(max_length=20, choices=LEAD_TYPE_CHOICES, default='person')
     company_name = models.CharField(max_length=200, blank=True)
+    company = models.ForeignKey(
+        'contacts.Company', on_delete=models.SET_NULL,
+        null=True, blank=True, related_name='leads',
+        help_text='Registered company this lead is connected to.',
+    )
     email = models.EmailField(blank=True)
     email_opt_out = models.BooleanField(default=False)
     phone = models.CharField(max_length=20, blank=True)

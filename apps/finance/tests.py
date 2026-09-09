@@ -17,7 +17,7 @@ from apps.finance.models import (
 )
 from apps.invoices.models import Invoice
 from apps.products.models import Product, ProductCategory
-from apps.purchases.models import Purchase, Vendor
+from apps.purchases.models import Purchase, PurchaseOrder, Vendor
 from apps.sales.models import Customer, SalesOrder, SalesOrderItem
 
 
@@ -128,6 +128,49 @@ class FinanceAPITests(TestCase):
         self.assertEqual(response.data['top_vendor']['name'], 'Vendor A')
         self.assertEqual(response.data['sources']['purchases']['total'], 100.0)
         self.assertEqual(len(response.data['expenses']), 2)
+
+    def test_expense_summary_includes_received_purchase_orders(self):
+        vendor = Vendor.objects.create(name='Vendor B')
+        PurchaseOrder.objects.create(
+            vendor=vendor, order_date=date(2026, 7, 5),
+            status='received', total_amount=300,
+        )
+        PurchaseOrder.objects.create(
+            vendor=vendor, order_date=date(2026, 7, 6),
+            status='pending', total_amount=900,
+        )
+        self.client.force_authenticate(user=self.admin)
+        response = self.client.get(
+            '/api/finance/reports/expense-summary/'
+            '?date_from=2026-07-01&date_to=2026-07-31',
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data['total_expense'], 300.0)
+        self.assertEqual(response.data['purchase_expense'], 300.0)
+        self.assertEqual(response.data['sources']['purchase_orders']['total'], 300.0)
+        self.assertEqual(response.data['sources']['purchase_orders']['count'], 1)
+        self.assertEqual(response.data['top_vendor']['name'], 'Vendor B')
+        self.assertEqual(len(response.data['expenses']), 1)
+        self.assertEqual(response.data['expenses'][0]['source'], 'purchase_order')
+
+    def test_expense_summary_filters_purchase_orders_by_status(self):
+        vendor = Vendor.objects.create(name='Vendor C')
+        PurchaseOrder.objects.create(
+            vendor=vendor, order_date=date(2026, 7, 5),
+            status='received', total_amount=300,
+        )
+        PurchaseOrder.objects.create(
+            vendor=vendor, order_date=date(2026, 7, 6),
+            status='partially_paid', total_amount=700,
+        )
+        self.client.force_authenticate(user=self.admin)
+        response = self.client.get(
+            '/api/finance/reports/expense-summary/'
+            '?date_from=2026-07-01&date_to=2026-07-31&status=received',
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data['purchase_expense'], 300.0)
+        self.assertEqual(response.data['sources']['purchase_orders']['count'], 1)
 
     def test_income_summary_with_growth(self):
         Income.objects.create(

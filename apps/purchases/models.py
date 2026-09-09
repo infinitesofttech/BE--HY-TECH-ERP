@@ -41,7 +41,7 @@ class Purchase(models.Model):
         ('partially_paid', 'Partially Paid'),
     ]
 
-    purchase_id = models.CharField(max_length=20, unique=True, blank=True)
+    purchase_id = models.CharField(max_length=20, unique=True, null=True, blank=True)
     vendor = models.ForeignKey(
         Vendor,
         on_delete=models.CASCADE,
@@ -98,6 +98,7 @@ class Purchase(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.purchase_id:
+            self.purchase_id = None
             super().save(*args, **kwargs)
             self.purchase_id = f'PC-{self.pk:04d}'
             super().save(update_fields=['purchase_id'])
@@ -149,9 +150,14 @@ class PurchaseItem(models.Model):
 
 class PurchaseOrder(models.Model):
     PAYMENT_TERMS_CHOICES = Purchase.PAYMENT_TERMS_CHOICES
-    STATUS_CHOICES = Purchase.STATUS_CHOICES
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('received', 'Received'),
+        ('paid', 'Paid'),
+        ('partially_paid', 'Partially Paid'),
+    ]
 
-    purchase_order_id = models.CharField(max_length=20, unique=True, blank=True)
+    purchase_order_id = models.CharField(max_length=20, unique=True, null=True, blank=True)
     vendor = models.ForeignKey(
         Vendor,
         on_delete=models.CASCADE,
@@ -202,6 +208,7 @@ class PurchaseOrder(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.purchase_order_id:
+            self.purchase_order_id = None
             super().save(*args, **kwargs)
             self.purchase_order_id = f'PO-{self.pk:04d}'
             super().save(update_fields=['purchase_order_id'])
@@ -255,7 +262,7 @@ class PurchaseReturn(models.Model):
     PAYMENT_TERMS_CHOICES = Purchase.PAYMENT_TERMS_CHOICES
     STATUS_CHOICES = Purchase.STATUS_CHOICES
 
-    return_id = models.CharField(max_length=20, unique=True, blank=True)
+    return_id = models.CharField(max_length=20, unique=True, null=True, blank=True)
     purchase = models.ForeignKey(
         Purchase,
         null=True,
@@ -314,6 +321,7 @@ class PurchaseReturn(models.Model):
         if not self.vendor_id and self.purchase_id:
             self.vendor = self.purchase.vendor
         if not self.return_id:
+            self.return_id = None
             super().save(*args, **kwargs)
             self.return_id = f'PR-{self.pk:04d}'
             super().save(update_fields=['return_id'])

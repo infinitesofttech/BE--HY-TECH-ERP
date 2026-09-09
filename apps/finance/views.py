@@ -9,9 +9,9 @@ from rest_framework.views import APIView
 
 from apps.accounts.permissions import IsManagerOrAbove
 from apps.invoices.models import Invoice
-from apps.purchases.models import Purchase
+from apps.purchases.models import Purchase, PurchaseOrder
 from apps.sales.models import SalesOrder, SalesOrderItem
-from apps.sales.views import parse_date_range
+from apps.common.utils import parse_date_range
 
 from .models import (
     BankAccount,
@@ -389,6 +389,18 @@ def serialize_purchase(purchase):
     }
 
 
+def serialize_purchase_order(order):
+    return {
+        'source': 'purchase_order',
+        'purchase_order_id': order.purchase_order_id,
+        'vendor': order.vendor.name,
+        'amount': float(order.total_amount),
+        'payment_terms': order.payment_terms,
+        'date': str(order.order_date),
+        'status': order.status,
+    }
+
+
 def serialize_sales_order(order):
     return {
         'source': 'sales_order',
@@ -413,18 +425,19 @@ def serialize_invoice(invoice):
     }
 
 
-def top_vendor(purchases):
-    aggregated = (
-        purchases.values('vendor__name')
-        .annotate(total=Sum('total_amount'))
-        .order_by('-total')
-        .first()
-    )
-    if not aggregated:
+def top_vendor(purchases, orders=None):
+    totals = {}
+    for name, amount in purchases.values_list('vendor__name', 'total_amount'):
+        totals[name] = totals.get(name, 0) + float(amount)
+    if orders is not None:
+        for name, amount in orders.values_list('vendor__name', 'total_amount'):
+            totals[name] = totals.get(name, 0) + float(amount)
+    if not totals:
         return None
+    name = max(totals, key=totals.get)
     return {
-        'name': aggregated['vendor__name'],
-        'amount': float(aggregated['total']),
+        'name': name,
+        'amount': totals[name],
     }
 
 
@@ -445,6 +458,10 @@ class ExpenseSummaryView(APIView):
             date__gte=start, date__lte=end,
             status__in=['paid', 'partially_paid'],
         )
+        orders = PurchaseOrder.objects.filter(
+            order_date__gte=start, order_date__lte=end,
+            status__in=['received', 'paid', 'partially_paid'],
+        )
         category = request.query_params.get('category')
         status_filter = request.query_params.get('status')
         payment_method = request.query_params.get('payment_method')
@@ -453,13 +470,15 @@ class ExpenseSummaryView(APIView):
         if status_filter:
             expenses = expenses.filter(status=status_filter)
             purchases = purchases.filter(status=status_filter)
+            orders = orders.filter(status=status_filter)
         if payment_method:
             expenses = expenses.filter(payment_method=payment_method)
 
         finance_total = expenses.aggregate(total=Sum('amount'))['total'] or 0
         purchase_total = purchases.aggregate(total=Sum('total_amount'))['total'] or 0
-        total_expense = float(finance_total) + float(purchase_total)
-        count = expenses.count() + purchases.count()
+        order_total = orders.aggregate(total=Sum('total_amount'))['total'] or 0
+        total_expense = float(finance_total) + float(purchase_total) + float(order_total)
+        count = expenses.count() + purchases.count() + orders.count()
 
         expense_entries = [
             serialize_expense(e) for e in expenses.select_related('category')
@@ -468,15 +487,19 @@ class ExpenseSummaryView(APIView):
             serialize_purchase(p)
             for p in purchases.select_related('vendor')
         )
+        expense_entries.extend(
+            serialize_purchase_order(o)
+            for o in orders.select_related('vendor')
+        )
 
         return Response({
             'date_from': str(start),
             'date_to': str(end),
             'total_expense': total_expense,
             'finance_expense': float(finance_total),
-            'purchase_expense': float(purchase_total),
+            'purchase_expense': float(purchase_total) + float(order_total),
             'highest_category': highest_category(expenses),
-            'top_vendor': top_vendor(purchases),
+            'top_vendor': top_vendor(purchases, orders),
             'average_expense': round(total_expense / count, 2) if count else 0,
             'sources': {
                 'finance_expenses': {
@@ -486,6 +509,10 @@ class ExpenseSummaryView(APIView):
                 'purchases': {
                     'total': float(purchase_total),
                     'count': purchases.count(),
+                },
+                'purchase_orders': {
+                    'total': float(order_total),
+                    'count': orders.count(),
                 },
             },
             'expenses': expense_entries,

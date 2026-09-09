@@ -2,7 +2,7 @@ import re
 from datetime import date, timedelta
 
 from django.core.validators import RegexValidator
-from django.db import models
+from django.db import models, transaction
 from django.db.models import Sum
 from django.conf import settings
 
@@ -82,7 +82,7 @@ class Expense(models.Model):
         ('approved', 'Approved'),
     ]
 
-    expense_id = models.CharField(max_length=20, unique=True, blank=True)
+    expense_id = models.CharField(max_length=20, unique=True, null=True, blank=True)
     name = models.CharField(max_length=200)
     category = models.ForeignKey(
         ExpenseCategory, on_delete=models.CASCADE, related_name='expenses',
@@ -103,6 +103,7 @@ class Expense(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.expense_id:
+            self.expense_id = None
             super().save(*args, **kwargs)
             self.expense_id = f'EXP-{self.pk:04d}'
             super().save(update_fields=['expense_id'])
@@ -117,7 +118,7 @@ class Payment(models.Model):
         ('failed', 'Failed'),
     ]
 
-    payment_id = models.CharField(max_length=20, unique=True, blank=True)
+    payment_id = models.CharField(max_length=20, unique=True, null=True, blank=True)
     payee = models.CharField(max_length=200)
     bank = models.ForeignKey(
         BankAccount, null=True, blank=True,
@@ -138,6 +139,7 @@ class Payment(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.payment_id:
+            self.payment_id = None
             super().save(*args, **kwargs)
             self.payment_id = f'PAY-{self.pk:04d}'
             super().save(update_fields=['payment_id'])
@@ -149,7 +151,7 @@ class Cashflow(models.Model):
     TYPE_CHOICES = [('inflow', 'Inflow'), ('outflow', 'Outflow')]
     STATUS_CHOICES = [('pending', 'Pending'), ('completed', 'Completed')]
 
-    ref_id = models.CharField(max_length=20, unique=True, blank=True)
+    ref_id = models.CharField(max_length=20, unique=True, null=True, blank=True)
     bank = models.ForeignKey(
         BankAccount, null=True, blank=True,
         on_delete=models.SET_NULL, related_name='cashflows',
@@ -170,6 +172,7 @@ class Cashflow(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.ref_id:
+            self.ref_id = None
             super().save(*args, **kwargs)
             self.ref_id = f'CF-{self.pk:04d}'
             super().save(update_fields=['ref_id'])
@@ -178,7 +181,7 @@ class Cashflow(models.Model):
 
 
 class Budget(models.Model):
-    budget_id = models.CharField(max_length=20, unique=True, blank=True)
+    budget_id = models.CharField(max_length=20, unique=True, null=True, blank=True)
     period = models.CharField(max_length=20, validators=[PERIOD_VALIDATOR])
     category = models.ForeignKey(
         ExpenseCategory, on_delete=models.CASCADE, related_name='budgets',
@@ -195,6 +198,7 @@ class Budget(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.budget_id:
+            self.budget_id = None
             super().save(*args, **kwargs)
             self.budget_id = f'BUD-{self.pk:04d}'
             super().save(update_fields=['budget_id'])
@@ -230,7 +234,7 @@ class Tax(models.Model):
     ]
     STATUS_CHOICES = [('active', 'Active'), ('inactive', 'Inactive')]
 
-    tax_id = models.CharField(max_length=20, unique=True, blank=True)
+    tax_id = models.CharField(max_length=20, unique=True, null=True, blank=True)
     name = models.CharField(max_length=100)
     rate = models.DecimalField(max_digits=5, decimal_places=2)
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='active')
@@ -246,6 +250,7 @@ class Tax(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.tax_id:
+            self.tax_id = None
             super().save(*args, **kwargs)
             self.tax_id = f'TAX-{self.pk:04d}'
             super().save(update_fields=['tax_id'])
@@ -284,7 +289,7 @@ class Income(models.Model):
         ('partial', 'Partial'),
     ]
 
-    income_id = models.CharField(max_length=20, unique=True, blank=True)
+    income_id = models.CharField(max_length=20, unique=True, null=True, blank=True)
     party_name = models.CharField(
         max_length=200, help_text='Vendor or customer name.',
     )
@@ -306,6 +311,7 @@ class Income(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.income_id:
+            self.income_id = None
             super().save(*args, **kwargs)
             self.income_id = f'INC-{self.pk:04d}'
             super().save(update_fields=['income_id'])
@@ -320,7 +326,7 @@ class PurchaseTax(models.Model):
         ('completed', 'Completed'),
     ]
 
-    bill_id = models.CharField(max_length=100)
+    bill_id = models.CharField(max_length=100, unique=True, null=True, blank=True)
     supplier = models.CharField(max_length=200)
     tax_type = models.ForeignKey(
         Tax, null=True, blank=True,
@@ -340,6 +346,15 @@ class PurchaseTax(models.Model):
     def __str__(self):
         return f'{self.bill_id} - {self.supplier}'
 
+    def save(self, *args, **kwargs):
+        if not self.bill_id:
+            with transaction.atomic():
+                last = PurchaseTax.objects.select_for_update().order_by('-id').first()
+                self.bill_id = f'PT-{(last.id if last else 0) + 1:04d}'
+                super().save(*args, **kwargs)
+        else:
+            super().save(*args, **kwargs)
+
 
 class Payroll(models.Model):
     STATUS_CHOICES = [
@@ -347,7 +362,7 @@ class Payroll(models.Model):
         ('paid', 'Paid'),
     ]
 
-    payroll_id = models.CharField(max_length=20, unique=True, blank=True)
+    payroll_id = models.CharField(max_length=20, unique=True, null=True, blank=True)
     employee = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
@@ -408,6 +423,7 @@ class Payroll(models.Model):
         )
         self.net_salary = self.total_earning - self.total_deduction
         if not self.payroll_id:
+            self.payroll_id = None
             super().save(*args, **kwargs)
             self.payroll_id = f'PL-{self.pk:04d}'
             super().save(update_fields=['payroll_id'])

@@ -8,6 +8,7 @@ class ContractSerializer(serializers.ModelSerializer):
     class Meta:
         model = Contract
         fields = '__all__'
+        read_only_fields = ['created_by', 'created_at', 'updated_at']
 
     def get_created_by_name(self, obj):
         if obj.created_by is None:

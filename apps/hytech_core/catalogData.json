@@ -1,0 +1,2193 @@
+[
+  {
+    "id": 101,
+    "ServiceName": "PM Awas Yojana Form",
+    "ServiceNameGu": "આવાસ યોજના",
+    "Category": "GOVT_FORMS",
+    "SubCategory": "Housing Welfare",
+    "Department": "Ministry of Housing and Urban Affairs",
+    "ServiceType": "NEW",
+    "Description": "Pradhan Mantri Awas Yojana Gramin / Urban Housing Assistance Application",
+    "GovernmentFee": 0,
+    "ServiceCharge": 150,
+    "TotalFee": 150,
+    "SlaDays": 30,
+    "Priority": "HIGH",
+    "SmsTemplateGu": "તમારું આવાસ યોજના ફોર્મ સફળતાપૂર્વક ભરાઈ ગયું છે. HY-TECH સેવા કેન્દ્ર.",
+    "SmsTemplateEn": "Your Awas Yojana application has been submitted. HY-TECH Service Center.",
+    "StaffInstructions": "Check BPL ration card and land ownership proof carefully.",
+    "IsOfficial": true,
+    "IsActive": true,
+    "CreatedAt": "2026-08-01T00:00:00Z",
+    "UpdatedAt": "2026-08-01T00:00:00Z",
+    "FormFields": [
+      {
+        "id": "family_income",
+        "label_en": "Annual Family Income",
+        "label_gu": "વાર્ષિક કૌટુંબિક આવક",
+        "type": "number",
+        "required": true
+      },
+      {
+        "id": "has_pucca_house",
+        "label_en": "Owns Pucca House?",
+        "label_gu": "પાકું મકાન ધરાવો છો?",
+        "type": "select",
+        "options": [
+          "No / ના",
+          "Yes / હા"
+        ],
+        "required": true
+      }
+    ],
+    "SubServices": [
+      {
+        "id": 1011,
+        "Service": 101,
+        "SubServiceName": "PMAY Gramin (ગ્રામીણ)",
+        "IsActive": true,
+        "CreatedAt": "2026-08-01T00:00:00Z",
+        "UpdatedAt": "2026-08-01T00:00:00Z",
+        "RequiredDocuments": [
+          {
+            "id": 10111,
+            "SubService": 1011,
+            "DocumentName": "Aadhaar Card of Head & Spouse",
+            "document_type": "AADHAR",
+            "IsRequired": true,
+            "CreatedAt": "2026-08-01T00:00:00Z"
+          },
+          {
+            "id": 10112,
+            "SubService": 1011,
+            "DocumentName": "BPL / SECC Ration Card",
+            "document_type": "RATION_CARD",
+            "IsRequired": true,
+            "CreatedAt": "2026-08-01T00:00:00Z"
+          },
+          {
+            "id": 10113,
+            "SubService": 1011,
+            "DocumentName": "Income Certificate",
+            "document_type": "INCOME_CERTIFICATE",
+            "IsRequired": true,
+            "CreatedAt": "2026-08-01T00:00:00Z"
+          }
+        ]
+      },
+      {
+        "id": 1012,
+        "Service": 101,
+        "SubServiceName": "PMAY Urban (શહેરી)",
+        "IsActive": true,
+        "CreatedAt": "2026-08-01T00:00:00Z",
+        "UpdatedAt": "2026-08-01T00:00:00Z",
+        "RequiredDocuments": [
+          {
+            "id": 10121,
+            "SubService": 1012,
+            "DocumentName": "Aadhaar Card",
+            "document_type": "AADHAR",
+            "IsRequired": true,
+            "CreatedAt": "2026-08-01T00:00:00Z"
+          },
+          {
+            "id": 10122,
+            "SubService": 1012,
+            "DocumentName": "Bank Passbook Copy",
+            "document_type": "OTHER",
+            "IsRequired": true,
+            "CreatedAt": "2026-08-01T00:00:00Z"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": 102,
+    "ServiceName": "Jawahar Navodaya Exam Form",
+    "ServiceNameGu": "જવાહર નવોદય યોજના",
+    "Category": "GOVT_FORMS",
+    "SubCategory": "School Admission",
+    "Department": "Navodaya Vidyalaya Samiti",
+    "ServiceType": "NEW",
+    "Description": "Class 6 & 9 Navodaya Vidyalaya Selection Test (JNVST) Online Application",
+    "GovernmentFee": 0,
+    "ServiceCharge": 100,
+    "TotalFee": 100,
+    "SlaDays": 7,
+    "Priority": "MEDIUM",
+    "SmsTemplateGu": "નવોદય પ્રવેશ પરીક્ષા ફોર્મ સફળતાપૂર્વક સબમિટ થઈ ગયું છે. HY-TECH.",
+    "SmsTemplateEn": "Navodaya entrance exam form has been submitted. HY-TECH.",
+    "IsOfficial": true,
+    "IsActive": true,
+    "CreatedAt": "2026-08-01T00:00:00Z",
+    "UpdatedAt": "2026-08-01T00:00:00Z",
+    "SubServices": [
+      {
+        "id": 1021,
+        "Service": 102,
+        "SubServiceName": "Class 6 Selection Test (ધોરણ ૬)",
+        "IsActive": true,
+        "CreatedAt": "2026-08-01T00:00:00Z",
+        "UpdatedAt": "2026-08-01T00:00:00Z",
+        "RequiredDocuments": [
+          {
+            "id": 10211,
+            "SubService": 1021,
+            "DocumentName": "Student Aadhaar Card",
+            "document_type": "AADHAR",
+            "IsRequired": true,
+            "CreatedAt": "2026-08-01T00:00:00Z"
+          },
+          {
+            "id": 10212,
+            "SubService": 1021,
+            "DocumentName": "Headmaster Study Certificate",
+            "document_type": "OTHER",
+            "IsRequired": true,
+            "CreatedAt": "2026-08-01T00:00:00Z"
+          },
+          {
+            "id": 10213,
+            "SubService": 1021,
+            "DocumentName": "Passport Size Photo",
+            "document_type": "PHOTO",
+            "IsRequired": true,
+            "CreatedAt": "2026-08-01T00:00:00Z"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": 103,
+    "ServiceName": "PM Kisan Samman Nidhi / e-KYC",
+    "ServiceNameGu": "P.M. કિસાન યોજના / e-KYC",
+    "Category": "GOVT_FORMS",
+    "SubCategory": "Agriculture Welfare",
+    "Department": "Ministry of Agriculture and Farmers Welfare",
+    "ServiceType": "KYC",
+    "Description": "₹6000 annual farmer assistance scheme registration and biometric/OTP e-KYC",
+    "GovernmentFee": 0,
+    "ServiceCharge": 70,
+    "TotalFee": 70,
+    "SlaDays": 5,
+    "Priority": "HIGH",
+    "SmsTemplateGu": "તમારું PM કિસાન e-KYC સફળતાપૂર્વક અપડેટ થઈ ગયું છે. HY-TECH.",
+    "SmsTemplateEn": "Your PM Kisan e-KYC has been successfully updated. HY-TECH.",
+    "IsOfficial": true,
+    "IsActive": true,
+    "CreatedAt": "2026-08-01T00:00:00Z",
+    "UpdatedAt": "2026-08-01T00:00:00Z",
+    "SubServices": [
+      {
+        "id": 1031,
+        "Service": 103,
+        "SubServiceName": "Farmer e-KYC (ઓનલાઈન KYC)",
+        "IsActive": true,
+        "CreatedAt": "2026-08-01T00:00:00Z",
+        "UpdatedAt": "2026-08-01T00:00:00Z",
+        "RequiredDocuments": [
+          {
+            "id": 10311,
+            "SubService": 1031,
+            "DocumentName": "Aadhaar Card (Mobile Linked)",
+            "document_type": "AADHAR",
+            "IsRequired": true,
+            "CreatedAt": "2026-08-01T00:00:00Z"
+          },
+          {
+            "id": 10312,
+            "SubService": 1031,
+            "DocumentName": "Land Record 7/12 & 8-A",
+            "document_type": "OTHER",
+            "IsRequired": false,
+            "CreatedAt": "2026-08-01T00:00:00Z"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": 104,
+    "ServiceName": "Udyog Aadhaar / MSME",
+    "ServiceNameGu": "ઉદ્યોગ આધાર",
+    "Category": "GOVT_FORMS",
+    "SubCategory": "Business Registration",
+    "Department": "Ministry of MSME",
+    "ServiceType": "NEW",
+    "Description": "Udyam / Udyog Aadhaar registration for small businesses and shops",
+    "GovernmentFee": 0,
+    "ServiceCharge": 200,
+    "TotalFee": 200,
+    "SlaDays": 3,
+    "Priority": "MEDIUM",
+    "SmsTemplateGu": "તમારું ઉદ્યોગ આધાર પ્રમાણપત્ર તૈયાર છે. HY-TECH.",
+    "SmsTemplateEn": "Your Udyog Aadhaar certificate is ready. HY-TECH.",
+    "IsOfficial": true,
+    "IsActive": true,
+    "CreatedAt": "2026-08-01T00:00:00Z",
+    "UpdatedAt": "2026-08-01T00:00:00Z",
+    "SubServices": [
+      {
+        "id": 1041,
+        "Service": 104,
+        "SubServiceName": "New Udyam Registration (નવી નોંધણી)",
+        "IsActive": true,
+        "CreatedAt": "2026-08-01T00:00:00Z",
+        "UpdatedAt": "2026-08-01T00:00:00Z",
+        "RequiredDocuments": [
+          {
+            "id": 10411,
+            "SubService": 1041,
+            "DocumentName": "Proprietor Aadhaar Card",
+            "document_type": "AADHAR",
+            "IsRequired": true,
+            "CreatedAt": "2026-08-01T00:00:00Z"
+          },
+          {
+            "id": 10412,
+            "SubService": 1041,
+            "DocumentName": "PAN Card",
+            "document_type": "PAN",
+            "IsRequired": true,
+            "CreatedAt": "2026-08-01T00:00:00Z"
+          },
+          {
+            "id": 10413,
+            "SubService": 1041,
+            "DocumentName": "Bank Account Passbook / Cheque",
+            "document_type": "OTHER",
+            "IsRequired": true,
+            "CreatedAt": "2026-08-01T00:00:00Z"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": 105,
+    "ServiceName": "Government Loan Forms",
+    "ServiceNameGu": "લોન ફોર્મ",
+    "Category": "GOVT_FORMS",
+    "SubCategory": "Financial Assistance",
+    "Department": "Gujarat Backward Class / Mudra Yojana",
+    "ServiceType": "NEW",
+    "Description": "Mudra Loan, Bajpai Bankable Scheme, and NBCFDC Subsidy Loan Applications",
+    "GovernmentFee": 0,
+    "ServiceCharge": 250,
+    "TotalFee": 250,
+    "SlaDays": 14,
+    "Priority": "HIGH",
+    "SmsTemplateGu": "તમારું લોન સહાય ફોર્મ સબમિટ થઈ ગયું છે. HY-TECH.",
+    "SmsTemplateEn": "Your government loan assistance form is submitted. HY-TECH.",
+    "IsOfficial": true,
+    "IsActive": true,
+    "CreatedAt": "2026-08-01T00:00:00Z",
+    "UpdatedAt": "2026-08-01T00:00:00Z",
+    "SubServices": [
+      {
+        "id": 1051,
+        "Service": 105,
+        "SubServiceName": "Mudra Loan & Subsidies",
+        "IsActive": true,
+        "CreatedAt": "2026-08-01T00:00:00Z",
+        "UpdatedAt": "2026-08-01T00:00:00Z",
+        "RequiredDocuments": [
+          {
+            "id": 10511,
+            "SubService": 1051,
+            "DocumentName": "Aadhaar Card",
+            "document_type": "AADHAR",
+            "IsRequired": true,
+            "CreatedAt": "2026-08-01T00:00:00Z"
+          },
+          {
+            "id": 10512,
+            "SubService": 1051,
+            "DocumentName": "PAN Card",
+            "document_type": "PAN",
+            "IsRequired": true,
+            "CreatedAt": "2026-08-01T00:00:00Z"
+          },
+          {
+            "id": 10513,
+            "SubService": 1051,
+            "DocumentName": "Electricity Bill of Business Premises",
+            "document_type": "OTHER",
+            "IsRequired": true,
+            "CreatedAt": "2026-08-01T00:00:00Z"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": 106,
+    "ServiceName": "Competitive Exam Form",
+    "ServiceNameGu": "Exam Form",
+    "Category": "GOVT_FORMS",
+    "SubCategory": "Employment & Recruitment",
+    "Department": "OJAS / GPSC / GSSSB / Staff Selection",
+    "ServiceType": "NEW",
+    "Description": "Online application for Talati, Junior Clerk, Police, TET/TAT, GPSC examinations",
+    "GovernmentFee": 100,
+    "ServiceCharge": 80,
+    "TotalFee": 180,
+    "SlaDays": 2,
+    "Priority": "HIGH",
+    "SmsTemplateGu": "તમારું પરીક્ષા ફોર્મ કન્ફર્મ થઈ ગયું છે. કન્ફર્મેશન સ્લિપ સાચવો. HY-TECH.",
+    "SmsTemplateEn": "Your exam application is confirmed. Keep confirmation slip. HY-TECH.",
+    "IsOfficial": true,
+    "IsActive": true,
+    "CreatedAt": "2026-08-01T00:00:00Z",
+    "UpdatedAt": "2026-08-01T00:00:00Z",
+    "SubServices": [
+      {
+        "id": 1061,
+        "Service": 106,
+        "SubServiceName": "OJAS Recruitment Exam",
+        "IsActive": true,
+        "CreatedAt": "2026-08-01T00:00:00Z",
+        "UpdatedAt": "2026-08-01T00:00:00Z",
+        "RequiredDocuments": [
+          {
+            "id": 10611,
+            "SubService": 1061,
+            "DocumentName": "Passport Size Photo",
+            "document_type": "PHOTO",
+            "IsRequired": true,
+            "CreatedAt": "2026-08-01T00:00:00Z"
+          },
+          {
+            "id": 10612,
+            "SubService": 1061,
+            "DocumentName": "Specimen Signature",
+            "document_type": "OTHER",
+            "IsRequired": true,
+            "CreatedAt": "2026-08-01T00:00:00Z"
+          },
+          {
+            "id": 10613,
+            "SubService": 1061,
+            "DocumentName": "Educational Marksheet",
+            "document_type": "OTHER",
+            "IsRequired": true,
+            "CreatedAt": "2026-08-01T00:00:00Z"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": 107,
+    "ServiceName": "Anganwadi Bharti Form",
+    "ServiceNameGu": "અંગણવાડી ફોર્મ",
+    "Category": "GOVT_FORMS",
+    "SubCategory": "Women & Child Development",
+    "Department": "Gujarat Women & Child Development",
+    "ServiceType": "NEW",
+    "Description": "Anganwadi Worker & Helper Online Recruitment Application",
+    "GovernmentFee": 0,
+    "ServiceCharge": 120,
+    "TotalFee": 120,
+    "SlaDays": 5,
+    "Priority": "MEDIUM",
+    "SmsTemplateGu": "અંગણવાડી ભરતી ફોર્મ સફળતાપૂર્વક ભરાઈ ગયું છે. HY-TECH.",
+    "SmsTemplateEn": "Anganwadi application submitted successfully. HY-TECH.",
+    "IsOfficial": true,
+    "IsActive": true,
+    "CreatedAt": "2026-08-01T00:00:00Z",
+    "UpdatedAt": "2026-08-01T00:00:00Z",
+    "SubServices": [
+      {
+        "id": 1071,
+        "Service": 107,
+        "SubServiceName": "Worker / Helper Application",
+        "IsActive": true,
+        "CreatedAt": "2026-08-01T00:00:00Z",
+        "UpdatedAt": "2026-08-01T00:00:00Z",
+        "RequiredDocuments": [
+          {
+            "id": 10711,
+            "SubService": 1071,
+            "DocumentName": "Applicant Aadhaar Card",
+            "document_type": "AADHAR",
+            "IsRequired": true,
+            "CreatedAt": "2026-08-01T00:00:00Z"
+          },
+          {
+            "id": 10712,
+            "SubService": 1071,
+            "DocumentName": "10th / 12th Marksheet",
+            "document_type": "OTHER",
+            "IsRequired": true,
+            "CreatedAt": "2026-08-01T00:00:00Z"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": 108,
+    "ServiceName": "Scholarship Form",
+    "ServiceNameGu": "સ્કોલરશિપ ફોર્મ",
+    "Category": "GOVT_FORMS",
+    "SubCategory": "Education Support",
+    "Department": "Digital Gujarat / National Scholarship Portal",
+    "ServiceType": "NEW",
+    "Description": "Pre-Matric & Post-Matric SC/ST/OBC/EWS Scholarship Applications",
+    "GovernmentFee": 0,
+    "ServiceCharge": 100,
+    "TotalFee": 100,
+    "SlaDays": 10,
+    "Priority": "HIGH",
+    "SmsTemplateGu": "તમારું ડિજિટલ ગુજરાત સ્કોલરશિપ ફોર્મ સબમિટ થઈ ગયું છે. HY-TECH.",
+    "SmsTemplateEn": "Your scholarship form has been submitted. HY-TECH.",
+    "IsOfficial": true,
+    "IsActive": true,
+    "CreatedAt": "2026-08-01T00:00:00Z",
+    "UpdatedAt": "2026-08-01T00:00:00Z",
+    "SubServices": [
+      {
+        "id": 1081,
+        "Service": 108,
+        "SubServiceName": "Digital Gujarat Post-Matric",
+        "IsActive": true,
+        "CreatedAt": "2026-08-01T00:00:00Z",
+        "UpdatedAt": "2026-08-01T00:00:00Z",
+        "RequiredDocuments": [
+          {
+            "id": 10811,
+            "SubService": 1081,
+            "DocumentName": "Student Aadhaar Card",
+            "document_type": "AADHAR",
+            "IsRequired": true,
+            "CreatedAt": "2026-08-01T00:00:00Z"
+          },
+          {
+            "id": 10812,
+            "SubService": 1081,
+            "DocumentName": "Caste Certificate",
+            "document_type": "CASTE_CERTIFICATE",
+            "IsRequired": true,
+            "CreatedAt": "2026-08-01T00:00:00Z"
+          },
+          {
+            "id": 10813,
+            "SubService": 1081,
+            "DocumentName": "Income Certificate",
+            "document_type": "INCOME_CERTIFICATE",
+            "IsRequired": true,
+            "CreatedAt": "2026-08-01T00:00:00Z"
+          },
+          {
+            "id": 10814,
+            "SubService": 1081,
+            "DocumentName": "College Fee Receipt & Bonafide",
+            "document_type": "OTHER",
+            "IsRequired": true,
+            "CreatedAt": "2026-08-01T00:00:00Z"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": 109,
+    "ServiceName": "GSRTC Bus Pass Form",
+    "ServiceNameGu": "બસ-પાસ ફોર્મ",
+    "Category": "GOVT_FORMS",
+    "SubCategory": "Transport",
+    "Department": "Gujarat State Road Transport Corporation",
+    "ServiceType": "RENEWAL",
+    "Description": "Student & Citizen Concessional Daily Bus Pass Registration & Renewal",
+    "GovernmentFee": 50,
+    "ServiceCharge": 50,
+    "TotalFee": 100,
+    "SlaDays": 3,
+    "Priority": "MEDIUM",
+    "SmsTemplateGu": "બસ પાસ અરજી સ્વીકારવામાં આવી છે. ટોકન સાચવો. HY-TECH.",
+    "SmsTemplateEn": "Bus pass application accepted. Keep your token. HY-TECH.",
+    "IsOfficial": true,
+    "IsActive": true,
+    "CreatedAt": "2026-08-01T00:00:00Z",
+    "UpdatedAt": "2026-08-01T00:00:00Z",
+    "SubServices": [
+      {
+        "id": 1091,
+        "Service": 109,
+        "SubServiceName": "Student Concessional Pass",
+        "IsActive": true,
+        "CreatedAt": "2026-08-01T00:00:00Z",
+        "UpdatedAt": "2026-08-01T00:00:00Z",
+        "RequiredDocuments": [
+          {
+            "id": 10911,
+            "SubService": 1091,
+            "DocumentName": "Student Aadhaar Card",
+            "document_type": "AADHAR",
+            "IsRequired": true,
+            "CreatedAt": "2026-08-01T00:00:00Z"
+          },
+          {
+            "id": 10912,
+            "SubService": 1091,
+            "DocumentName": "School / College Bonafide Certificate",
+            "document_type": "OTHER",
+            "IsRequired": true,
+            "CreatedAt": "2026-08-01T00:00:00Z"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": 110,
+    "ServiceName": "Provident Fund (PF) Withdrawal",
+    "ServiceNameGu": "P.F. / અન્ય ફોર્મ",
+    "Category": "GOVT_FORMS",
+    "SubCategory": "Labour & Employment",
+    "Department": "Employees Provident Fund Organisation (EPFO)",
+    "ServiceType": "NEW",
+    "Description": "EPFO UAN Kyc, Advance PF Claim Form 31, 19, 10C Withdrawal",
+    "GovernmentFee": 0,
+    "ServiceCharge": 150,
+    "TotalFee": 150,
+    "SlaDays": 7,
+    "Priority": "HIGH",
+    "SmsTemplateGu": "તમારો PF ક્લેમ સબમિટ થઈ ગયો છે. ટ્રેકિંગ નંબર સાચવો. HY-TECH.",
+    "SmsTemplateEn": "Your PF claim has been submitted. Keep tracking number. HY-TECH.",
+    "IsOfficial": true,
+    "IsActive": true,
+    "CreatedAt": "2026-08-01T00:00:00Z",
+    "UpdatedAt": "2026-08-01T00:00:00Z",
+    "SubServices": [
+      {
+        "id": 1101,
+        "Service": 110,
+        "SubServiceName": "PF Advance / Full Settlement",
+        "IsActive": true,
+        "CreatedAt": "2026-08-01T00:00:00Z",
+        "UpdatedAt": "2026-08-01T00:00:00Z",
+        "RequiredDocuments": [
+          {
+            "id": 11011,
+            "SubService": 1101,
+            "DocumentName": "Aadhaar Card (Linked with UAN)",
+            "document_type": "AADHAR",
+            "IsRequired": true,
+            "CreatedAt": "2026-08-01T00:00:00Z"
+          },
+          {
+            "id": 11012,
+            "SubService": 1101,
+            "DocumentName": "PAN Card",
+            "document_type": "PAN",
+            "IsRequired": true,
+            "CreatedAt": "2026-08-01T00:00:00Z"
+          },
+          {
+            "id": 11013,
+            "SubService": 1101,
+            "DocumentName": "Cancelled Cheque / Bank Passbook",
+            "document_type": "OTHER",
+            "IsRequired": true,
+            "CreatedAt": "2026-08-01T00:00:00Z"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": 111,
+    "ServiceName": "Welfare Schemes (General)",
+    "ServiceNameGu": "સરકારી યોજનાઓ",
+    "Category": "GOVT_FORMS",
+    "SubCategory": "Social Justice",
+    "Department": "Social Justice & Empowerment Department",
+    "ServiceType": "NEW",
+    "Description": "Vidhva Sahay, Niradhar Vrudhh Pension, Ganga Swarupa Yojana",
+    "GovernmentFee": 0,
+    "ServiceCharge": 120,
+    "TotalFee": 120,
+    "SlaDays": 20,
+    "Priority": "HIGH",
+    "SmsTemplateGu": "સરકારી યોજના સહાય માટેની અરજી સ્વીકારવામાં આવી છે. HY-TECH.",
+    "SmsTemplateEn": "Government welfare assistance application accepted. HY-TECH.",
+    "IsOfficial": true,
+    "IsActive": true,
+    "CreatedAt": "2026-08-01T00:00:00Z",
+    "UpdatedAt": "2026-08-01T00:00:00Z",
+    "SubServices": [
+      {
+        "id": 1111,
+        "Service": 111,
+        "SubServiceName": "Vrudhh Pension / Vidhva Sahay",
+        "IsActive": true,
+        "CreatedAt": "2026-08-01T00:00:00Z",
+        "UpdatedAt": "2026-08-01T00:00:00Z",
+        "RequiredDocuments": [
+          {
+            "id": 11111,
+            "SubService": 1111,
+            "DocumentName": "Applicant Aadhaar Card",
+            "document_type": "AADHAR",
+            "IsRequired": true,
+            "CreatedAt": "2026-08-01T00:00:00Z"
+          },
+          {
+            "id": 11112,
+            "SubService": 1111,
+            "DocumentName": "Ration Card",
+            "document_type": "RATION_CARD",
+            "IsRequired": true,
+            "CreatedAt": "2026-08-01T00:00:00Z"
+          },
+          {
+            "id": 11113,
+            "SubService": 1111,
+            "DocumentName": "Income Certificate",
+            "document_type": "INCOME_CERTIFICATE",
+            "IsRequired": true,
+            "CreatedAt": "2026-08-01T00:00:00Z"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": 112,
+    "ServiceName": "Official Certificates & Affidavits",
+    "ServiceNameGu": "G-20 / અન્ય દાખલા",
+    "Category": "GOVT_FORMS",
+    "SubCategory": "Revenue Department",
+    "Department": "Collector / Mamlatdar Office",
+    "ServiceType": "NEW",
+    "Description": "Non-Creamy Layer, Character Certificate, Domicile, EWS Certificate",
+    "GovernmentFee": 20,
+    "ServiceCharge": 100,
+    "TotalFee": 120,
+    "SlaDays": 7,
+    "Priority": "MEDIUM",
+    "SmsTemplateGu": "તમારો દાખલો તૈયાર થઈ ગયો છે. કલેક્શન માટે પધારો. HY-TECH.",
+    "SmsTemplateEn": "Your certificate is ready for collection. HY-TECH.",
+    "IsOfficial": true,
+    "IsActive": true,
+    "CreatedAt": "2026-08-01T00:00:00Z",
+    "UpdatedAt": "2026-08-01T00:00:00Z",
+    "SubServices": [
+      {
+        "id": 1121,
+        "Service": 112,
+        "SubServiceName": "Non-Creamy Layer (NCL) Certificate",
+        "IsActive": true,
+        "CreatedAt": "2026-08-01T00:00:00Z",
+        "UpdatedAt": "2026-08-01T00:00:00Z",
+        "RequiredDocuments": [
+          {
+            "id": 11211,
+            "SubService": 1121,
+            "DocumentName": "Aadhaar Card",
+            "document_type": "AADHAR",
+            "IsRequired": true,
+            "CreatedAt": "2026-08-01T00:00:00Z"
+          },
+          {
+            "id": 11212,
+            "SubService": 1121,
+            "DocumentName": "Caste Certificate",
+            "document_type": "CASTE_CERTIFICATE",
+            "IsRequired": true,
+            "CreatedAt": "2026-08-01T00:00:00Z"
+          },
+          {
+            "id": 11213,
+            "SubService": 1121,
+            "DocumentName": "Income Certificate",
+            "document_type": "INCOME_CERTIFICATE",
+            "IsRequired": true,
+            "CreatedAt": "2026-08-01T00:00:00Z"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": 113,
+    "ServiceName": "Income Certificate",
+    "ServiceNameGu": "આવકનો દાખલો",
+    "Category": "GOVT_FORMS",
+    "SubCategory": "Revenue Department",
+    "Department": "Mamlatdar Office / Jan Seva Kendra",
+    "ServiceType": "NEW",
+    "Description": "Digital Gujarat Official Annual Income Certificate for Government Subsidies",
+    "GovernmentFee": 20,
+    "ServiceCharge": 80,
+    "TotalFee": 100,
+    "SlaDays": 5,
+    "Priority": "HIGH",
+    "SmsTemplateGu": "આવકનો દાખલો તૈયાર છે. HY-TECH સેવા કેન્દ્રથી મેળવી લેશો.",
+    "SmsTemplateEn": "Income certificate is ready. Please collect from HY-TECH.",
+    "IsOfficial": true,
+    "IsActive": true,
+    "CreatedAt": "2026-08-01T00:00:00Z",
+    "UpdatedAt": "2026-08-01T00:00:00Z",
+    "SubServices": [
+      {
+        "id": 1131,
+        "Service": 113,
+        "SubServiceName": "Income Certificate (3 Years Validity)",
+        "IsActive": true,
+        "CreatedAt": "2026-08-01T00:00:00Z",
+        "UpdatedAt": "2026-08-01T00:00:00Z",
+        "RequiredDocuments": [
+          {
+            "id": 11311,
+            "SubService": 1131,
+            "DocumentName": "Ration Card",
+            "document_type": "RATION_CARD",
+            "IsRequired": true,
+            "CreatedAt": "2026-08-01T00:00:00Z"
+          },
+          {
+            "id": 11312,
+            "SubService": 1131,
+            "DocumentName": "Aadhaar Card",
+            "document_type": "AADHAR",
+            "IsRequired": true,
+            "CreatedAt": "2026-08-01T00:00:00Z"
+          },
+          {
+            "id": 11313,
+            "SubService": 1131,
+            "DocumentName": "Electricity Bill / Talati Dakhalo",
+            "document_type": "OTHER",
+            "IsRequired": true,
+            "CreatedAt": "2026-08-01T00:00:00Z"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": 114,
+    "ServiceName": "Land Records & Revenue Forms",
+    "ServiceNameGu": "નવાંધણી / વિવિધ ફોર્મ",
+    "Category": "GOVT_FORMS",
+    "SubCategory": "Revenue & Land",
+    "Department": "Revenue Department Gujarat / AnyRoR",
+    "ServiceType": "NEW",
+    "Description": "7/12, 8-A, Hakka Nondh, Property Card, Certified Land Map Copy",
+    "GovernmentFee": 25,
+    "ServiceCharge": 50,
+    "TotalFee": 75,
+    "SlaDays": 3,
+    "Priority": "MEDIUM",
+    "SmsTemplateGu": "જમીનની નકલ / નોંધણી તૈયાર છે. HY-TECH.",
+    "SmsTemplateEn": "Land records copy is ready. HY-TECH.",
+    "IsOfficial": true,
+    "IsActive": true,
+    "CreatedAt": "2026-08-01T00:00:00Z",
+    "UpdatedAt": "2026-08-01T00:00:00Z",
+    "SubServices": [
+      {
+        "id": 1141,
+        "Service": 114,
+        "SubServiceName": "AnyRoR 7/12 & 8-A RoR Copy",
+        "IsActive": true,
+        "CreatedAt": "2026-08-01T00:00:00Z",
+        "UpdatedAt": "2026-08-01T00:00:00Z",
+        "RequiredDocuments": [
+          {
+            "id": 11411,
+            "SubService": 1141,
+            "DocumentName": "Khata Number / Survey Number",
+            "document_type": "OTHER",
+            "IsRequired": true,
+            "CreatedAt": "2026-08-01T00:00:00Z"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": 115,
+    "ServiceName": "Passport Seva Kendra Online Form",
+    "ServiceNameGu": "પાસપોર્ટ",
+    "Category": "GOVT_FORMS",
+    "SubCategory": "External Affairs",
+    "Department": "Ministry of External Affairs",
+    "ServiceType": "NEW",
+    "Description": "Passport Application, Police Verification Appointment, Renewal & Tatkaal",
+    "GovernmentFee": 1500,
+    "ServiceCharge": 300,
+    "TotalFee": 1800,
+    "SlaDays": 15,
+    "Priority": "HIGH",
+    "SmsTemplateGu": "પાસપોર્ટ એપોઇન્ટમેન્ટ બુક થઈ ગઈ છે. તારીખ અને સમય ચકાસો. HY-TECH.",
+    "SmsTemplateEn": "Passport appointment booked. Please check date and time. HY-TECH.",
+    "IsOfficial": true,
+    "IsActive": true,
+    "CreatedAt": "2026-08-01T00:00:00Z",
+    "UpdatedAt": "2026-08-01T00:00:00Z",
+    "SubServices": [
+      {
+        "id": 1151,
+        "Service": 115,
+        "SubServiceName": "Fresh Passport (સામાન્ય પાસપોર્ટ)",
+        "IsActive": true,
+        "CreatedAt": "2026-08-01T00:00:00Z",
+        "UpdatedAt": "2026-08-01T00:00:00Z",
+        "RequiredDocuments": [
+          {
+            "id": 11511,
+            "SubService": 1151,
+            "DocumentName": "Aadhaar Card",
+            "document_type": "AADHAR",
+            "IsRequired": true,
+            "CreatedAt": "2026-08-01T00:00:00Z"
+          },
+          {
+            "id": 11512,
+            "SubService": 1151,
+            "DocumentName": "PAN Card",
+            "document_type": "PAN",
+            "IsRequired": true,
+            "CreatedAt": "2026-08-01T00:00:00Z"
+          },
+          {
+            "id": 11513,
+            "SubService": 1151,
+            "DocumentName": "School Leaving Certificate (LC)",
+            "document_type": "OTHER",
+            "IsRequired": true,
+            "CreatedAt": "2026-08-01T00:00:00Z"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": 201,
+    "ServiceName": "Aadhaar Card Update",
+    "ServiceNameGu": "આધાર કાર્ડ",
+    "Category": "CARD_SERVICES",
+    "SubCategory": "UIDAI Identity",
+    "Department": "Unique Identification Authority of India (UIDAI)",
+    "ServiceType": "UPDATE",
+    "Description": "Address Update, Mobile Linking, Name/DOB Correction, Biometric Update",
+    "GovernmentFee": 50,
+    "ServiceCharge": 50,
+    "TotalFee": 100,
+    "SlaDays": 7,
+    "Priority": "HIGH",
+    "SmsTemplateGu": "આધાર કાર્ડ અપડેટ થઈ ગયું છે. ડાઉનલોડ કરવા માટે HY-TECH પધારો.",
+    "SmsTemplateEn": "Your Aadhaar update is complete. Collect printout at HY-TECH.",
+    "StaffInstructions": "Customer presence is mandatory for biometric verification.",
+    "IsOfficial": true,
+    "IsActive": true,
+    "CreatedAt": "2026-08-01T00:00:00Z",
+    "UpdatedAt": "2026-08-01T00:00:00Z",
+    "SubServices": [
+      {
+        "id": 2011,
+        "Service": 201,
+        "SubServiceName": "Address Update (સરનામું સુધારો)",
+        "IsActive": true,
+        "CreatedAt": "2026-08-01T00:00:00Z",
+        "UpdatedAt": "2026-08-01T00:00:00Z",
+        "RequiredDocuments": [
+          {
+            "id": 20111,
+            "SubService": 2011,
+            "DocumentName": "Existing Aadhaar Card",
+            "document_type": "AADHAR",
+            "IsRequired": true,
+            "CreatedAt": "2026-08-01T00:00:00Z"
+          },
+          {
+            "id": 20112,
+            "SubService": 2011,
+            "DocumentName": "Valid Address Proof (Light bill / Ration)",
+            "document_type": "OTHER",
+            "IsRequired": true,
+            "CreatedAt": "2026-08-01T00:00:00Z"
+          }
+        ]
+      },
+      {
+        "id": 2012,
+        "Service": 201,
+        "SubServiceName": "Mobile Linking / Email Update",
+        "IsActive": true,
+        "CreatedAt": "2026-08-01T00:00:00Z",
+        "UpdatedAt": "2026-08-01T00:00:00Z",
+        "RequiredDocuments": [
+          {
+            "id": 20121,
+            "SubService": 2012,
+            "DocumentName": "Original Aadhaar Card",
+            "document_type": "AADHAR",
+            "IsRequired": true,
+            "CreatedAt": "2026-08-01T00:00:00Z"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": 202,
+    "ServiceName": "PAN Card Correction / Reprint",
+    "ServiceNameGu": "PAN કાર્ડ",
+    "Category": "CARD_SERVICES",
+    "SubCategory": "Income Tax",
+    "Department": "Income Tax Department / NSDL",
+    "ServiceType": "UPDATE",
+    "Description": "Correction in Name, Date of Birth, Father Name, or Reprint of Lost PAN",
+    "GovernmentFee": 107,
+    "ServiceCharge": 73,
+    "TotalFee": 180,
+    "SlaDays": 10,
+    "Priority": "HIGH",
+    "SmsTemplateGu": "તમારું PAN કાર્ડ સુધરી ગયું છે. e-PAN તૈયાર છે. HY-TECH.",
+    "SmsTemplateEn": "Your corrected PAN card is ready. Collect at HY-TECH.",
+    "IsOfficial": true,
+    "IsActive": true,
+    "CreatedAt": "2026-08-01T00:00:00Z",
+    "UpdatedAt": "2026-08-01T00:00:00Z",
+    "SubServices": [
+      {
+        "id": 2021,
+        "Service": 202,
+        "SubServiceName": "Correction in Existing PAN",
+        "IsActive": true,
+        "CreatedAt": "2026-08-01T00:00:00Z",
+        "UpdatedAt": "2026-08-01T00:00:00Z",
+        "RequiredDocuments": [
+          {
+            "id": 20211,
+            "SubService": 2021,
+            "DocumentName": "Aadhaar Card (Linked)",
+            "document_type": "AADHAR",
+            "IsRequired": true,
+            "CreatedAt": "2026-08-01T00:00:00Z"
+          },
+          {
+            "id": 20212,
+            "SubService": 2021,
+            "DocumentName": "Copy of Existing PAN Card",
+            "document_type": "PAN",
+            "IsRequired": true,
+            "CreatedAt": "2026-08-01T00:00:00Z"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": 203,
+    "ServiceName": "E-Shram Card Update",
+    "ServiceNameGu": "E-શ્રમ કાર્ડ",
+    "Category": "CARD_SERVICES",
+    "SubCategory": "Labour Welfare",
+    "Department": "Ministry of Labour & Employment",
+    "ServiceType": "UPDATE",
+    "Description": "Update occupation, address, and mobile number in E-Shram portal",
+    "GovernmentFee": 0,
+    "ServiceCharge": 50,
+    "TotalFee": 50,
+    "SlaDays": 1,
+    "Priority": "LOW",
+    "SmsTemplateGu": "તમારું E-શ્રમ કાર્ડ અપડેટ થઈ ગયું છે. HY-TECH.",
+    "SmsTemplateEn": "Your E-Shram card has been updated. HY-TECH.",
+    "IsOfficial": true,
+    "IsActive": true,
+    "CreatedAt": "2026-08-01T00:00:00Z",
+    "UpdatedAt": "2026-08-01T00:00:00Z",
+    "SubServices": [
+      {
+        "id": 2031,
+        "Service": 203,
+        "SubServiceName": "E-Shram Profile Update",
+        "IsActive": true,
+        "CreatedAt": "2026-08-01T00:00:00Z",
+        "UpdatedAt": "2026-08-01T00:00:00Z",
+        "RequiredDocuments": [
+          {
+            "id": 20311,
+            "SubService": 2031,
+            "DocumentName": "Aadhaar Card",
+            "document_type": "AADHAR",
+            "IsRequired": true,
+            "CreatedAt": "2026-08-01T00:00:00Z"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": 204,
+    "ServiceName": "Ayushman Card (PMJAY) Update",
+    "ServiceNameGu": "આયુષ્માન કાર્ડ",
+    "Category": "CARD_SERVICES",
+    "SubCategory": "Health Welfare",
+    "Department": "National Health Authority",
+    "ServiceType": "UPDATE",
+    "Description": "₹5 Lakh Health Cover Card e-KYC and family member syncing",
+    "GovernmentFee": 0,
+    "ServiceCharge": 50,
+    "TotalFee": 50,
+    "SlaDays": 2,
+    "Priority": "HIGH",
+    "SmsTemplateGu": "આયુષ્માન કાર્ડ e-KYC સફળતાપૂર્વક અપડેટ થઈ ગયું છે. HY-TECH.",
+    "SmsTemplateEn": "Ayushman card e-KYC updated successfully. HY-TECH.",
+    "IsOfficial": true,
+    "IsActive": true,
+    "CreatedAt": "2026-08-01T00:00:00Z",
+    "UpdatedAt": "2026-08-01T00:00:00Z",
+    "SubServices": [
+      {
+        "id": 2041,
+        "Service": 204,
+        "SubServiceName": "Ayushman e-KYC & PVC Print",
+        "IsActive": true,
+        "CreatedAt": "2026-08-01T00:00:00Z",
+        "UpdatedAt": "2026-08-01T00:00:00Z",
+        "RequiredDocuments": [
+          {
+            "id": 20411,
+            "SubService": 2041,
+            "DocumentName": "Aadhaar Card",
+            "document_type": "AADHAR",
+            "IsRequired": true,
+            "CreatedAt": "2026-08-01T00:00:00Z"
+          },
+          {
+            "id": 20412,
+            "SubService": 2041,
+            "DocumentName": "Ration Card",
+            "document_type": "RATION_CARD",
+            "IsRequired": true,
+            "CreatedAt": "2026-08-01T00:00:00Z"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": 205,
+    "ServiceName": "Voter ID Correction",
+    "ServiceNameGu": "વોટર કાર્ડ",
+    "Category": "CARD_SERVICES",
+    "SubCategory": "Election Commission",
+    "Department": "Election Commission of India (ECI)",
+    "ServiceType": "UPDATE",
+    "Description": "Form 8 - Correction in Name, Address, Photo or Epic replacement",
+    "GovernmentFee": 0,
+    "ServiceCharge": 70,
+    "TotalFee": 70,
+    "SlaDays": 14,
+    "Priority": "MEDIUM",
+    "SmsTemplateGu": "વોટર કાર્ડ સુધારા અરજી સ્વીકારવામાં આવી છે. રેફરન્સ નંબર સાચવો. HY-TECH.",
+    "SmsTemplateEn": "Voter ID correction submitted. Save reference number. HY-TECH.",
+    "IsOfficial": true,
+    "IsActive": true,
+    "CreatedAt": "2026-08-01T00:00:00Z",
+    "UpdatedAt": "2026-08-01T00:00:00Z",
+    "SubServices": [
+      {
+        "id": 2051,
+        "Service": 205,
+        "SubServiceName": "Form 8 Correction (નામ / સરનામું)",
+        "IsActive": true,
+        "CreatedAt": "2026-08-01T00:00:00Z",
+        "UpdatedAt": "2026-08-01T00:00:00Z",
+        "RequiredDocuments": [
+          {
+            "id": 20511,
+            "SubService": 2051,
+            "DocumentName": "Aadhaar Card",
+            "document_type": "AADHAR",
+            "IsRequired": true,
+            "CreatedAt": "2026-08-01T00:00:00Z"
+          },
+          {
+            "id": 20512,
+            "SubService": 2051,
+            "DocumentName": "Current Voter ID Copy",
+            "document_type": "VOTER_ID",
+            "IsRequired": true,
+            "CreatedAt": "2026-08-01T00:00:00Z"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": 206,
+    "ServiceName": "Voter Card Aadhaar Link / KYC",
+    "ServiceNameGu": "વોટર-કાર્ડ KYC",
+    "Category": "CARD_SERVICES",
+    "SubCategory": "Election Commission",
+    "Department": "Election Commission of India (ECI)",
+    "ServiceType": "KYC",
+    "Description": "Form 6B - Linking Aadhaar number with EPIC Voter Card",
+    "GovernmentFee": 0,
+    "ServiceCharge": 50,
+    "TotalFee": 50,
+    "SlaDays": 3,
+    "Priority": "MEDIUM",
+    "SmsTemplateGu": "તમારું વોટર કાર્ડ આધાર સાથે લિંક થઈ ગયું છે. HY-TECH.",
+    "SmsTemplateEn": "Your Voter card has been linked with Aadhaar. HY-TECH.",
+    "IsOfficial": true,
+    "IsActive": true,
+    "CreatedAt": "2026-08-01T00:00:00Z",
+    "UpdatedAt": "2026-08-01T00:00:00Z",
+    "SubServices": [
+      {
+        "id": 2061,
+        "Service": 206,
+        "SubServiceName": "Form 6B Aadhaar Link",
+        "IsActive": true,
+        "CreatedAt": "2026-08-01T00:00:00Z",
+        "UpdatedAt": "2026-08-01T00:00:00Z",
+        "RequiredDocuments": [
+          {
+            "id": 20611,
+            "SubService": 2061,
+            "DocumentName": "Voter Card Number",
+            "document_type": "VOTER_ID",
+            "IsRequired": true,
+            "CreatedAt": "2026-08-01T00:00:00Z"
+          },
+          {
+            "id": 20612,
+            "SubService": 2061,
+            "DocumentName": "Aadhaar Card",
+            "document_type": "AADHAR",
+            "IsRequired": true,
+            "CreatedAt": "2026-08-01T00:00:00Z"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": 207,
+    "ServiceName": "Ration Card Update / Member Addition",
+    "ServiceNameGu": "રેશન કાર્ડ",
+    "Category": "CARD_SERVICES",
+    "SubCategory": "Food & Civil Supplies",
+    "Department": "Food, Civil Supplies and Consumer Affairs Department",
+    "ServiceType": "UPDATE",
+    "Description": "Adding new baby/spouse name, splitting family ration card, address transfer",
+    "GovernmentFee": 20,
+    "ServiceCharge": 100,
+    "TotalFee": 120,
+    "SlaDays": 15,
+    "Priority": "HIGH",
+    "SmsTemplateGu": "રેશનકાર્ડમાં નામ ઉમેરવાની અરજી સ્વીકારવામાં આવી છે. HY-TECH.",
+    "SmsTemplateEn": "Ration card member addition application submitted. HY-TECH.",
+    "IsOfficial": true,
+    "IsActive": true,
+    "CreatedAt": "2026-08-01T00:00:00Z",
+    "UpdatedAt": "2026-08-01T00:00:00Z",
+    "SubServices": [
+      {
+        "id": 2071,
+        "Service": 207,
+        "SubServiceName": "Member Name Addition (નામ ઉમેરવું)",
+        "IsActive": true,
+        "CreatedAt": "2026-08-01T00:00:00Z",
+        "UpdatedAt": "2026-08-01T00:00:00Z",
+        "RequiredDocuments": [
+          {
+            "id": 20711,
+            "SubService": 2071,
+            "DocumentName": "Original Ration Card",
+            "document_type": "RATION_CARD",
+            "IsRequired": true,
+            "CreatedAt": "2026-08-01T00:00:00Z"
+          },
+          {
+            "id": 20712,
+            "SubService": 2071,
+            "DocumentName": "Birth Certificate (for Child) / Marriage Proof",
+            "document_type": "BIRTH_CERTIFICATE",
+            "IsRequired": true,
+            "CreatedAt": "2026-08-01T00:00:00Z"
+          },
+          {
+            "id": 20713,
+            "SubService": 2071,
+            "DocumentName": "Aadhaar Card of New Member",
+            "document_type": "AADHAR",
+            "IsRequired": true,
+            "CreatedAt": "2026-08-01T00:00:00Z"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": 301,
+    "ServiceName": "New Aadhaar Enrolment",
+    "ServiceNameGu": "આધાર કાર્ડ (નવું)",
+    "Category": "NEW_SERVICES",
+    "SubCategory": "UIDAI Identity",
+    "Department": "UIDAI",
+    "ServiceType": "NEW",
+    "Description": "First-time Aadhaar card registration for child or adult (Free Govt Service)",
+    "GovernmentFee": 0,
+    "ServiceCharge": 50,
+    "TotalFee": 50,
+    "SlaDays": 10,
+    "Priority": "HIGH",
+    "SmsTemplateGu": "તમારી નવી આધાર નોંધણી થઈ ગઈ છે. EID સ્લિપ સાચવવી. HY-TECH.",
+    "SmsTemplateEn": "New Aadhaar enrolment completed. Keep enrolment slip safe. HY-TECH.",
+    "StaffInstructions": "Original birth certificate and parent Aadhaar required for child < 5 years.",
+    "IsOfficial": true,
+    "IsActive": true,
+    "CreatedAt": "2026-08-01T00:00:00Z",
+    "UpdatedAt": "2026-08-01T00:00:00Z",
+    "SubServices": [
+      {
+        "id": 3011,
+        "Service": 301,
+        "SubServiceName": "New Child Aadhaar (0 to 5 Years)",
+        "IsActive": true,
+        "CreatedAt": "2026-08-01T00:00:00Z",
+        "UpdatedAt": "2026-08-01T00:00:00Z",
+        "RequiredDocuments": [
+          {
+            "id": 30111,
+            "SubService": 3011,
+            "DocumentName": "Child Birth Certificate with QR code",
+            "document_type": "BIRTH_CERTIFICATE",
+            "IsRequired": true,
+            "CreatedAt": "2026-08-01T00:00:00Z"
+          },
+          {
+            "id": 30112,
+            "SubService": 3011,
+            "DocumentName": "Parent Aadhaar Card",
+            "document_type": "AADHAR",
+            "IsRequired": true,
+            "CreatedAt": "2026-08-01T00:00:00Z"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": 302,
+    "ServiceName": "New PAN Card (Form 49A)",
+    "ServiceNameGu": "PAN કાર્ડ (નવું)",
+    "Category": "NEW_SERVICES",
+    "SubCategory": "Income Tax",
+    "Department": "Income Tax Department / NSDL",
+    "ServiceType": "NEW",
+    "Description": "First-time PAN Card application for individual, student or business",
+    "GovernmentFee": 107,
+    "ServiceCharge": 93,
+    "TotalFee": 200,
+    "SlaDays": 7,
+    "Priority": "HIGH",
+    "SmsTemplateGu": "તમારું નવું PAN કાર્ડ બુક થઈ ગયું છે. ઈ-પેન 3 દિવસમાં આવશે. HY-TECH.",
+    "SmsTemplateEn": "New PAN Card booked. e-PAN will arrive in 3 days. HY-TECH.",
+    "IsOfficial": true,
+    "IsActive": true,
+    "CreatedAt": "2026-08-01T00:00:00Z",
+    "UpdatedAt": "2026-08-01T00:00:00Z",
+    "SubServices": [
+      {
+        "id": 3021,
+        "Service": 302,
+        "SubServiceName": "Instant e-KYC PAN Card",
+        "IsActive": true,
+        "CreatedAt": "2026-08-01T00:00:00Z",
+        "UpdatedAt": "2026-08-01T00:00:00Z",
+        "RequiredDocuments": [
+          {
+            "id": 30211,
+            "SubService": 3021,
+            "DocumentName": "Aadhaar Card with linked mobile",
+            "document_type": "AADHAR",
+            "IsRequired": true,
+            "CreatedAt": "2026-08-01T00:00:00Z"
+          },
+          {
+            "id": 30212,
+            "SubService": 3021,
+            "DocumentName": "Passport Size Photograph",
+            "document_type": "PHOTO",
+            "IsRequired": true,
+            "CreatedAt": "2026-08-01T00:00:00Z"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": 303,
+    "ServiceName": "New E-Shram Card",
+    "ServiceNameGu": "E-શ્રમ કાર્ડ (નવું)",
+    "Category": "NEW_SERVICES",
+    "SubCategory": "Labour Welfare",
+    "Department": "Ministry of Labour & Employment",
+    "ServiceType": "NEW",
+    "Description": "National Database of Unorganized Workers (NDUW) Registration",
+    "GovernmentFee": 0,
+    "ServiceCharge": 70,
+    "TotalFee": 70,
+    "SlaDays": 1,
+    "Priority": "MEDIUM",
+    "SmsTemplateGu": "તમારું નવું E-શ્રમ કાર્ડ બની ગયું છે. HY-TECH.",
+    "SmsTemplateEn": "Your new E-Shram Card has been generated. HY-TECH.",
+    "IsOfficial": true,
+    "IsActive": true,
+    "CreatedAt": "2026-08-01T00:00:00Z",
+    "UpdatedAt": "2026-08-01T00:00:00Z",
+    "SubServices": [
+      {
+        "id": 3031,
+        "Service": 303,
+        "SubServiceName": "First-time Worker Registration",
+        "IsActive": true,
+        "CreatedAt": "2026-08-01T00:00:00Z",
+        "UpdatedAt": "2026-08-01T00:00:00Z",
+        "RequiredDocuments": [
+          {
+            "id": 30311,
+            "SubService": 3031,
+            "DocumentName": "Aadhaar Card",
+            "document_type": "AADHAR",
+            "IsRequired": true,
+            "CreatedAt": "2026-08-01T00:00:00Z"
+          },
+          {
+            "id": 30312,
+            "SubService": 3031,
+            "DocumentName": "Bank Account Passbook",
+            "document_type": "OTHER",
+            "IsRequired": true,
+            "CreatedAt": "2026-08-01T00:00:00Z"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": 304,
+    "ServiceName": "New Ayushman Card (PMJAY)",
+    "ServiceNameGu": "આયુષ્માન કાર્ડ (નવું)",
+    "Category": "NEW_SERVICES",
+    "SubCategory": "Health Insurance",
+    "Department": "National Health Authority",
+    "ServiceType": "NEW",
+    "Description": "Free ₹5,00,000 Hospital Treatment Card Registration",
+    "GovernmentFee": 0,
+    "ServiceCharge": 70,
+    "TotalFee": 70,
+    "SlaDays": 3,
+    "Priority": "HIGH",
+    "SmsTemplateGu": "તમારું નવું આયુષ્માન ભારત કાર્ડ તૈયાર છે. મેળવી લેશો. HY-TECH.",
+    "SmsTemplateEn": "Your new Ayushman card is ready for collection. HY-TECH.",
+    "IsOfficial": true,
+    "IsActive": true,
+    "CreatedAt": "2026-08-01T00:00:00Z",
+    "UpdatedAt": "2026-08-01T00:00:00Z",
+    "SubServices": [
+      {
+        "id": 3041,
+        "Service": 304,
+        "SubServiceName": "PMJAY Beneficiary Enrolment",
+        "IsActive": true,
+        "CreatedAt": "2026-08-01T00:00:00Z",
+        "UpdatedAt": "2026-08-01T00:00:00Z",
+        "RequiredDocuments": [
+          {
+            "id": 30411,
+            "SubService": 3041,
+            "DocumentName": "Ration Card (NFSA / BPL)",
+            "document_type": "RATION_CARD",
+            "IsRequired": true,
+            "CreatedAt": "2026-08-01T00:00:00Z"
+          },
+          {
+            "id": 30412,
+            "SubService": 3041,
+            "DocumentName": "Aadhaar Card",
+            "document_type": "AADHAR",
+            "IsRequired": true,
+            "CreatedAt": "2026-08-01T00:00:00Z"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": 305,
+    "ServiceName": "New Voter Registration (Form 6)",
+    "ServiceNameGu": "વોટર કાર્ડ (નવું)",
+    "Category": "NEW_SERVICES",
+    "SubCategory": "Election Commission",
+    "Department": "ECI",
+    "ServiceType": "NEW",
+    "Description": "Form 6 - First time voter registration for citizens aged 18+",
+    "GovernmentFee": 0,
+    "ServiceCharge": 70,
+    "TotalFee": 70,
+    "SlaDays": 20,
+    "Priority": "MEDIUM",
+    "SmsTemplateGu": "નવા વોટર કાર્ડ માટે ફોર્મ 6 સબમિટ થઈ ગયું છે. HY-TECH.",
+    "SmsTemplateEn": "Form 6 for new voter ID submitted. Reference saved. HY-TECH.",
+    "IsOfficial": true,
+    "IsActive": true,
+    "CreatedAt": "2026-08-01T00:00:00Z",
+    "UpdatedAt": "2026-08-01T00:00:00Z",
+    "SubServices": [
+      {
+        "id": 3051,
+        "Service": 305,
+        "SubServiceName": "Form 6 New Registration",
+        "IsActive": true,
+        "CreatedAt": "2026-08-01T00:00:00Z",
+        "UpdatedAt": "2026-08-01T00:00:00Z",
+        "RequiredDocuments": [
+          {
+            "id": 30511,
+            "SubService": 3051,
+            "DocumentName": "Aadhaar Card / Age Proof",
+            "document_type": "AADHAR",
+            "IsRequired": true,
+            "CreatedAt": "2026-08-01T00:00:00Z"
+          },
+          {
+            "id": 30512,
+            "SubService": 3051,
+            "DocumentName": "Passport Size Photograph",
+            "document_type": "PHOTO",
+            "IsRequired": true,
+            "CreatedAt": "2026-08-01T00:00:00Z"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": 306,
+    "ServiceName": "New Ration Card Application",
+    "ServiceNameGu": "રેશન કાર્ડ (નવું)",
+    "Category": "NEW_SERVICES",
+    "SubCategory": "Food & Civil Supplies",
+    "Department": "Food & Civil Supplies Department",
+    "ServiceType": "NEW",
+    "Description": "New Separate Household Ration Card Application (Separate Chulha)",
+    "GovernmentFee": 50,
+    "ServiceCharge": 150,
+    "TotalFee": 200,
+    "SlaDays": 25,
+    "Priority": "HIGH",
+    "SmsTemplateGu": "નવા રેશનકાર્ડની અરજી નોંધાઈ ગઈ છે. HY-TECH સેવા કેન્દ્ર.",
+    "SmsTemplateEn": "New Ration Card application recorded. HY-TECH Service Center.",
+    "IsOfficial": true,
+    "IsActive": true,
+    "CreatedAt": "2026-08-01T00:00:00Z",
+    "UpdatedAt": "2026-08-01T00:00:00Z",
+    "SubServices": [
+      {
+        "id": 3061,
+        "Service": 306,
+        "SubServiceName": "New Household Separation Form",
+        "IsActive": true,
+        "CreatedAt": "2026-08-01T00:00:00Z",
+        "UpdatedAt": "2026-08-01T00:00:00Z",
+        "RequiredDocuments": [
+          {
+            "id": 30611,
+            "SubService": 3061,
+            "DocumentName": "Parent Ration Card Cancellation / Name Deletion Slip",
+            "document_type": "RATION_CARD",
+            "IsRequired": true,
+            "CreatedAt": "2026-08-01T00:00:00Z"
+          },
+          {
+            "id": 30612,
+            "SubService": 3061,
+            "DocumentName": "Aadhaar Card of All Members",
+            "document_type": "AADHAR",
+            "IsRequired": true,
+            "CreatedAt": "2026-08-01T00:00:00Z"
+          },
+          {
+            "id": 30613,
+            "SubService": 3061,
+            "DocumentName": "Electricity Bill of Current Residence",
+            "document_type": "OTHER",
+            "IsRequired": true,
+            "CreatedAt": "2026-08-01T00:00:00Z"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": 401,
+    "ServiceName": "Xerox / Photocopy Service",
+    "ServiceNameGu": "ઝેરોક્સ",
+    "Category": "OTHER_SERVICES",
+    "SubCategory": "Reprographics",
+    "Department": "HY-TECH Center",
+    "ServiceType": "OTHER",
+    "Description": "High-speed Black & White and Duplex Document Photocopying",
+    "GovernmentFee": 0,
+    "ServiceCharge": 2,
+    "TotalFee": 2,
+    "SlaDays": 0,
+    "Priority": "LOW",
+    "SmsTemplateGu": "તમારી ઝેરોક્સ પ્રિન્ટ્સ તૈયાર છે. HY-TECH.",
+    "SmsTemplateEn": "Your photocopy prints are ready. HY-TECH.",
+    "IsOfficial": false,
+    "IsActive": true,
+    "CreatedAt": "2026-08-01T00:00:00Z",
+    "UpdatedAt": "2026-08-01T00:00:00Z",
+    "SubServices": [
+      {
+        "id": 4011,
+        "Service": 401,
+        "SubServiceName": "Standard A4 Xerox",
+        "IsActive": true,
+        "CreatedAt": "2026-08-01T00:00:00Z",
+        "UpdatedAt": "2026-08-01T00:00:00Z",
+        "RequiredDocuments": []
+      }
+    ]
+  },
+  {
+    "id": 402,
+    "ServiceName": "Document Lamination",
+    "ServiceNameGu": "લેમિનેશન",
+    "Category": "OTHER_SERVICES",
+    "SubCategory": "Document Protection",
+    "Department": "HY-TECH Center",
+    "ServiceType": "OTHER",
+    "Description": "Heavy-duty 125 Micron & 250 Micron Thermal Document Lamination",
+    "GovernmentFee": 0,
+    "ServiceCharge": 20,
+    "TotalFee": 20,
+    "SlaDays": 0,
+    "Priority": "LOW",
+    "SmsTemplateGu": "તમારા ડોક્યુમેન્ટ લેમિનેશન તૈયાર છે. HY-TECH.",
+    "SmsTemplateEn": "Your document lamination is completed. HY-TECH.",
+    "IsOfficial": false,
+    "IsActive": true,
+    "CreatedAt": "2026-08-01T00:00:00Z",
+    "UpdatedAt": "2026-08-01T00:00:00Z",
+    "SubServices": [
+      {
+        "id": 4021,
+        "Service": 402,
+        "SubServiceName": "A4 Document Lamination",
+        "IsActive": true,
+        "CreatedAt": "2026-08-01T00:00:00Z",
+        "UpdatedAt": "2026-08-01T00:00:00Z",
+        "RequiredDocuments": []
+      }
+    ]
+  },
+  {
+    "id": 403,
+    "ServiceName": "Color Printing Service",
+    "ServiceNameGu": "કલર પ્રિન્ટ",
+    "Category": "OTHER_SERVICES",
+    "SubCategory": "Printing",
+    "Department": "HY-TECH Center",
+    "ServiceType": "OTHER",
+    "Description": "Glossy & Matte High-Resolution Color Printouts for Certificates & Projects",
+    "GovernmentFee": 0,
+    "ServiceCharge": 15,
+    "TotalFee": 15,
+    "SlaDays": 0,
+    "Priority": "LOW",
+    "SmsTemplateGu": "તમારા કલર પ્રિન્ટ્સ તૈયાર છે. HY-TECH.",
+    "SmsTemplateEn": "Your color printouts are ready. HY-TECH.",
+    "IsOfficial": false,
+    "IsActive": true,
+    "CreatedAt": "2026-08-01T00:00:00Z",
+    "UpdatedAt": "2026-08-01T00:00:00Z",
+    "SubServices": [
+      {
+        "id": 4031,
+        "Service": 403,
+        "SubServiceName": "Color Print A4",
+        "IsActive": true,
+        "CreatedAt": "2026-08-01T00:00:00Z",
+        "UpdatedAt": "2026-08-01T00:00:00Z",
+        "RequiredDocuments": []
+      }
+    ]
+  },
+  {
+    "id": 404,
+    "ServiceName": "Smart PVC Card Printing",
+    "ServiceNameGu": "PVC કાર્ડ",
+    "Category": "OTHER_SERVICES",
+    "SubCategory": "Plastic Cards",
+    "Department": "HY-TECH Center",
+    "ServiceType": "NEW",
+    "Description": "ATM-Quality Waterproof Plastic PVC Printing for Aadhaar, PAN, Ayushman, Voter",
+    "GovernmentFee": 0,
+    "ServiceCharge": 50,
+    "TotalFee": 50,
+    "SlaDays": 0,
+    "Priority": "MEDIUM",
+    "SmsTemplateGu": "તમારું સ્માર્ટ PVC પ્લાસ્ટિક કાર્ડ પ્રિન્ટ થઈ ગયું છે. HY-TECH.",
+    "SmsTemplateEn": "Your smart PVC plastic card is printed and ready. HY-TECH.",
+    "IsOfficial": false,
+    "IsActive": true,
+    "CreatedAt": "2026-08-01T00:00:00Z",
+    "UpdatedAt": "2026-08-01T00:00:00Z",
+    "SubServices": [
+      {
+        "id": 4041,
+        "Service": 404,
+        "SubServiceName": "PVC Card Print (Aadhaar / Ayushman / PAN)",
+        "IsActive": true,
+        "CreatedAt": "2026-08-01T00:00:00Z",
+        "UpdatedAt": "2026-08-01T00:00:00Z",
+        "RequiredDocuments": [
+          {
+            "id": 40411,
+            "SubService": 4041,
+            "DocumentName": "Original Digital PDF File",
+            "document_type": "OTHER",
+            "IsRequired": true,
+            "CreatedAt": "2026-08-01T00:00:00Z"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": 405,
+    "ServiceName": "Bio-Data / Professional Resume",
+    "ServiceNameGu": "બાયો ડેટા (Resume)",
+    "Category": "OTHER_SERVICES",
+    "SubCategory": "Job & Matrimonial",
+    "Department": "HY-TECH Center",
+    "ServiceType": "NEW",
+    "Description": "Professional Job Resume, Curriculum Vitae, and Matrimonial Bio-Data Drafting",
+    "GovernmentFee": 0,
+    "ServiceCharge": 80,
+    "TotalFee": 80,
+    "SlaDays": 1,
+    "Priority": "LOW",
+    "SmsTemplateGu": "તમારો પ્રોફેશનલ બાયોડેટા તૈયાર થઈ ગયો છે. HY-TECH.",
+    "SmsTemplateEn": "Your professional bio-data / resume is ready. HY-TECH.",
+    "IsOfficial": false,
+    "IsActive": true,
+    "CreatedAt": "2026-08-01T00:00:00Z",
+    "UpdatedAt": "2026-08-01T00:00:00Z",
+    "SubServices": [
+      {
+        "id": 4051,
+        "Service": 405,
+        "SubServiceName": "Job Resume / Lagna Biodata",
+        "IsActive": true,
+        "CreatedAt": "2026-08-01T00:00:00Z",
+        "UpdatedAt": "2026-08-01T00:00:00Z",
+        "RequiredDocuments": []
+      }
+    ]
+  },
+  {
+    "id": 406,
+    "ServiceName": "Instant Passport Size Photographs",
+    "ServiceNameGu": "પાસપોર્ટ સાઇઝ ફોટો",
+    "Category": "OTHER_SERVICES",
+    "SubCategory": "Photography",
+    "Department": "HY-TECH Center",
+    "ServiceType": "NEW",
+    "Description": "8 / 16 / 32 Copies Instant Passport Size Photos with White / Blue Background",
+    "GovernmentFee": 0,
+    "ServiceCharge": 50,
+    "TotalFee": 50,
+    "SlaDays": 0,
+    "Priority": "LOW",
+    "SmsTemplateGu": "તમારા પાસપોર્ટ સાઇઝ ફોટા તૈયાર છે. HY-TECH.",
+    "SmsTemplateEn": "Your passport size photographs are ready. HY-TECH.",
+    "IsOfficial": false,
+    "IsActive": true,
+    "CreatedAt": "2026-08-01T00:00:00Z",
+    "UpdatedAt": "2026-08-01T00:00:00Z",
+    "SubServices": [
+      {
+        "id": 4061,
+        "Service": 406,
+        "SubServiceName": "8 Photos Instant Pack",
+        "IsActive": true,
+        "CreatedAt": "2026-08-01T00:00:00Z",
+        "UpdatedAt": "2026-08-01T00:00:00Z",
+        "RequiredDocuments": []
+      }
+    ]
+  },
+  {
+    "id": 407,
+    "ServiceName": "Digital Signature Certificate (DSC)",
+    "ServiceNameGu": "ડિજિટલ સહી / સહી સંબંધિત સેવા",
+    "Category": "OTHER_SERVICES",
+    "SubCategory": "E-Governance & Tenders",
+    "Department": "CCA / eMudhra / Capricorn",
+    "ServiceType": "NEW",
+    "Description": "Class 3 Digital Signature Token for e-Tendering, GST & ROC Filings",
+    "GovernmentFee": 800,
+    "ServiceCharge": 400,
+    "TotalFee": 1200,
+    "SlaDays": 2,
+    "Priority": "HIGH",
+    "SmsTemplateGu": "તમારું ડિજિટલ સહી ટોકન (DSC) તૈયાર છે. HY-TECH.",
+    "SmsTemplateEn": "Your Digital Signature Certificate token is ready. HY-TECH.",
+    "IsOfficial": true,
+    "IsActive": true,
+    "CreatedAt": "2026-08-01T00:00:00Z",
+    "UpdatedAt": "2026-08-01T00:00:00Z",
+    "SubServices": [
+      {
+        "id": 4071,
+        "Service": 407,
+        "SubServiceName": "Class 3 DSC (2 Years Validity)",
+        "IsActive": true,
+        "CreatedAt": "2026-08-01T00:00:00Z",
+        "UpdatedAt": "2026-08-01T00:00:00Z",
+        "RequiredDocuments": [
+          {
+            "id": 40711,
+            "SubService": 4071,
+            "DocumentName": "Aadhaar Card",
+            "document_type": "AADHAR",
+            "IsRequired": true,
+            "CreatedAt": "2026-08-01T00:00:00Z"
+          },
+          {
+            "id": 40712,
+            "SubService": 4071,
+            "DocumentName": "PAN Card",
+            "document_type": "PAN",
+            "IsRequired": true,
+            "CreatedAt": "2026-08-01T00:00:00Z"
+          },
+          {
+            "id": 40713,
+            "SubService": 4071,
+            "DocumentName": "Passport Size Photo",
+            "document_type": "PHOTO",
+            "IsRequired": true,
+            "CreatedAt": "2026-08-01T00:00:00Z"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": 501,
+    "ServiceName": "Course on Computer Concepts (C.C.C)",
+    "ServiceNameGu": "C.C.C",
+    "Category": "COMPUTER_COURSES",
+    "SubCategory": "Govt Job Qualification",
+    "Department": "NIELIT / Gujarat Govt Approved",
+    "ServiceType": "NEW",
+    "Description": "Complete Basic Computer Course mandatory for Gujarat Government Job Aspirants",
+    "GovernmentFee": 500,
+    "ServiceCharge": 1500,
+    "TotalFee": 2000,
+    "SlaDays": 60,
+    "Priority": "MEDIUM",
+    "SmsTemplateGu": "CCC કોર્સમાં તમારું એડમિશન કન્ફર્મ થઈ ગયું છે. HY-TECH એકેડમી.",
+    "SmsTemplateEn": "CCC admission confirmed. Welcome to HY-TECH Academy.",
+    "IsOfficial": true,
+    "IsActive": true,
+    "CreatedAt": "2026-08-01T00:00:00Z",
+    "UpdatedAt": "2026-08-01T00:00:00Z",
+    "SubServices": [
+      {
+        "id": 5011,
+        "Service": 501,
+        "SubServiceName": "CCC 3-Months Certification Batch",
+        "IsActive": true,
+        "CreatedAt": "2026-08-01T00:00:00Z",
+        "UpdatedAt": "2026-08-01T00:00:00Z",
+        "RequiredDocuments": [
+          {
+            "id": 50111,
+            "SubService": 5011,
+            "DocumentName": "Student Aadhaar Card",
+            "document_type": "AADHAR",
+            "IsRequired": true,
+            "CreatedAt": "2026-08-01T00:00:00Z"
+          },
+          {
+            "id": 50112,
+            "SubService": 5011,
+            "DocumentName": "10th Marksheet",
+            "document_type": "OTHER",
+            "IsRequired": true,
+            "CreatedAt": "2026-08-01T00:00:00Z"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": 502,
+    "ServiceName": "Tally Prime with GST",
+    "ServiceNameGu": "TALLY Prime with GST (Accounting)",
+    "Category": "COMPUTER_COURSES",
+    "SubCategory": "Accounting & Taxation",
+    "Department": "HY-TECH Skill Center",
+    "ServiceType": "NEW",
+    "Description": "Professional Business Accounting, Invoicing, GST Return Filing & Banking in Tally Prime",
+    "GovernmentFee": 0,
+    "ServiceCharge": 3500,
+    "TotalFee": 3500,
+    "SlaDays": 60,
+    "Priority": "MEDIUM",
+    "SmsTemplateGu": "ટેલી પ્રાઇમ એકાઉન્ટિંગ કોર્સમાં એડમિશન કન્ફર્મ. HY-TECH.",
+    "SmsTemplateEn": "Tally Prime with GST admission confirmed. HY-TECH.",
+    "IsOfficial": false,
+    "IsActive": true,
+    "CreatedAt": "2026-08-01T00:00:00Z",
+    "UpdatedAt": "2026-08-01T00:00:00Z",
+    "SubServices": [
+      {
+        "id": 5021,
+        "Service": 502,
+        "SubServiceName": "Tally Prime Master Accounting",
+        "IsActive": true,
+        "CreatedAt": "2026-08-01T00:00:00Z",
+        "UpdatedAt": "2026-08-01T00:00:00Z",
+        "RequiredDocuments": [
+          {
+            "id": 50211,
+            "SubService": 5021,
+            "DocumentName": "Aadhaar Card",
+            "document_type": "AADHAR",
+            "IsRequired": true,
+            "CreatedAt": "2026-08-01T00:00:00Z"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": 503,
+    "ServiceName": "Desktop Publishing (D.T.P.)",
+    "ServiceNameGu": "D.T.P. (Desktop Publishing)",
+    "Category": "COMPUTER_COURSES",
+    "SubCategory": "Graphic Design",
+    "Department": "HY-TECH Skill Center",
+    "ServiceType": "NEW",
+    "Description": "Adobe Photoshop, CorelDraw, Pagemaker, Gujarati & English Typing for Flex Printing",
+    "GovernmentFee": 0,
+    "ServiceCharge": 3000,
+    "TotalFee": 3000,
+    "SlaDays": 60,
+    "Priority": "LOW",
+    "SmsTemplateGu": "DTP કોર્સ એડમિશન કન્ફર્મ થયેલ છે. HY-TECH.",
+    "SmsTemplateEn": "DTP graphic design course admission confirmed. HY-TECH.",
+    "IsOfficial": false,
+    "IsActive": true,
+    "CreatedAt": "2026-08-01T00:00:00Z",
+    "UpdatedAt": "2026-08-01T00:00:00Z",
+    "SubServices": [
+      {
+        "id": 5031,
+        "Service": 503,
+        "SubServiceName": "Photoshop + CorelDraw Masterclass",
+        "IsActive": true,
+        "CreatedAt": "2026-08-01T00:00:00Z",
+        "UpdatedAt": "2026-08-01T00:00:00Z",
+        "RequiredDocuments": [
+          {
+            "id": 50311,
+            "SubService": 5031,
+            "DocumentName": "Aadhaar Card",
+            "document_type": "AADHAR",
+            "IsRequired": true,
+            "CreatedAt": "2026-08-01T00:00:00Z"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": 504,
+    "ServiceName": "Data Entry Operator Training",
+    "ServiceNameGu": "Data Entry Operator",
+    "Category": "COMPUTER_COURSES",
+    "SubCategory": "Office Skills",
+    "Department": "HY-TECH Skill Center",
+    "ServiceType": "NEW",
+    "Description": "Fast Typing in Gujarati & English, Advanced MS Excel, Word & Data Formatting",
+    "GovernmentFee": 0,
+    "ServiceCharge": 2000,
+    "TotalFee": 2000,
+    "SlaDays": 30,
+    "Priority": "LOW",
+    "SmsTemplateGu": "ડેટા એન્ટ્રી ઓપરેટર ટ્રેનિંગમાં સ્વાગત છે. HY-TECH.",
+    "SmsTemplateEn": "Welcome to Data Entry Operator training. HY-TECH.",
+    "IsOfficial": false,
+    "IsActive": true,
+    "CreatedAt": "2026-08-01T00:00:00Z",
+    "UpdatedAt": "2026-08-01T00:00:00Z",
+    "SubServices": [
+      {
+        "id": 5041,
+        "Service": 504,
+        "SubServiceName": "Speed Typing & Advanced Excel",
+        "IsActive": true,
+        "CreatedAt": "2026-08-01T00:00:00Z",
+        "UpdatedAt": "2026-08-01T00:00:00Z",
+        "RequiredDocuments": []
+      }
+    ]
+  },
+  {
+    "id": 505,
+    "ServiceName": "Computer Hardware & Networking",
+    "ServiceNameGu": "Computer Hardware & Network",
+    "Category": "COMPUTER_COURSES",
+    "SubCategory": "Technical Skills",
+    "Department": "HY-TECH Skill Center",
+    "ServiceType": "NEW",
+    "Description": "PC Assembling, Windows Installation, Printer Servicing, LAN & WiFi Troubleshooting",
+    "GovernmentFee": 0,
+    "ServiceCharge": 4000,
+    "TotalFee": 4000,
+    "SlaDays": 60,
+    "Priority": "LOW",
+    "SmsTemplateGu": "હાર્ડવેર અને નેટવર્કિંગ કોર્સમાં એડમિશન કન્ફર્મ. HY-TECH.",
+    "SmsTemplateEn": "Hardware & Networking admission confirmed. HY-TECH.",
+    "IsOfficial": false,
+    "IsActive": true,
+    "CreatedAt": "2026-08-01T00:00:00Z",
+    "UpdatedAt": "2026-08-01T00:00:00Z",
+    "SubServices": [
+      {
+        "id": 5051,
+        "Service": 505,
+        "SubServiceName": "Hardware Maintenance & LAN",
+        "IsActive": true,
+        "CreatedAt": "2026-08-01T00:00:00Z",
+        "UpdatedAt": "2026-08-01T00:00:00Z",
+        "RequiredDocuments": []
+      }
+    ]
+  },
+  {
+    "id": 506,
+    "ServiceName": "Programming (HTML, Web, C++, Java)",
+    "ServiceNameGu": "HTML, Web Design, C++, Java",
+    "Category": "COMPUTER_COURSES",
+    "SubCategory": "Software Development",
+    "Department": "HY-TECH Skill Center",
+    "ServiceType": "NEW",
+    "Description": "Foundation in Computer Programming, Logic Building, Web Pages & Java Objects",
+    "GovernmentFee": 0,
+    "ServiceCharge": 4500,
+    "TotalFee": 4500,
+    "SlaDays": 90,
+    "Priority": "LOW",
+    "SmsTemplateGu": "પ્રોગ્રામિંગ કોર્સ એડમિશન કન્ફર્મ થયેલ છે. HY-TECH.",
+    "SmsTemplateEn": "Programming foundation course admission confirmed. HY-TECH.",
+    "IsOfficial": false,
+    "IsActive": true,
+    "CreatedAt": "2026-08-01T00:00:00Z",
+    "UpdatedAt": "2026-08-01T00:00:00Z",
+    "SubServices": [
+      {
+        "id": 5061,
+        "Service": 506,
+        "SubServiceName": "Web Development & C++/Java",
+        "IsActive": true,
+        "CreatedAt": "2026-08-01T00:00:00Z",
+        "UpdatedAt": "2026-08-01T00:00:00Z",
+        "RequiredDocuments": []
+      }
+    ]
+  },
+  {
+    "id": 601,
+    "ServiceName": "Online Printing & Form Assistance",
+    "ServiceNameGu": "ઓનલાઈન પ્રિન્ટિંગ / ફોર્મ ભરવાની સેવા",
+    "Category": "ADDITIONAL_SERVICES",
+    "SubCategory": "Online Desk",
+    "Department": "HY-TECH Center",
+    "ServiceType": "OTHER",
+    "Description": "Assisted form filling for private tenders, college forms, and official printouts",
+    "GovernmentFee": 0,
+    "ServiceCharge": 50,
+    "TotalFee": 50,
+    "SlaDays": 1,
+    "Priority": "MEDIUM",
+    "SmsTemplateGu": "ઓનલાઈન ફોર્મ પ્રક્રિયા પૂર્ણ થયેલ છે. HY-TECH.",
+    "SmsTemplateEn": "Online form process has been completed. HY-TECH.",
+    "IsOfficial": false,
+    "IsActive": true,
+    "CreatedAt": "2026-08-01T00:00:00Z",
+    "UpdatedAt": "2026-08-01T00:00:00Z",
+    "SubServices": [
+      {
+        "id": 6011,
+        "Service": 601,
+        "SubServiceName": "General Online Form Filing",
+        "IsActive": true,
+        "CreatedAt": "2026-08-01T00:00:00Z",
+        "UpdatedAt": "2026-08-01T00:00:00Z",
+        "RequiredDocuments": []
+      }
+    ]
+  },
+  {
+    "id": 602,
+    "ServiceName": "Driving License Services (Sarathi)",
+    "ServiceNameGu": "ડ્રાઇવિંગ / ઓનલાઈન સેવાઓ",
+    "Category": "ADDITIONAL_SERVICES",
+    "SubCategory": "RTO & Transport",
+    "Department": "Ministry of Road Transport and Highways (Sarathi Parivahan)",
+    "ServiceType": "NEW",
+    "Description": "Learner License Appointment, LL Test Slot Booking, Driving License Renewal",
+    "GovernmentFee": 150,
+    "ServiceCharge": 150,
+    "TotalFee": 300,
+    "SlaDays": 7,
+    "Priority": "HIGH",
+    "SmsTemplateGu": "ડ્રાઇવિંગ લાયસન્સ ટેસ્ટ સ્લોટ બુક થઈ ગયો છે. HY-TECH.",
+    "SmsTemplateEn": "Driving license test slot is confirmed. HY-TECH.",
+    "IsOfficial": true,
+    "IsActive": true,
+    "CreatedAt": "2026-08-01T00:00:00Z",
+    "UpdatedAt": "2026-08-01T00:00:00Z",
+    "SubServices": [
+      {
+        "id": 6021,
+        "Service": 602,
+        "SubServiceName": "Learner License (LL) Online Slot",
+        "IsActive": true,
+        "CreatedAt": "2026-08-01T00:00:00Z",
+        "UpdatedAt": "2026-08-01T00:00:00Z",
+        "RequiredDocuments": [
+          {
+            "id": 60211,
+            "SubService": 6021,
+            "DocumentName": "Aadhaar Card",
+            "document_type": "AADHAR",
+            "IsRequired": true,
+            "CreatedAt": "2026-08-01T00:00:00Z"
+          },
+          {
+            "id": 60212,
+            "SubService": 6021,
+            "DocumentName": "School Leaving Certificate (LC)",
+            "document_type": "OTHER",
+            "IsRequired": true,
+            "CreatedAt": "2026-08-01T00:00:00Z"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": 603,
+    "ServiceName": "Utility Bills Payment (Electricity, Gas, Water)",
+    "ServiceNameGu": "લાઇવ બિલ / અન્ય સેવા",
+    "Category": "ADDITIONAL_SERVICES",
+    "SubCategory": "Bill Payment",
+    "Department": "PGVCL / DGVCL / MGVCL / Gujarat Gas",
+    "ServiceType": "OTHER",
+    "Description": "Instant Light Bill, Gas Bill, Water Tax payment with official printed receipt",
+    "GovernmentFee": 0,
+    "ServiceCharge": 20,
+    "TotalFee": 20,
+    "SlaDays": 0,
+    "Priority": "HIGH",
+    "SmsTemplateGu": "તમારું લાઇટ બિલ સફળતાપૂર્વક ભરાઈ ગયું છે. રસીદ સાચવવી. HY-TECH.",
+    "SmsTemplateEn": "Your electricity bill payment was successful. Keep receipt. HY-TECH.",
+    "IsOfficial": true,
+    "IsActive": true,
+    "CreatedAt": "2026-08-01T00:00:00Z",
+    "UpdatedAt": "2026-08-01T00:00:00Z",
+    "SubServices": [
+      {
+        "id": 6031,
+        "Service": 603,
+        "SubServiceName": "Electricity Bill Payment (PGVCL/DGVCL)",
+        "IsActive": true,
+        "CreatedAt": "2026-08-01T00:00:00Z",
+        "UpdatedAt": "2026-08-01T00:00:00Z",
+        "RequiredDocuments": [
+          {
+            "id": 60311,
+            "SubService": 6031,
+            "DocumentName": "Consumer Number / Bill Copy",
+            "document_type": "OTHER",
+            "IsRequired": true,
+            "CreatedAt": "2026-08-01T00:00:00Z"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": 604,
+    "ServiceName": "Birth & Death Certificate Verification",
+    "ServiceNameGu": "જન્મ / મરણ દાખલો",
+    "Category": "ADDITIONAL_SERVICES",
+    "SubCategory": "Civil Registration",
+    "Department": "Nagar Palika / Gram Panchayat",
+    "ServiceType": "NEW",
+    "Description": "Digital verification, duplicate issuance and English translation of birth/death records",
+    "GovernmentFee": 20,
+    "ServiceCharge": 80,
+    "TotalFee": 100,
+    "SlaDays": 5,
+    "Priority": "HIGH",
+    "SmsTemplateGu": "જન્મ / મરણ પ્રમાણપત્ર તૈયાર છે. મેળવી લેશો. HY-TECH.",
+    "SmsTemplateEn": "Birth / Death certificate is ready. Please collect. HY-TECH.",
+    "IsOfficial": true,
+    "IsActive": true,
+    "CreatedAt": "2026-08-01T00:00:00Z",
+    "UpdatedAt": "2026-08-01T00:00:00Z",
+    "SubServices": [
+      {
+        "id": 6041,
+        "Service": 604,
+        "SubServiceName": "Digital QR Certificate Copy",
+        "IsActive": true,
+        "CreatedAt": "2026-08-01T00:00:00Z",
+        "UpdatedAt": "2026-08-01T00:00:00Z",
+        "RequiredDocuments": [
+          {
+            "id": 60411,
+            "SubService": 6041,
+            "DocumentName": "Parent Aadhaar Card",
+            "document_type": "AADHAR",
+            "IsRequired": true,
+            "CreatedAt": "2026-08-01T00:00:00Z"
+          },
+          {
+            "id": 60412,
+            "SubService": 6041,
+            "DocumentName": "Hospital Discharge Card / Slip",
+            "document_type": "BIRTH_CERTIFICATE",
+            "IsRequired": true,
+            "CreatedAt": "2026-08-01T00:00:00Z"
+          }
+        ]
+      }
+    ]
+  }
+]

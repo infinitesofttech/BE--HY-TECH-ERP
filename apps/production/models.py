@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.db import models
+from django.utils import timezone
 
 
 class ProductionStage(models.Model):
@@ -22,7 +23,7 @@ class Machine(models.Model):
     STATUS_CHOICES = [('active', 'Active'), ('inactive', 'Inactive')]
 
     name = models.CharField(max_length=200)
-    code = models.CharField(max_length=50, unique=True, blank=True)
+    code = models.CharField(max_length=50, unique=True, null=True, blank=True)
     machine_type = models.CharField(max_length=100, blank=True)
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='active')
     created_at = models.DateTimeField(auto_now_add=True)
@@ -36,6 +37,7 @@ class Machine(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.code:
+            self.code = None
             super().save(*args, **kwargs)
             self.code = f'M-{self.pk:03d}'
             super().save(update_fields=['code'])
@@ -105,7 +107,7 @@ class JobOrder(models.Model):
         ('cancelled', 'Cancelled'),
     ]
 
-    job_no = models.CharField(max_length=20, unique=True, blank=True)
+    job_no = models.CharField(max_length=20, unique=True, null=True, blank=True)
     sales_order = models.ForeignKey(
         'sales.SalesOrder',
         on_delete=models.SET_NULL,
@@ -160,6 +162,12 @@ class JobOrder(models.Model):
         blank=True,
         related_name='job_order_operations',
     )
+    workers = models.ManyToManyField(
+        'Worker',
+        blank=True,
+        related_name='job_orders',
+        help_text='Production workers assigned to this job order.',
+    )
     bom = models.ForeignKey(
         Bom,
         on_delete=models.SET_NULL,
@@ -179,6 +187,7 @@ class JobOrder(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.job_no:
+            self.job_no = None
             super().save(*args, **kwargs)
             self.job_no = f'JO-{self.pk:04d}'
             super().save(update_fields=['job_no'])
@@ -221,7 +230,7 @@ class MaterialRequirement(models.Model):
 class MaterialIssueSlip(models.Model):
     STATUS_CHOICES = [('draft', 'Draft'), ('issued', 'Issued'), ('closed', 'Closed')]
 
-    slip_no = models.CharField(max_length=20, unique=True, blank=True)
+    slip_no = models.CharField(max_length=20, unique=True, null=True, blank=True)
     job_order = models.ForeignKey(
         JobOrder,
         on_delete=models.CASCADE,
@@ -234,6 +243,14 @@ class MaterialIssueSlip(models.Model):
         null=True,
         blank=True,
         related_name='issued_material_slips',
+    )
+    issued_to_worker = models.ForeignKey(
+        'Worker',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='material_issue_slips',
+        help_text='Worker this material is issued to.',
     )
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='draft')
     created_by = models.ForeignKey(
@@ -254,6 +271,7 @@ class MaterialIssueSlip(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.slip_no:
+            self.slip_no = None
             super().save(*args, **kwargs)
             self.slip_no = f'MIS-{self.pk:04d}'
             super().save(update_fields=['slip_no'])
@@ -294,7 +312,7 @@ class PurchaseRequisition(models.Model):
         ('completed', 'Completed'),
     ]
 
-    requisition_no = models.CharField(max_length=20, unique=True, blank=True)
+    requisition_no = models.CharField(max_length=20, unique=True, null=True, blank=True)
     job_order = models.ForeignKey(
         JobOrder,
         on_delete=models.SET_NULL,
@@ -330,6 +348,7 @@ class PurchaseRequisition(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.requisition_no:
+            self.requisition_no = None
             super().save(*args, **kwargs)
             self.requisition_no = f'PRQ-{self.pk:04d}'
             super().save(update_fields=['requisition_no'])
@@ -364,7 +383,7 @@ class GoodsReceiptNote(models.Model):
         ('completed', 'Completed'),
     ]
 
-    grn_no = models.CharField(max_length=20, unique=True, blank=True)
+    grn_no = models.CharField(max_length=20, unique=True, null=True, blank=True)
     purchase_order = models.ForeignKey(
         'purchases.PurchaseOrder',
         on_delete=models.SET_NULL,
@@ -407,6 +426,7 @@ class GoodsReceiptNote(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.grn_no:
+            self.grn_no = None
             super().save(*args, **kwargs)
             self.grn_no = f'GRN-{self.pk:04d}'
             super().save(update_fields=['grn_no'])
@@ -437,7 +457,7 @@ class GRNItem(models.Model):
 class QualityInspection(models.Model):
     STATUS_CHOICES = [('pending', 'Pending'), ('passed', 'Passed'), ('failed', 'Failed')]
 
-    inspection_no = models.CharField(max_length=20, unique=True, blank=True)
+    inspection_no = models.CharField(max_length=20, unique=True, null=True, blank=True)
     grn = models.ForeignKey(
         GoodsReceiptNote,
         on_delete=models.SET_NULL,
@@ -483,6 +503,7 @@ class QualityInspection(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.inspection_no:
+            self.inspection_no = None
             super().save(*args, **kwargs)
             self.inspection_no = f'QI-{self.pk:04d}'
             super().save(update_fields=['inspection_no'])
@@ -506,6 +527,14 @@ class ProductionProcess(models.Model):
     )
     sequence = models.PositiveIntegerField()
     name = models.CharField(max_length=100)
+    worker = models.ForeignKey(
+        'Worker',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='production_processes',
+        help_text='Worker performing this production operation.',
+    )
     status = models.CharField(max_length=15, choices=STATUS_CHOICES, default='pending')
     started_at = models.DateTimeField(null=True, blank=True)
     completed_at = models.DateTimeField(null=True, blank=True)
@@ -521,7 +550,7 @@ class ProductionProcess(models.Model):
 class FinishedGoods(models.Model):
     STATUS_CHOICES = [('in_stock', 'In Stock'), ('dispatched', 'Dispatched')]
 
-    finished_goods_no = models.CharField(max_length=20, unique=True, blank=True)
+    finished_goods_no = models.CharField(max_length=20, unique=True, null=True, blank=True)
     job_order = models.ForeignKey(
         JobOrder,
         on_delete=models.CASCADE,
@@ -555,6 +584,7 @@ class FinishedGoods(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.finished_goods_no:
+            self.finished_goods_no = None
             super().save(*args, **kwargs)
             self.finished_goods_no = f'FG-{self.pk:04d}'
             self.barcode = f'FG{self.pk:06d}'
@@ -571,7 +601,7 @@ class Dispatch(models.Model):
         ('delivered', 'Delivered'),
     ]
 
-    dispatch_no = models.CharField(max_length=20, unique=True, blank=True)
+    dispatch_no = models.CharField(max_length=20, unique=True, null=True, blank=True)
     job_order = models.ForeignKey(
         JobOrder,
         on_delete=models.SET_NULL,
@@ -619,8 +649,103 @@ class Dispatch(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.dispatch_no:
+            self.dispatch_no = None
             super().save(*args, **kwargs)
             self.dispatch_no = f'DS-{self.pk:04d}'
             super().save(update_fields=['dispatch_no'])
             return
         super().save(*args, **kwargs)
+
+
+class Worker(models.Model):
+    WORKER_TYPE_CHOICES = [
+        ('cutting', 'Cutting'),
+        ('bending', 'Bending'),
+        ('welding', 'Welding'),
+        ('painting', 'Painting'),
+        ('assembly', 'Assembly'),
+        ('quality_check', 'Quality Check'),
+        ('packing', 'Packing'),
+        ('other', 'Other'),
+    ]
+    SKILL_LEVEL_CHOICES = [
+        ('junior', 'Junior'),
+        ('senior', 'Senior'),
+        ('supervisor', 'Supervisor'),
+    ]
+    STATUS_CHOICES = [('active', 'Active'), ('inactive', 'Inactive')]
+
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='production_worker_profile',
+        help_text='Benefit of being a User: the worker gets check-in/checkout, attendance and leave exactly like an employee.',
+    )
+    worker_code = models.CharField(max_length=20, unique=True, null=True, blank=True)
+    worker_type = models.CharField(
+        max_length=20, choices=WORKER_TYPE_CHOICES, default='other',
+    )
+    skill_level = models.CharField(
+        max_length=20, choices=SKILL_LEVEL_CHOICES, default='junior',
+    )
+    machine = models.ForeignKey(
+        Machine,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='workers',
+        help_text='Machine this worker operates.',
+    )
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='active')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['user__first_name', 'user__last_name']
+
+    def __str__(self):
+        return f'{self.worker_code or self.pk} - {self.user.get_full_name() or self.user.email} ({self.get_worker_type_display()})'
+
+    def save(self, *args, **kwargs):
+        if not self.worker_code:
+            self.worker_code = None
+            super().save(*args, **kwargs)
+            self.worker_code = f'WRK-{self.pk:04d}'
+            super().save(update_fields=['worker_code'])
+            return
+        super().save(*args, **kwargs)
+
+
+class DailyWorkEntry(models.Model):
+    worker = models.ForeignKey(
+        Worker,
+        on_delete=models.CASCADE,
+        related_name='daily_work_entries',
+        help_text='Worker who performed the work (derived from the logged-in user).',
+    )
+    date = models.DateField(
+        default=timezone.localdate,
+        help_text='Date the work was performed.',
+    )
+    job_order = models.ForeignKey(
+        JobOrder,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='daily_work_entries',
+        help_text='Job order the work belongs to, if any.',
+    )
+    description = models.TextField(
+        blank=True,
+        default='',
+        help_text='Summary of the work done.',
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-date', 'worker__user__first_name', 'worker__user__last_name']
+
+    def __str__(self):
+        task = (self.process.name if self.process else None) or self.description
+        return f'{self.date} - {self.worker_id} - {task or "No task"}'

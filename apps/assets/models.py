@@ -36,7 +36,7 @@ class AssetRegistration(models.Model):
 class AssetAssignment(models.Model):
     STATUS_CHOICES = [('active', 'Active'), ('inactive', 'Inactive')]
 
-    assignment_id = models.CharField(max_length=20, unique=True, blank=True)
+    assignment_id = models.CharField(max_length=20, unique=True, null=True, blank=True)
     asset = models.ForeignKey(
         AssetRegistration,
         on_delete=models.CASCADE,
@@ -64,6 +64,7 @@ class AssetAssignment(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.assignment_id:
+            self.assignment_id = None
             super().save(*args, **kwargs)
             self.assignment_id = f'ASN-{self.pk:04d}'
             super().save(update_fields=['assignment_id'])
@@ -84,7 +85,7 @@ class AssetDepreciation(models.Model):
         ('in_use', 'In Use'),
     ]
 
-    depreciation_id = models.CharField(max_length=20, unique=True, blank=True)
+    depreciation_id = models.CharField(max_length=20, unique=True, null=True, blank=True)
     asset = models.ForeignKey(
         AssetRegistration,
         on_delete=models.CASCADE,
@@ -111,6 +112,7 @@ class AssetDepreciation(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.depreciation_id:
+            self.depreciation_id = None
             super().save(*args, **kwargs)
             self.depreciation_id = f'DEP-{self.pk:04d}'
             super().save(update_fields=['depreciation_id'])
@@ -129,7 +131,7 @@ class AssetMaintenance(models.Model):
         ('pending', 'Pending'),
     ]
 
-    maintenance_id = models.CharField(max_length=20, unique=True, blank=True)
+    maintenance_id = models.CharField(max_length=20, unique=True, null=True, blank=True)
     asset = models.ForeignKey(
         AssetRegistration,
         on_delete=models.CASCADE,
@@ -152,6 +154,7 @@ class AssetMaintenance(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.maintenance_id:
+            self.maintenance_id = None
             super().save(*args, **kwargs)
             self.maintenance_id = f'MNT-{self.pk:04d}'
             super().save(update_fields=['maintenance_id'])
@@ -171,7 +174,7 @@ class AssetDisposal(models.Model):
         ('scheduled', 'Scheduled'),
     ]
 
-    disposal_id = models.CharField(max_length=20, unique=True, blank=True)
+    disposal_id = models.CharField(max_length=20, unique=True, null=True, blank=True)
     asset = models.ForeignKey(
         AssetRegistration,
         on_delete=models.CASCADE,
@@ -199,6 +202,7 @@ class AssetDisposal(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.disposal_id:
+            self.disposal_id = None
             super().save(*args, **kwargs)
             self.disposal_id = f'DSP-{self.pk:04d}'
             super().save(update_fields=['disposal_id'])

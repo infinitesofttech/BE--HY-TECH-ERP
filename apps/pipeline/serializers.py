@@ -45,7 +45,7 @@ class LeadSerializer(serializers.ModelSerializer):
         model = Lead
         fields = [
             'id', 'first_name', 'last_name', 'name', 'lead_type', 'company_name',
-            'email', 'phone', 'status', 'value', 'product_requirement',
+            'company', 'email', 'phone', 'status', 'value', 'product_requirement',
             'quantity', 'owner', 'owner_name', 'source', 'industry', 'description',
             'created_at', 'updated_at',
         ]
@@ -64,6 +64,7 @@ class DealSerializer(serializers.ModelSerializer):
     class Meta:
         model = Deal
         fields = '__all__'
+        read_only_fields = ['created_by', 'created_at', 'updated_at']
 
     def get_owner_name(self, obj):
         return obj.owner.email if obj.owner else ''

@@ -1,5 +1,5 @@
 from django.utils import timezone
-from django.db import models
+from django.db import models, transaction
 from django.db.models import Sum
 
 from rest_framework import generics, status
@@ -164,7 +164,8 @@ class LeaveApproveView(APIView):
 
     def patch(self, request, pk):
         try:
-            leave = Leave.objects.get(pk=pk)
+            with transaction.atomic():
+                leave = Leave.objects.select_for_update().get(pk=pk)
         except Leave.DoesNotExist:
             return Response(
                 {'error': 'Leave not found.'}, status=status.HTTP_404_NOT_FOUND,

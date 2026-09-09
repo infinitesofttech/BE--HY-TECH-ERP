@@ -35,7 +35,7 @@ class SalesOrder(models.Model):
         ('cancelled', 'Cancelled'),
     ]
 
-    order_id = models.CharField(max_length=20, unique=True, blank=True)
+    order_id = models.CharField(max_length=20, unique=True, null=True, blank=True)
     quotation = models.ForeignKey(
         'orders.Quotation',
         on_delete=models.SET_NULL,
@@ -89,6 +89,7 @@ class SalesOrder(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.order_id:
+            self.order_id = None
             super().save(*args, **kwargs)
             self.order_id = f'SO-{self.pk:04d}'
             super().save(update_fields=['order_id'])
@@ -156,7 +157,7 @@ class Refund(models.Model):
         ('rejected', 'Rejected'),
     ]
 
-    refund_id = models.CharField(max_length=20, unique=True, blank=True)
+    refund_id = models.CharField(max_length=20, unique=True, null=True, blank=True)
     reference = models.CharField(max_length=100, blank=True)
     amount = models.DecimalField(max_digits=12, decimal_places=2)
     customer = models.ForeignKey(
@@ -182,6 +183,7 @@ class Refund(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.refund_id:
+            self.refund_id = None
             super().save(*args, **kwargs)
             self.refund_id = f'RF-{self.pk:04d}'
             super().save(update_fields=['refund_id'])
@@ -199,7 +201,7 @@ class DeliveryNote(models.Model):
     ]
     STATUS_CHOICES = [('active', 'Active'), ('inactive', 'Inactive')]
 
-    delivery_note_id = models.CharField(max_length=20, unique=True, blank=True)
+    delivery_note_id = models.CharField(max_length=20, unique=True, null=True, blank=True)
     sales_order = models.ForeignKey(
         SalesOrder,
         on_delete=models.SET_NULL,
@@ -251,6 +253,7 @@ class DeliveryNote(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.delivery_note_id:
+            self.delivery_note_id = None
             super().save(*args, **kwargs)
             self.delivery_note_id = f'DN-{self.pk:04d}'
             super().save(update_fields=['delivery_note_id'])

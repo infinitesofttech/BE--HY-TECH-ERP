@@ -11,7 +11,7 @@ class ProjectSerializer(serializers.ModelSerializer):
     class Meta:
         model = Project
         fields = '__all__'
-
+        read_only_fields = ['created_by', 'created_at', 'updated_at']
     def get_team_leader_name(self, obj):
         if obj.team_leader:
             return obj.team_leader.get_full_name() or obj.team_leader.email
@@ -31,6 +31,7 @@ class TaskSerializer(serializers.ModelSerializer):
     class Meta:
         model = Task
         fields = '__all__'
+        read_only_fields = ['created_at', 'updated_at']
 
     def get_project_name(self, obj):
         return obj.project.name if obj.project else ''
@@ -57,6 +58,7 @@ class TimesheetSerializer(serializers.ModelSerializer):
     class Meta:
         model = Timesheet
         fields = '__all__'
+        read_only_fields = ['created_at', 'updated_at']
 
     def get_user_name(self, obj):
         if obj.user:
@@ -77,6 +79,7 @@ class MilestoneSerializer(serializers.ModelSerializer):
     class Meta:
         model = Milestone
         fields = '__all__'
+        read_only_fields = ['created_at', 'updated_at']
 
     def get_project_name(self, obj):
         return obj.project.name if obj.project else ''

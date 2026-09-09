@@ -5,6 +5,14 @@ urlpatterns = [
     path('machines/', views.MachineListCreateView.as_view(), name='machine-list-create'),
     path('machines/<int:pk>/', views.MachineDetailView.as_view(), name='machine-detail'),
 
+    path('workers/', views.WorkerListCreateView.as_view(), name='worker-list-create'),
+    path('workers/<int:pk>/', views.WorkerDetailView.as_view(), name='worker-detail'),
+    path('workers/attendance/excel/', views.WorkerAttendanceExcelView.as_view(), name='worker-attendance-excel'),
+    path('workers/profile-daily-routine/excel/', views.WorkerProfileDailyRoutineExcelView.as_view(), name='worker-profile-daily-routine-excel'),
+
+    path('daily-work/', views.DailyWorkEntryListCreateView.as_view(), name='daily-work-list-create'),
+    path('daily-work/<int:pk>/', views.DailyWorkEntryDetailView.as_view(), name='daily-work-detail'),
+
     path('stages/', views.ProductionStageListCreateView.as_view(), name='stage-list-create'),
     path('stages/<int:pk>/', views.ProductionStageDetailView.as_view(), name='stage-detail'),
 
@@ -20,6 +28,7 @@ urlpatterns = [
     path('job-orders/<int:pk>/rework/', views.JobOrderReworkView.as_view(), name='job-order-rework'),
     path('job-orders/<int:pk>/qc/', views.JobOrderQcView.as_view(), name='job-order-qc'),
     path('job-orders/<int:pk>/dispatch/', views.JobOrderDispatchView.as_view(), name='job-order-dispatch'),
+    path('job-orders/<int:pk>/production-report/', views.JobOrderProductionReportExcelView.as_view(), name='job-order-production-report'),
 
     path('material-issues/', views.MaterialIssueSlipListView.as_view(), name='material-issue-list'),
     path('material-issues/<int:pk>/', views.MaterialIssueSlipDetailView.as_view(), name='material-issue-detail'),

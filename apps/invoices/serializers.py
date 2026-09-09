@@ -34,7 +34,7 @@ class InvoiceSerializer(serializers.ModelSerializer):
             'id', 'invoice_number', 'sales_order', 'sales_order_id_ref',
             'delivery_note', 'delivery_note_id_ref',
             'customer_name', 'customer_email',
-            'customer_address', 'billing_address', 'invoice_date', 'due_date',
+            'customer_address', 'billing_address', 'company', 'invoice_date', 'due_date',
             'payment_method', 'transaction_id', 'subtotal', 'tax',
             'tax_name', 'tax_percentage',
             'tax_amount', 'discount_percentage', 'discount_amount', 'total',

@@ -24,4 +24,7 @@ urlpatterns = [
     path('roles/<int:pk>/', views.RoleDetailView.as_view(), name='role-detail'),
     path('login-logs/', views.LoginLogListView.as_view(), name='login-log-list'),
     path('activity-logs/', views.UserActivityLogListCreateView.as_view(), name='activity-log-list'),
+    
+    path('designs/', views.DesignDocumentListCreateView.as_view(), name='design-document-list'),
+    path('designs/<int:pk>/', views.DesignDocumentDetailView.as_view(), name='design-document-detail'),
 ]

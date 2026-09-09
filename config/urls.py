@@ -11,6 +11,34 @@ urlpatterns = [
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
     path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
 
+    # HY-TECH ERP Routes (Direct root URLs matching frontend endpoints.ts)
+    path('auth/', include('apps.hytech_core.urls_auth')),
+    path('customers/', include('apps.hytech_customers.urls')),
+    path('documents/', include('apps.hytech_customers.urls_documents')),
+    path('services/', include('apps.hytech_services.urls')),
+    path('reminders/', include('apps.hytech_operations.urls_reminders')),
+    path('pending-work/', include('apps.hytech_operations.urls_pending')),
+    path('dashboard/', include('apps.hytech_core.urls_dashboard')),
+    path('applications/', include('apps.hytech_operations.urls_applications')),
+    path('notifications/', include('apps.hytech_core.urls_notifications')),
+    path('hrms/', include('apps.hytech_hrms.urls')),
+    path('villages/', include('apps.hytech_demographics.urls')),
+    path('inquiries/', include('apps.hytech_demographics.urls_inquiries')),
+    path('audit-logs/', include('apps.hytech_demographics.urls_audit')),
+
+    # HY-TECH ERP Routes (with api/ prefix for backwards compatibility)
+    path('api/customers/', include('apps.hytech_customers.urls')),
+    path('api/documents/', include('apps.hytech_customers.urls_documents')),
+    path('api/services/', include('apps.hytech_services.urls')),
+    path('api/reminders/', include('apps.hytech_operations.urls_reminders')),
+    path('api/pending-work/', include('apps.hytech_operations.urls_pending')),
+    path('api/dashboard/', include('apps.hytech_core.urls_dashboard')),
+    path('api/applications/', include('apps.hytech_operations.urls_applications')),
+    path('api/hrms/', include('apps.hytech_hrms.urls')),
+    path('api/villages/', include('apps.hytech_demographics.urls')),
+    path('api/inquiries/', include('apps.hytech_demographics.urls_inquiries')),
+    path('api/audit-logs/', include('apps.hytech_demographics.urls_audit')),
+
     # App URLs
     path('api/auth/', include('apps.accounts.urls')),
     path('api/assets/', include('apps.assets.urls')),
@@ -51,3 +79,4 @@ urlpatterns = [
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+

@@ -26,7 +26,7 @@ from .serializers import (
     PurchaseReturnUpdateSerializer,
 )
 from apps.accounts.permissions import IsSuperAdmin, IsManagerOrAbove
-from apps.sales.views import parse_date_range
+from apps.common.utils import parse_date_range
 
 
 class VendorListCreateView(generics.ListCreateAPIView):

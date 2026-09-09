@@ -353,6 +353,10 @@ class ProductionWorkflowTests(TestCase):
         production_services.issue_material(job_order, created_by=self.user)
         job_order = production_services.start_production(
             job_order, machine=self.machine, supervisor=self.user,
+            process_names=[
+                'cutting', 'fabrication', 'machining', 'welding',
+                'grinding', 'painting', 'assembly', 'qc',
+            ],
         )
         self.assertEqual(job_order.status, 'in_production')
         self.assertEqual(job_order.processes.count(), 8)
@@ -385,6 +389,68 @@ class ProductionWorkflowTests(TestCase):
         job_order.refresh_from_db()
         self.assertEqual(job_order.machine, self.machine)
         self.assertEqual(job_order.supervisor, self.user)
+
+    def test_start_production_accepts_custom_process_names(self):
+        job_order = JobOrder.objects.create(
+            customer=self.customer,
+            product=self.cabinet,
+            quantity=1,
+            start_date=date(2026, 8, 10),
+            bom=self.bom,
+        )
+        production_services.issue_material(job_order, created_by=self.user)
+        custom_stages = ['Cutting', 'Fabrication', 'Welding', 'Painting', 'QC']
+        job_order = production_services.start_production(
+            job_order, process_names=custom_stages,
+        )
+        processes = list(job_order.processes.order_by('sequence'))
+        self.assertEqual(
+            [p.name for p in processes],
+            ['cutting', 'fabrication', 'welding', 'painting', 'qc'],
+        )
+        self.assertEqual(
+            [p.sequence for p in processes], [1, 2, 3, 4, 5],
+        )
+        self.assertEqual(processes[0].status, 'in_progress')
+        self.assertEqual(job_order.status, 'in_production')
+
+    def test_start_production_replaces_existing_processes(self):
+        job_order = JobOrder.objects.create(
+            customer=self.customer,
+            product=self.cabinet,
+            quantity=1,
+            start_date=date(2026, 8, 10),
+            bom=self.bom,
+        )
+        production_services.issue_material(job_order, created_by=self.user)
+        production_services.start_production(
+            job_order, process_names=['cutting', 'welding', 'qc'],
+        )
+        production_services.start_production(
+            job_order, process_names=['Cutting', 'Welding', 'Painting', 'QC'],
+        )
+        processes = list(job_order.processes.order_by('sequence'))
+        self.assertEqual(
+            [p.name for p in processes],
+            ['cutting', 'welding', 'painting', 'qc'],
+        )
+        self.assertEqual(len(processes), 4)
+
+    def test_start_production_rejects_unknown_stage(self):
+        job_order = JobOrder.objects.create(
+            customer=self.customer,
+            product=self.cabinet,
+            quantity=1,
+            start_date=date(2026, 8, 10),
+            bom=self.bom,
+        )
+        production_services.issue_material(job_order, created_by=self.user)
+        with self.assertRaises(ValueError):
+            production_services.start_production(
+                job_order, process_names=['Cutting', 'Bending', 'QC'],
+            )
+        self.assertEqual(job_order.processes.count(), 0)
+        self.assertEqual(job_order.status, 'material_issued')
 
     def test_record_qc_result_accepts_warehouse_pk(self):
         job_order = JobOrder.objects.create(
@@ -427,7 +493,13 @@ class ProductionWorkflowTests(TestCase):
             bom=self.bom,
         )
         production_services.issue_material(job_order, created_by=self.user)
-        production_services.start_production(job_order)
+        production_services.start_production(
+            job_order,
+            process_names=[
+                'cutting', 'fabrication', 'machining', 'welding',
+                'grinding', 'painting', 'assembly', 'qc',
+            ],
+        )
         result = production_services.record_qc_result(
             job_order, passed=False, inspected_by=self.user,
         )
@@ -446,7 +518,13 @@ class ProductionWorkflowTests(TestCase):
             sales_order,
         )[0]
         production_services.issue_material(job_order, created_by=self.user)
-        production_services.start_production(job_order)
+        production_services.start_production(
+            job_order,
+            process_names=[
+                'cutting', 'fabrication', 'machining', 'welding',
+                'grinding', 'painting', 'assembly', 'qc',
+            ],
+        )
         for process in job_order.processes.exclude(name__iexact='qc'):
             production_services.advance_process(process)
         production_services.record_qc_result(
@@ -648,6 +726,32 @@ class ProductionAPITests(TestCase):
         self.assertEqual(by_product[self.product.name]['quantity'], '5.00')
         self.assertEqual(by_product[self.raw.name]['quantity'], '10.00')
         self.assertTrue(all(item['inspection_no'] for item in response.data))
+
+    def test_receive_grn_marks_purchase_order_received(self):
+        vendor = Vendor.objects.create(name='Test Supplier')
+        purchase_order = PurchaseOrder.objects.create(
+            vendor=vendor, order_date=date(2026, 8, 1), status='pending',
+        )
+        grn = GoodsReceiptNote.objects.create(
+            purchase_order=purchase_order,
+            supplier=vendor,
+            warehouse=self.warehouse,
+            received_date=date(2026, 8, 12),
+            status='received',
+        )
+        GRNItem.objects.create(
+            grn=grn, product=self.raw, quantity=5,
+        )
+        response = self.client.post(
+            f'/api/production/grns/{grn.id}/receive/',
+            format='json',
+        )
+        self.assertEqual(response.status_code, 200)
+        purchase_order.refresh_from_db()
+        self.assertEqual(purchase_order.status, 'received')
+        self.assertEqual(
+            purchase_order.actual_delivery_date, date(2026, 8, 12),
+        )
 
     def test_unauthenticated_access_rejected(self):
         anon = APIClient()
