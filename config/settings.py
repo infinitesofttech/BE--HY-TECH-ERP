@@ -7,7 +7,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = config('DJANGO_SECRET_KEY', default='django-insecure-change-me')
 DEBUG = config('DJANGO_DEBUG', default=True, cast=bool)
-ALLOWED_HOSTS = config('DJANGO_ALLOWED_HOSTS', default='localhost,127.0.0.1').split(',')
+ALLOWED_HOSTS = config('DJANGO_ALLOWED_HOSTS', default='localhost,127.0.0.1,hytechepr.pythonanywhere.com,.pythonanywhere.com').split(',')
+
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -187,7 +188,8 @@ SIMPLE_JWT = {
 }
 
 # CORS Settings
-CORS_ALLOW_ALL_ORIGINS = DEBUG
+CORS_ALLOW_ALL_ORIGINS = config('CORS_ALLOW_ALL_ORIGINS', default=True, cast=bool)
+CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:3000',
     'http://127.0.0.1:3000',
