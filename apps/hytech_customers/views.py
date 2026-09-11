@@ -28,7 +28,7 @@ class CustomerViewSet(viewsets.ModelViewSet):
         queryset = self.filter_queryset(self.get_queryset())
         lookup_url_kwarg = self.lookup_url_kwarg or self.lookup_field
         val = self.kwargs[lookup_url_kwarg]
-        
+
         # Try lookup by family_id first, then numeric id
         try:
             if str(val).isdigit():
@@ -54,18 +54,23 @@ class FamilyMemberViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         family_id = self.kwargs.get('family_id')
-        customer = None
-        if family_id:
-            if str(family_id).isdigit():
-                customer = Customer.objects.filter(Q(family_id=family_id) | Q(id=int(family_id))).first()
-            else:
-                customer = Customer.objects.filter(family_id__iexact=family_id).first()
-        if customer:
-            serializer.save(customer=customer, family_id=customer.family_id)
-            customer.family_member_count = customer.members.count()
-            customer.save(update_fields=['family_member_count'])
-        else:
-            serializer.save()
+
+        customer = Customer.objects.filter(
+            family_id__iexact=family_id
+        ).first()
+
+        if not customer:
+            raise serializers.ValidationError({
+                'family_id': 'Customer family not found.'
+            })
+
+        serializer.save(
+            customer=customer,
+            family_id=customer.family_id
+        )
+
+        customer.family_member_count = customer.members.count()
+        customer.save(update_fields=['family_member_count'])
 
 
 class CustomerDocumentViewSet(viewsets.ModelViewSet):
@@ -75,43 +80,104 @@ class CustomerDocumentViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         family_id = self.kwargs.get('family_id')
         member_id = self.kwargs.get('member_id')
+
         qs = CustomerDocument.objects.all()
+
         if family_id:
             if str(family_id).isdigit():
-                qs = qs.filter(Q(family_id=family_id) | Q(customer__id=int(family_id)))
+                qs = qs.filter(
+                    Q(family_id=family_id) |
+                    Q(customer__id=int(family_id))
+                )
             else:
-                qs = qs.filter(family_id__iexact=family_id)
+                qs = qs.filter(
+                    family_id__iexact=family_id
+                )
+
         if member_id and str(member_id).lower() != 'all' and str(member_id) != '0':
-            qs = qs.filter(family_member_id=member_id)
+            qs = qs.filter(
+                family_member_id=member_id
+            )
+
         return qs
 
     def create(self, request, *args, **kwargs):
+
         family_id = self.kwargs.get('family_id')
         member_id = self.kwargs.get('member_id')
+
+        # -------------------------
+        # Find Customer
+        # -------------------------
+
         customer = None
+
         if family_id:
             if str(family_id).isdigit():
-                customer = Customer.objects.filter(Q(family_id=family_id) | Q(id=int(family_id))).first()
+                customer = Customer.objects.filter(
+                    Q(family_id=family_id) |
+                    Q(id=int(family_id))
+                ).first()
             else:
-                customer = Customer.objects.filter(family_id__iexact=family_id).first()
-        
+                customer = Customer.objects.filter(
+                    family_id__iexact=family_id
+                ).first()
+
+        if not customer:
+            return Response(
+                {
+                    'family_id': 'Customer family not found.'
+                },
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        # -------------------------
+        # Find Family Member
+        # -------------------------
+
         member = None
+
         if member_id and str(member_id).isdigit() and int(member_id) > 0:
-            member = FamilyMember.objects.filter(id=int(member_id)).first()
 
-        data = request.data.copy()
-        if customer:
-            data['customer'] = customer.id
-            data['family_id'] = customer.family_id
-        if member:
-            data['family_member'] = member.id
-            data['member_name'] = member.name
+            member = FamilyMember.objects.filter(
+                id=int(member_id),
+                customer=customer
+            ).first()
 
-        serializer = self.get_serializer(data=data)
+            if not member:
+                return Response(
+                    {
+                        'member_id': 'Family member not found in this family.'
+                    },
+                    status=status.HTTP_404_NOT_FOUND
+                )
+
+        # -------------------------
+        # Validate request body
+        # -------------------------
+
+        serializer = self.get_serializer(data=request.data)
+
         serializer.is_valid(raise_exception=True)
-        self.perform_create(serializer)
+
+        # -------------------------
+        # Save
+        # -------------------------
+
+        serializer.save(
+            customer=customer,
+            family_id=customer.family_id,
+            family_member=member,
+            member_name=member.name if member else ''
+        )
+
         headers = self.get_success_headers(serializer.data)
-        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+        return Response(
+            serializer.data,
+            status=status.HTTP_201_CREATED,
+            headers=headers
+        )
 
 
 class ServiceVisitViewSet(viewsets.ModelViewSet):
@@ -138,7 +204,7 @@ class ServiceVisitViewSet(viewsets.ModelViewSet):
     def update_document(self, request, visit_no=None, doc_id=None):
         visit = self.get_object()
         doc = get_object_or_404(VisitDocument, visit=visit, id=doc_id)
-        
+
         file_obj = request.FILES.get('document_file') or request.FILES.get('file')
         if file_obj:
             doc.document_file = file_obj

@@ -80,7 +80,7 @@ class PendingWork(models.Model):
     service_visit = models.ForeignKey('hytech_customers.ServiceVisit', on_delete=models.SET_NULL, null=True, blank=True, related_name='pending_works')
     customer = models.ForeignKey('hytech_customers.Customer', on_delete=models.CASCADE, related_name='pending_works')
     service = models.ForeignKey('hytech_services.BaseService', on_delete=models.SET_NULL, null=True, blank=True, related_name='pending_works')
-    pending_since = models.DateField(default=timezone.now)
+    pending_since = models.DateField(default=timezone.localdate)
     expected_date = models.DateField()
     priority = models.CharField(max_length=20, choices=PRIORITY_CHOICES, default='MEDIUM')
     pending_reason = models.TextField()

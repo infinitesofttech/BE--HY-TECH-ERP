@@ -10,7 +10,7 @@ class VillageSerializer(serializers.ModelSerializer):
             'total_families', 'total_citizens', 'total_documents',
             'male_count', 'female_count', 'is_active', 'created_at'
         ]
-        read_only_fields = ['id', 'created_at']
+        read_only_fields = ['id', 'code', 'created_at']
 
 
 class ContactInquirySerializer(serializers.ModelSerializer):

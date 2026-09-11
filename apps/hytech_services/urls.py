@@ -1,8 +1,5 @@
 from django.urls import path
-from .views import (
-    BaseServiceViewSet, SubServiceViewSet,
-    RequiredDocumentViewSet, TransactionViewSet
-)
+from .views import *
 
 urlpatterns = [
     # Sub Services (must be before <int:pk> of base services)
@@ -30,6 +27,7 @@ urlpatterns = [
     }), name='required-document-detail'),
 
     # Transactions
+    path('transactions/revenue/', RevenueAPIView.as_view(), name='transaction-revenue'),
     path('transactions/', TransactionViewSet.as_view({
         'get': 'list',
         'post': 'create',

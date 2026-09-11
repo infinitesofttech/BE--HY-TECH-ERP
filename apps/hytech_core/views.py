@@ -19,11 +19,15 @@ from apps.hytech_operations.models import PendingWork, Reminder, Application
 
 User = get_user_model()
 
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
 
+@method_decorator(csrf_exempt, name='dispatch')
 class StaffLoginView(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
+        print("🔥 STAFF LOGIN VIEW REACHED")
         username_or_email = request.data.get('username', '').strip()
         password = request.data.get('password', '')
 
@@ -31,21 +35,12 @@ class StaffLoginView(APIView):
             return Response({'error': 'Username and password are required.'}, status=status.HTTP_400_BAD_REQUEST)
 
         # Authenticate
-        target_name = username_or_email
-        if target_name.lower() == 'operator':
-            target_name = 'staff'
-
-        user = authenticate(username=target_name, password=password)
+        user = authenticate(username=username_or_email, password=password)
         if not user:
-            # Try with capitalized or lowercased password
-            user = authenticate(username=target_name, password=password.capitalize()) or authenticate(username=target_name, password=password.lower())
-
-        if not user:
-            # Try by email or username direct match
-            user_obj = User.objects.filter(Q(username__iexact=target_name) | Q(email__iexact=target_name)).first()
-            if user_obj:
-                if user_obj.check_password(password) or user_obj.check_password(password.capitalize()) or user_obj.check_password(password.lower()):
-                    user = user_obj
+            # Try by email
+            user_obj = User.objects.filter(email__iexact=username_or_email).first()
+            if user_obj and user_obj.check_password(password):
+                user = user_obj
 
         if not user:
             return Response({'error': 'Invalid username or password.'}, status=status.HTTP_401_UNAUTHORIZED)
@@ -54,7 +49,7 @@ class StaffLoginView(APIView):
             return Response({'error': 'User account is inactive.'}, status=status.HTTP_403_FORBIDDEN)
 
         refresh = RefreshToken.for_user(user)
-        user_type = 'admin' if (user.is_superuser or user.role in ['super_admin', 'manager', 'admin']) else 'employee'
+        user_type = 'admin' if (user.is_superuser or user.role in ['admin', 'hr']) else 'employee'
 
         return Response({
             'message': 'Staff login successful.',
@@ -95,7 +90,7 @@ class CustomerLoginView(APIView):
             username=f"cust_{customer.family_id.lower().replace('-', '_')}",
             defaults={
                 'email': f"{customer.family_id.lower()}@hytech.local",
-                'role': 'retailer',
+                'role': 'customer',
                 'first_name': customer.head_of_family,
                 'phone': customer.mobile_number
             }
@@ -146,8 +141,10 @@ class EmployeeViewSet(viewsets.ModelViewSet):
         username = data.get('username') or data.get('email', '').split('@')[0]
         email = data.get('email', '')
         password = data.get('password') or 'Hytech@123'
-        role = 'super_admin' if str(data.get('role', '')).upper() == 'ADMIN' else 'operation_executive'
-        
+        role = str(data.get('role', 'staff')).lower()
+        if role not in ['admin', 'staff', 'hr', 'customer']:
+            role = 'staff'
+
         user = User.objects.create_user(
             username=username,
             email=email,
@@ -155,7 +152,8 @@ class EmployeeViewSet(viewsets.ModelViewSet):
             first_name=data.get('full_name', '').split(' ')[0],
             last_name=' '.join(data.get('full_name', '').split(' ')[1:]) if ' ' in data.get('full_name', '') else '',
             phone=data.get('mobile_number') or data.get('phone', ''),
-            role=role
+            role=role,
+            is_staff=(role in ['admin', 'staff', 'hr'])
         )
         return Response(EmployeeUserSerializer(user).data, status=status.HTTP_201_CREATED)
 
@@ -196,20 +194,6 @@ class DashboardView(APIView):
         urgent_tasks = PendingWork.objects.filter(priority='HIGH').exclude(work_status='COMPLETED').count()
         documents_pending = VisitDocument.objects.filter(status='NOT_AVAILABLE').count()
 
-        # Today revenue vs Month revenue
-        today_txns = Transaction.objects.filter(transaction_date=today).aggregate(today_paid=Sum('paid_amount'))
-        today_revenue = float(today_txns['today_paid'] or 0)
-        if today_revenue == 0 and advance_received > 0:
-            today_revenue = advance_received
-
-        category_distribution = [
-            {'name': 'Aadhaar Card', 'count': 42, 'percentage': 38},
-            {'name': 'Ayushman Card', 'count': 28, 'percentage': 25},
-            {'name': 'Election Card', 'count': 18, 'percentage': 16},
-            {'name': 'PAN Card', 'count': 14, 'percentage': 13},
-            {'name': 'Ration Card', 'count': 9, 'percentage': 8},
-        ]
-
         return Response({
             'today_summary': {
                 'total_customers': total_customers,
@@ -231,13 +215,7 @@ class DashboardView(APIView):
                 'repeat_customers': repeat_customers,
                 'urgent_tasks': urgent_tasks,
                 'documents_pending': documents_pending,
-            },
-            'financial_kpi': {
-                'today_revenue': f'{today_revenue:,.2f}',
-                'month_revenue': f'{advance_received:,.2f}',
-                'total_revenue': f'{total_billing:,.2f}',
-            },
-            'category_distribution': category_distribution,
+            }
         })
 
 

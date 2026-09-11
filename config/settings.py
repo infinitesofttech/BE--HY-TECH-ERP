@@ -7,8 +7,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = config('DJANGO_SECRET_KEY', default='django-insecure-change-me')
 DEBUG = config('DJANGO_DEBUG', default=True, cast=bool)
-ALLOWED_HOSTS = config('DJANGO_ALLOWED_HOSTS', default='localhost,127.0.0.1,hytechepr.pythonanywhere.com,.pythonanywhere.com').split(',')
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'testserver', 'HyTechEPR.pythonanywhere.com', '*']
 
+CSRF_TRUSTED_ORIGINS=["http://localhost:3000","https://HyTechEPR.pythonanywhere.com"]
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -28,39 +29,39 @@ INSTALLED_APPS = [
     'drf_spectacular',
 
     # Local apps
-    'apps.accounts',
-    'apps.assets',
-    'apps.attendance',
-    'apps.tracking',
-    'apps.masters',
-    'apps.visits',
-    'apps.products',
-    'apps.sales',
-    'apps.purchases',
-    'apps.production',
-    'apps.targets',
-    'apps.leaves',
-    'apps.notifications',
-    'apps.orders',
-    'apps.reports',
-    'apps.pipeline',
-    'apps.contacts',
-    'apps.invoices',
-    'apps.projects',
-    'apps.contracts',
-    'apps.email_marketing',
-    'apps.chat',
-    'apps.tickets',
-    'apps.blog',
-    'apps.subscriptions',
-    'apps.settings_config',
-    'apps.calendar_events',
-    'apps.invitations',
-    'apps.marketing',
-    'apps.finance',
-    'apps.estimations',
-    'apps.content_management',
-    'apps.system_admin',
+    # 'apps.accounts',
+    # 'apps.assets',
+    # 'apps.attendance',
+    # 'apps.tracking',
+    # 'apps.masters',
+    # 'apps.visits',
+    # 'apps.products',
+    # 'apps.sales',
+    # 'apps.purchases',
+    # 'apps.production',
+    # 'apps.targets',
+    # 'apps.leaves',
+    # 'apps.notifications',
+    # 'apps.orders',
+    # 'apps.reports',
+    # 'apps.pipeline',
+    # 'apps.contacts',
+    # 'apps.invoices',
+    # 'apps.projects',
+    # 'apps.contracts',
+    # 'apps.email_marketing',
+    # 'apps.chat',
+    # 'apps.tickets',
+    # 'apps.blog',
+    # 'apps.subscriptions',
+    # 'apps.settings_config',
+    # 'apps.calendar_events',
+    # 'apps.invitations',
+    # 'apps.marketing',
+    # 'apps.finance',
+    # 'apps.estimations',
+    # 'apps.content_management',
+    # 'apps.system_admin',
 
     # HY-TECH ERP Core & Domain Apps
     'apps.hytech_core',
@@ -69,6 +70,7 @@ INSTALLED_APPS = [
     'apps.hytech_operations',
     'apps.hytech_hrms',
     'apps.hytech_demographics',
+    'apps.payroll',
 ]
 
 MIDDLEWARE = [
@@ -152,13 +154,13 @@ STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 # Media files
-MEDIA_URL = 'media/'
+MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Custom User Model
-AUTH_USER_MODEL = 'accounts.User'
+AUTH_USER_MODEL = 'hytech_customers.User'
 
 # REST Framework
 REST_FRAMEWORK = {
@@ -188,8 +190,7 @@ SIMPLE_JWT = {
 }
 
 # CORS Settings
-CORS_ALLOW_ALL_ORIGINS = config('CORS_ALLOW_ALL_ORIGINS', default=True, cast=bool)
-CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_ALL_ORIGINS = DEBUG
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:3000',
     'http://127.0.0.1:3000',

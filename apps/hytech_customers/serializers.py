@@ -9,7 +9,7 @@ class FamilyMemberSerializer(serializers.ModelSerializer):
             'id', 'customer', 'family_id', 'name', 'relationship',
             'gender', 'mobile_number', 'birth_date', 'is_active', 'created_at'
         ]
-        read_only_fields = ['id', 'created_at']
+        read_only_fields = ['id', 'customer', 'family_id', 'created_at']
 
 
 class CustomerDocumentSerializer(serializers.ModelSerializer):
@@ -22,7 +22,7 @@ class CustomerDocumentSerializer(serializers.ModelSerializer):
             'document_type', 'document_type_display', 'document_name',
             'document_file', 'description', 'is_verified', 'created_at', 'updated_at'
         ]
-        read_only_fields = ['id', 'created_at', 'updated_at']
+        read_only_fields = ['id', 'customer', 'family_id', 'created_at', 'updated_at']
 
 
 class CustomerSerializer(serializers.ModelSerializer):
@@ -40,14 +40,13 @@ class CustomerSerializer(serializers.ModelSerializer):
             'digital_card_sent', 'created_at', 'updated_at',
             'members', 'documents'
         ]
-        read_only_fields = ['id', 'created_at', 'updated_at']
+        read_only_fields = ['id',  'family_id', 'created_at', 'updated_at']
 
     def create(self, validated_data):
         customer = super().create(validated_data)
         # Automatically create head member
         FamilyMember.objects.create(
             customer=customer,
-            family_id=customer.family_id,
             name=customer.head_of_family,
             relationship='HEAD',
             mobile_number=customer.mobile_number,

@@ -12,6 +12,7 @@ build/
 local_settings.py
 db.sqlite3
 media/
+staticfiles/
 
 # Environment
 .env
@@ -31,3 +32,4 @@ firebase-credentials.json
 # OS
 .DS_Store
 Thumbs.db
+.nfs*

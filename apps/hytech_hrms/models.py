@@ -91,3 +91,165 @@ class HolidayItem(models.Model):
 
     def __str__(self):
         return f"{self.title} ({self.date})"
+
+
+class HRCompanySetting(models.Model):
+    organization_name = models.CharField(max_length=255, default="HY-TECH CITIZEN SERVICES & COMPUTER HUB")
+    opening_time = models.CharField(max_length=50, default="09:00 AM")
+    closing_time = models.CharField(max_length=50, default="07:00 PM")
+    contact_email = models.EmailField(max_length=100, blank=True, default="contact@hytech.com")
+    contact_phone = models.CharField(max_length=50, blank=True, default="+91 98765 43210")
+    address = models.TextField(blank=True, default="Opp. Bus Station, Main Road, Gujarat")
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "HR Company Setting"
+        verbose_name_plural = "HR Company Settings"
+
+    def __str__(self):
+        return self.organization_name
+
+    @classmethod
+    def load(cls):
+        obj, _ = cls.objects.get_or_create(id=1)
+        return obj
+
+
+class HRAttendanceSetting(models.Model):
+    grace_period_minutes = models.IntegerField(default=15)
+    grace_period_label = models.CharField(max_length=50, default="15 Minutes")
+    half_day_cutoff_time = models.CharField(max_length=50, default="01:30 PM")
+    shift_start_time = models.CharField(max_length=50, default="09:30 AM")
+    shift_end_time = models.CharField(max_length=50, default="06:30 PM")
+    standard_work_hours = models.FloatField(default=8.0)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "HR Attendance Setting"
+        verbose_name_plural = "HR Attendance Settings"
+
+    def __str__(self):
+        return f"Shift: {self.shift_start_time} - {self.shift_end_time} (Grace: {self.grace_period_label})"
+
+    @classmethod
+    def load(cls):
+        obj, _ = cls.objects.get_or_create(id=1)
+        return obj
+
+
+class HRLeaveSetting(models.Model):
+    annual_casual_leave = models.IntegerField(default=12)
+    annual_sick_leave = models.IntegerField(default=6)
+    annual_paid_leave = models.IntegerField(default=18)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "HR Leave Setting"
+        verbose_name_plural = "HR Leave Settings"
+
+    def __str__(self):
+        return f"Leaves: CL={self.annual_casual_leave}, SL={self.annual_sick_leave}, PL={self.annual_paid_leave}"
+
+    @classmethod
+    def load(cls):
+        obj, _ = cls.objects.get_or_create(id=1)
+        return obj
+
+
+class HRNotificationSetting(models.Model):
+    whatsapp_daily_punch_summary = models.BooleanField(default=True)
+    sms_leave_approval = models.BooleanField(default=True)
+    email_leave_notifications = models.BooleanField(default=False)
+    admin_whatsapp_number = models.CharField(max_length=50, blank=True, default="")
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "HR Notification Setting"
+        verbose_name_plural = "HR Notification Settings"
+
+    def __str__(self):
+        return "HR Notification Preferences"
+
+    @classmethod
+    def load(cls):
+        obj, _ = cls.objects.get_or_create(id=1)
+        return obj
+
+
+class HRRolePermission(models.Model):
+    ROLE_CHOICES = [
+        ('ADMIN', 'Administrator'),
+        ('STAFF', 'Staff Operator'),
+        ('HR', 'HR Manager'),
+    ]
+
+    role = models.CharField(max_length=50, unique=True, choices=ROLE_CHOICES)
+    display_name = models.CharField(max_length=100, blank=True)
+    description = models.TextField(blank=True)
+    can_manage_employees = models.BooleanField(default=False)
+    can_view_attendance = models.BooleanField(default=True)
+    can_mark_attendance = models.BooleanField(default=True)
+    can_approve_leaves = models.BooleanField(default=False)
+    can_manage_payroll = models.BooleanField(default=False)
+    can_view_reports = models.BooleanField(default=False)
+    can_manage_settings = models.BooleanField(default=False)
+    can_process_services = models.BooleanField(default=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "HR Role Permission"
+        verbose_name_plural = "HR Role Permissions"
+        ordering = ['role']
+
+    def __str__(self):
+        return f"{self.role} ({self.display_name or self.get_role_display()})"
+
+    @classmethod
+    def seed_defaults(cls):
+        defaults = [
+            {
+                'role': 'ADMIN',
+                'display_name': 'Administrator',
+                'description': 'Full administrative access to all modules, finance, payroll, and configuration.',
+                'can_manage_employees': True,
+                'can_view_attendance': True,
+                'can_mark_attendance': True,
+                'can_approve_leaves': True,
+                'can_manage_payroll': True,
+                'can_view_reports': True,
+                'can_manage_settings': True,
+                'can_process_services': True,
+            },
+            {
+                'role': 'STAFF',
+                'display_name': 'Front Desk Operator',
+                'description': 'Operational intake operator: Citizen service processing and attendance punch-in.',
+                'can_manage_employees': False,
+                'can_view_attendance': True,
+                'can_mark_attendance': True,
+                'can_approve_leaves': False,
+                'can_manage_payroll': False,
+                'can_view_reports': False,
+                'can_manage_settings': False,
+                'can_process_services': True,
+            },
+            {
+                'role': 'HR',
+                'display_name': 'HR Manager',
+                'description': 'HR and attendance supervision, leave approval, and staff roster oversight.',
+                'can_manage_employees': True,
+                'can_view_attendance': True,
+                'can_mark_attendance': True,
+                'can_approve_leaves': True,
+                'can_manage_payroll': False,
+                'can_view_reports': True,
+                'can_manage_settings': False,
+                'can_process_services': False,
+            },
+        ]
+        results = []
+        for d in defaults:
+            role_val = d.pop('role')
+            obj, _ = cls.objects.get_or_create(role=role_val, defaults=d)
+            results.append(obj)
+        return results
